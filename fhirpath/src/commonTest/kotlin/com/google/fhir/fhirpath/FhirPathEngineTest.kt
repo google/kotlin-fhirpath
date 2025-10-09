@@ -43,17 +43,26 @@ val testGroupsToSkip =
 
 val testCasesToSkip =
   listOf(
-    // It is not clear the behaviour of `as()` function should differ from the `as` operator
-    // according to the specification https://hl7.org/fhirpath/#as-type-specifier. Our
-    // implementation throws an error here since Quantity cannot be converted to Period.
-    "testPolymorphismAsBFunction",
-    // The comparison result should be an empty set since the two values have different precisions.
+    // No error should be thrown according to https://hl7.org/fhirpath/#as-type-specifier
+    "testPolymorphismAsB",
+    // Unclear in the specification whether the result should still be empty if two values have
+    // different precisions but the comparison can still be "certain" (e.g. 2025 is greater than
+    // 2024-01).
     "testDateTimeGreaterThanDate1",
-    // No conversion between calendar durations and definite durations.
-    "testStringQuantityDayLiteralToQuantity",
-    "testStringQuantityWeekLiteralToQuantity",
+    // https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/testCollectionNotEqualEmpty/with/543927021
+    // https://github.com/FHIR/fhir-test-cases/pull/244
+    "testCollectionNotEqualEmpty",
+    // The result should be true
+    "testDecimalLiteralToInteger",
+    // Unclear if integers should be converted to decimals as part of quantity. See
+    // https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110.
+    "testStringIntegerLiteralToQuantity",
+    "testQuantityLiteralWkToString",
+    "testQuantityLiteralWeekToString",
     // https://github.com/FHIR/fhir-test-cases/pull/243
     "testQuantity4",
+    // As `testDateTimeGreaterThanDate1`
+    "testNow1",
   )
 
 class FhirPathEngineTest :
@@ -71,6 +80,7 @@ class FhirPathEngineTest :
         context(group.name) {
           group.tests
             .filterNot { testCasesToSkip.contains(it.name) }
+            //            .filter { it.name == "testNEquality2" }
             .forEach { testCase ->
               test(testCase.name) {
                 if (testCase.expression.invalid != null) {

@@ -191,12 +191,18 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     val left = visit(ctx.expression(0)!!)
     val right = visit(ctx.expression(1)!!)
 
+    if (left.isEmpty() || right.isEmpty()) {
+      return emptyList()
+    }
+
     val op = ctx.getChild(1)!!.text
     if (left.size != right.size) {
       return when (op) {
-          "=", "~" -> listOf(false)
-          "!=", "!~" -> listOf(true)
-          else -> error("Unknown equality operator: $op")
+        "=",
+        "~" -> listOf(false)
+        "!=",
+        "!~" -> listOf(true)
+        else -> error("Unknown equality operator: $op")
       }
     }
 
@@ -212,23 +218,18 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     // In our implementation we choose to treat empty sets as inconclusive, and return an empty set
     // if the equality of two collections cannot be decided.
     // Also see: https://jira.hl7.org/browse/FHIR-53076
-    val pairwiseComparisons = when {
-      op.contains("=") -> left.zip(right).map { (l, r) -> equals(l, r) }
-      op.contains("~") -> left.zip(right).map { (l, r) -> equivalent(l, r) }
-      else -> error("Unknown equality operator: $op")
-    }
-    return if(op.contains("!")) {
-      when{
-        pairwiseComparisons.any { it == false } -> listOf(true)
-        pairwiseComparisons.any { it == null } -> emptyList()
-        else -> listOf(false)
-      }
-    } else {
+    val pairwiseComparisons =
       when {
-        pairwiseComparisons.any { it == false } -> listOf(false)
-        pairwiseComparisons.any { it == null } -> emptyList()
-        else -> listOf(true)
+        op.contains("=") -> left.zip(right).map { (l, r) -> equals(l, r) }
+        op.contains("~") -> left.zip(right).map { (l, r) -> equivalent(l, r) }
+        else -> error("Unknown equality operator: $op")
       }
+
+    val negated = op.contains("!")
+    return when {
+      pairwiseComparisons.any { it == false } -> listOf(negated)
+      pairwiseComparisons.all { it == true } -> listOf(!negated)
+      else -> emptyList()
     }
   }
 

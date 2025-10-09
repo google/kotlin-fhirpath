@@ -48,5 +48,5 @@ internal fun Collection<Any>.`as`(params: List<Any>): Collection<Any> {
     }
   }
 
-  error("Type mismatch: $type is not ${params.single()}")
+  return emptyList()
 }
