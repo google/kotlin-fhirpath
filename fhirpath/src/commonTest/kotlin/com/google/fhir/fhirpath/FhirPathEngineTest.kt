@@ -80,7 +80,6 @@ class FhirPathEngineTest :
         context(group.name) {
           group.tests
             .filterNot { testCasesToSkip.contains(it.name) }
-            //            .filter { it.name == "testNEquality2" }
             .forEach { testCase ->
               test(testCase.name) {
                 if (testCase.expression.invalid != null) {
