@@ -1,7 +1,7 @@
 # Kotlin FHIRPath
 
 [![stability-wip](https://img.shields.io/badge/stability-wip-lightgrey.svg)](https://guidelines.denpa.pro/stability#work-in-progress)
-![Static Badge](https://img.shields.io/badge/tests_passing-706%2F915-f4d03f)
+![Static Badge](https://img.shields.io/badge/tests_passing-705%2F915-f4d03f)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/overview.html)'s
@@ -96,7 +96,7 @@ FHIRPath but not allowed in FHIR).
 Due to the library's WIP status, not all test cases from the published official test suites are
 passing. The failures are documented in the table below.
 
-|              Test case               |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                             Note                                                                                             |
+| Test case                            |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                             Note                                                                                             |
 |--------------------------------------|--------------------|-----|--------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `testPolymorphismAsB`                | Test               |     | To be raised                                           | No error should be thrown according to [specification](https://hl7.org/fhirpath/#as-type-specifier).                                                                                         |
 | `testDateTimeGreaterThanDate1`       | Specification/Test |     | To be raised                                           | Unclear in the specification whether the result should still be empty if two values have different precisions but the comparison can still be "certain" (e.g. 2025 is greater than 2024-01). |
@@ -120,6 +120,7 @@ passing. The failures are documented in the table below.
 | `testAggregate*`                     | Implementation     |     |                                                        | Function `aggregate` is not implemented.                                                                                                                                                     |
 | `testIif10`                          | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testIif11`                          | Implementation     |     |                                                        |                                                                                                                                                                                              |
+| `testMatchesSingleLineMode1`         | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testReplace5`                       | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testReplace6`                       | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testEncode*`                        | Implementation     | STU |                                                        | Function `encode` is not implemented.                                                                                                                                                        |
@@ -251,6 +252,25 @@ since the `buildSrc` directory is precompiled separately in Gradle.
 ```
 
 The number of passing test cases is displayed on a badge at the top of this page.
+
+### Publishing
+
+To create a maven repository from the generated FHIR model, run:
+
+```
+./gradlew :fhirpath:publish
+```
+
+This will create a maven repository in the `fhirpath/build/repo` directory with artifacts for all
+supported platforms.
+
+To zip the repository, run:
+
+```
+./gradlew :fhirpath:zipRepo
+```
+
+This will generate a `.zip` file in the `fhirpath/build/repoZip` directory.
 
 ### Third Party
 

@@ -102,7 +102,7 @@ internal fun Collection<Any>.matches(params: List<Any>): Collection<Any> {
   check(size <= 1) { "matches() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString() ?: return emptyList()
   val regex = params.singleOrNull()?.unwrapString() ?: return emptyList()
-  return listOf(regex.toRegexInSingleLineMode().containsMatchIn(input))
+  return listOf(regex.toRegex().containsMatchIn(input))
 }
 
 /**
@@ -112,7 +112,7 @@ internal fun Collection<Any>.matchesFull(params: List<Any>): Collection<Any> {
   check(size <= 1) { "matches() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString() ?: return emptyList()
   val regex = params.singleOrNull()?.unwrapString() ?: return emptyList()
-  return listOf(input.matches(regex.toRegexInSingleLineMode()))
+  return listOf(input.matches(regex.toRegex()))
 }
 
 /**
@@ -132,7 +132,7 @@ internal fun Collection<Any>.replaceMatches(params: List<Any>): Collection<Any> 
   if (regex.isEmpty()) {
     return this
   }
-  return listOf(input.replace(regex.toRegexInSingleLineMode(), substitution))
+  return listOf(input.replace(regex.toRegex(), substitution))
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#length-integer). */
@@ -179,8 +179,4 @@ private fun Any.unwrapString(): String? {
     is String -> this
     else -> null
   }
-}
-
-private fun String.toRegexInSingleLineMode(): Regex {
-  return toRegex(RegexOption.DOT_MATCHES_ALL)
 }
