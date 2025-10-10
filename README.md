@@ -1,7 +1,7 @@
 # Kotlin FHIRPath
 
 [![stability-wip](https://img.shields.io/badge/stability-wip-lightgrey.svg)](https://guidelines.denpa.pro/stability#work-in-progress)
-![Static Badge](https://img.shields.io/badge/tests_passing-705%2F915-f4d03f)
+![Static Badge](https://img.shields.io/badge/tests_passing-725%2F915-f4d03f)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/overview.html)'s
@@ -91,12 +91,52 @@ FHIRPath are more lenient than in the FHIR specification. As a result, custom cl
 authored to handle cases where the minutes, seconds, or milliseconds are not present (allowed in
 FHIRPath but not allowed in FHIR).
 
+### Timezone offset in date time values
+
+The FHIRPath specification allows implementations to provide a default timezone offset when
+comparing a date time value with a timezone offset against one without. See the relevant sections on
+[equality](https://hl7.org/fhirpath/N1/#datetime-equality),
+[equivalence](https://hl7.org/fhirpath/N1/#datetime-equivalence), and
+[comparison](https://hl7.org/fhirpath/N1/#comparison).
+
+To prioritise safety and correctness, this implementation **does not assume a default timezone
+offset** (such as UTC or the system's timezone offset) for date time values without one. This is the
+safest approach because the implementation does not have the provenance of the data: it could have
+originated from a different system or context, making any "guess" potentially incorrect and
+dangerous.
+
+This leads to the following behavior:
+- Equality (`=`, `!=`) and comparison (`<=`, `<`, `>`, `>=`) operators will return an empty result
+'{}' to indicate uncertainty
+- Equivalence (`~`) operator will return `false` since equivalence cannot be proven. Likewise, `!~`
+will return `true`.
+
+```
+@2025-01-01T00:00:00.0+00:00 = @2025-01-01T00:00:00.0  // returns {} 
+@2025-01-01T00:00:00.0+00:00 ~ @2025-01-01T00:00:00.0  // returns false
+@2025-01-01T00:00:00.0+00:00 > @2025-01-01T00:00:00.0  // returns {}
+```
+
+While the specification defines behavior for comparing date time values with different precisions,
+it does not explicitly detail the rules for comparing two partial date time values when both have
+timezone offsets. This scenario introduces significant complexity. A partial date time with a
+timezone offset (e.g., @2025-01-01T00+05:30) represent an interval that might not be aligned to the
+hour due to half hour and quarter hour timezones). Comparing two such intervals requires complex
+logic to determine if they overlap. Whilst it is possible to provide an definitive answer for more
+straightforward cases, for simplicity, this implementation **returns an empty result for comparing
+partial date time values with timezone offsets**.
+
+```
+// Indian Standard Time (IST) and Nepal Time (NPT)
+@2025-01-01T00+05:30 = @2025-01-01T00+05:45   // returns {}
+```
+
 ## Conformance
 
 Due to the library's WIP status, not all test cases from the published official test suites are
 passing. The failures are documented in the table below.
 
-| Test case                            |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                             Note                                                                                             |
+|              Test case               |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                             Note                                                                                             |
 |--------------------------------------|--------------------|-----|--------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `testPolymorphismAsB`                | Test               |     | To be raised                                           | No error should be thrown according to [specification](https://hl7.org/fhirpath/#as-type-specifier).                                                                                         |
 | `testDateTimeGreaterThanDate1`       | Specification/Test |     | To be raised                                           | Unclear in the specification whether the result should still be empty if two values have different precisions but the comparison can still be "certain" (e.g. 2025 is greater than 2024-01). |
@@ -130,15 +170,7 @@ passing. The failures are documented in the table below.
 | `testTrace2`                         | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testNow1`                           | Specification/Test |     |                                                        | As `testDateTimeGreaterThanDate1`.                                                                                                                                                           |
 | `testSort*`                          | Specification/Test |     |                                                        | Function `sort` is not defined in the specification.                                                                                                                                         |
-| `testEquality20`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testEquality21`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testEquality22`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testEquality23`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testEquality28`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testNEquality14`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testNEquality15`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testNEquality16`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testNEquality17`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testNEquality24`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testEquivalent2`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testEquivalent3`                    | Implementation     |     |                                                        |                                                                                                                                                                                              |
@@ -149,26 +181,14 @@ passing. The failures are documented in the table below.
 | `testNotEquivalent2`                 | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testNotEquivalent3`                 | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testNotEquivalent21`                | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessThan6`                      | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessThan13`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessThan20`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testLessThan22`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessThan26`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessOrEqual6`                   | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessOrEqual13`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessOrEqual20`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
+| `testLessThan24`                     | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testLessOrEqual22`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testLessOrEqual26`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterOrEqual6`                | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterOrEqual13`               | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterOrEqual20`               | Implementation     |     |                                                        |                                                                                                                                                                                              |
+| `testLessOrEqual24`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testGreaterOrEqual22`               | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterOrEqual26`               | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterThan6`                   | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterThan13`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterThan20`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
+| `testGreaterOrEqual24`               | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testGreaterThan22`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
-| `testGreaterThan26`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
+| `testGreaterThan24`                  | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testGreaterThan6`                   | Implementation     |     |                                                        |                                                                                                                                                                                              |
 | `testCombine*`                       | Implementation     |     |                                                        | Function `combine` is not implemented.                                                                                                                                                       |
 | `testPlusDate*`                      | Implementation     |     |                                                        | Date time arithmetic not implemented.                                                                                                                                                        |
