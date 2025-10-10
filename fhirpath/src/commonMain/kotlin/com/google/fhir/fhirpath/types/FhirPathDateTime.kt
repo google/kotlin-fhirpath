@@ -54,40 +54,56 @@ internal data class FhirPathDateTime(
     }
 
   fun compareTo(other: FhirPathDateTime): Int? {
-    if (precision != other.precision) {
+    // A value with a timezone offset cannot be compared to a value without a timezone offset
+    if ((utcOffset == null) != (other.utcOffset == null)) {
       return null
     }
-    if (precision > Precision.DAY) {
+
+    if (precision == Precision.SECOND && other.precision == Precision.SECOND) {
       return toInstant().compareTo(other.toInstant())
     }
+
+    // Partial date times with timezone offsets cannot be compared
+    // See
+    // https://github.com/jingtang10/kotlin-fhirpath/tree/main?tab=readme-ov-file#timezone-offset-in-date-time-values
+    if (utcOffset != null) return null
+
     year.compareTo(other.year).let { if (it != 0) return it }
+
+    if ((month == null) != (other.month == null)) return null
     month?.compareTo(other.month!!).let { if (it != 0) return it }
+
+    if ((day == null) != (other.day == null)) return null
     day?.compareTo(other.day!!).let { if (it != 0) return it }
-    return 0
+
+    if ((hour == null) != (other.hour == null)) return null
+    hour?.compareTo(other.hour!!).let { if (it != 0) return it }
+
+    if ((minute == null) != (other.minute == null)) return null
+    minute?.compareTo(other.minute!!).let { if (it != 0) return it }
+
+    return 0 // Precision.SECOND is already covered above
   }
 
   /**
-   * Converts the DateTime to an Instant, filling in minutes, seconds, and nanoseconds if they are
-   * missing.
+   * Converts the DateTime to an Instant, assuming a zero timezone offset.
    *
-   * This function is only used in this class for timezone-aware comparison of DateTime values.
-   * Hence filling in the missing fields for two DateTime values with the same precision is fine.
+   * This functions is used to compare two values with explicit timezone offsets, or two values
+   * without timezone offsets. In the former case, no timezone offset will be assumed in this
+   * function; in the latter case, the same timezone offset will be assumed, producing correct
+   * comparison result.
    */
   private fun toInstant(): Instant {
-    check(hour != null && utcOffset != null) {
-      "Hour and UTC offset must be provided to convert DateTime to Instant"
-    }
-    val localDateTime =
-      LocalDateTime(
+    return LocalDateTime(
         year,
         month!!,
         day!!,
-        hour,
-        minute ?: 0,
-        second?.toInt() ?: 0,
-        second?.rem(1)?.times(1_000_000_000.0)?.toInt() ?: 0,
+        hour!!,
+        minute!!,
+        second!!.toInt(),
+        second.rem(1).times(1_000_000_000.0).toInt(),
       )
-    return localDateTime.toInstant(utcOffset)
+      .toInstant(utcOffset ?: UtcOffset.ZERO)
   }
 
   companion object {
