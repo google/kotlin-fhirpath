@@ -26,7 +26,7 @@ import com.google.fhir.fhirpath.operators.compare
 import com.google.fhir.fhirpath.operators.concat
 import com.google.fhir.fhirpath.operators.div
 import com.google.fhir.fhirpath.operators.division
-import com.google.fhir.fhirpath.operators.equals
+import com.google.fhir.fhirpath.operators.equal
 import com.google.fhir.fhirpath.operators.equivalent
 import com.google.fhir.fhirpath.operators.implies
 import com.google.fhir.fhirpath.operators.`is`
@@ -191,45 +191,17 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     val left = visit(ctx.expression(0)!!)
     val right = visit(ctx.expression(1)!!)
 
-    if (left.isEmpty() || right.isEmpty()) {
-      return emptyList()
-    }
-
     val op = ctx.getChild(1)!!.text
-    if (left.size != right.size) {
-      return when (op) {
-        "=",
-        "~" -> listOf(false)
-        "!=",
-        "!~" -> listOf(true)
-        else -> error("Unknown equality operator: $op")
-      }
-    }
-
-    // The FHIRPath specification states every pair of items must be equal for two collections to be
-    // equal. However, it does not explicitly states how to account for item comparison results that
-    // are empty sets. This can be interpreted as an inconsistency since this definition does not
-    // reduce nicely to the special case of collections with a single item. Consider two collections
-    // with a single item in each that are incomparable (returns empty set if compared), if we use
-    // the definition of equality for collections, we would conclude the two collections are not
-    // equal. But the special case states that an empty set should be returned.
-    // This nuance results in inconsistent behaviors in different implementations. See
-    // [discussion](https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Collection.20equality/with/540473873).
-    // In our implementation we choose to treat empty sets as inconclusive, and return an empty set
-    // if the equality of two collections cannot be decided.
-    // Also see: https://jira.hl7.org/browse/FHIR-53076
-    val pairwiseComparisons =
-      when {
-        op.contains("=") -> left.zip(right).map { (l, r) -> equals(l, r) }
-        op.contains("~") -> left.zip(right).map { (l, r) -> equivalent(l, r) }
-        else -> error("Unknown equality operator: $op")
-      }
-
     val negated = op.contains("!")
-    return when {
-      pairwiseComparisons.any { it == false } -> listOf(negated)
-      pairwiseComparisons.all { it == true } -> listOf(!negated)
-      else -> emptyList()
+    val result = when {
+      op.contains("=") -> equal(left, right)
+      op.contains("~") -> equivalent(left, right)
+      else -> error("Unknown equality operator: $op")
+    }
+    return when (result) {
+      true -> listOf(!negated)
+      false -> listOf(negated)
+      null -> emptyList()
     }
   }
 
