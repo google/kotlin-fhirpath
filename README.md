@@ -93,21 +93,26 @@ FHIRPath but not allowed in FHIR).
 
 ### Timezone offset in date time values
 
-The FHIRPath specification allows implementations to provide a default timezone offset when
-comparing a date time value with a timezone offset against one without. See the relevant sections on
+This FHIRPath implementation adopts a strict, safety-first approach to date time comparisons,
+especially around the handling of timezones and date time values with different precisions.
+
+#### Date time values without timezone offset
+
+The FHIRPath specification allows implementations to provide a default timezone offset for date time
+values that do not have one. See the relevant sections on
 [equality](https://hl7.org/fhirpath/N1/#datetime-equality),
 [equivalence](https://hl7.org/fhirpath/N1/#datetime-equivalence), and
 [comparison](https://hl7.org/fhirpath/N1/#comparison).
 
-To prioritise safety and correctness, this implementation **does not assume a default timezone
-offset** (such as UTC or the system's timezone offset) for date time values without one. This is the
-safest approach because the implementation does not have the provenance of the data: it could have
-originated from a different system or context, making any "guess" potentially incorrect and
-dangerous.
+To prioritise safety and correctness, when comparing date time values without a timezone offset with
+date time values with a timezone offset, this implementation **does not assume a default timezone
+offset** (such as UTC or the system's timezone offset). This is because the data could have
+originated from a different system or context unknown to this implementation, making any "guess"
+potentially incorrect and unsafe.
 
 This leads to the following behavior:
 - Equality (`=`, `!=`) and comparison (`<=`, `<`, `>`, `>=`) operators will return an empty result
-'{}' to indicate uncertainty
+`{}` to indicate uncertainty
 - Equivalence (`~`) operator will return `false` since equivalence cannot be proven. Likewise, `!~`
 will return `true`.
 
@@ -117,14 +122,26 @@ will return `true`.
 @2025-01-01T00:00:00.0+00:00 > @2025-01-01T00:00:00.0  // returns {}
 ```
 
-While the specification defines behavior for comparing date time values with different precisions,
-it does not explicitly detail the rules for comparing two partial date time values when both have
-timezone offsets. This scenario introduces significant complexity. A partial date time with a
-timezone offset (e.g., @2025-01-01T00+05:30) represent an interval that might not be aligned to the
-hour due to half hour and quarter hour timezones). Comparing two such intervals requires complex
-logic to determine if they overlap. Whilst it is possible to provide an definitive answer for more
-straightforward cases, for simplicity, this implementation **returns an empty result for comparing
-partial date time values with timezone offsets**.
+> **Note:** While comparing two date time values without timezone offset, the implementation will
+> treat them as if they had the same timezone offset. This compromise is made so that local date
+> time values can be compared:
+>
+> ```
+> @2025-01-01T00:00:00.0 = @2025-01-01T00:00:00.0`  // returns true
+> ```
+
+#### Date time values with timezone offsets but different precisions
+
+According to the specification, two date time values should be compared at each precision, starting
+from years all the way to seconds. However, this becomes problematic when the date time values at
+hourly precision have half-hour or quarter-hour timezone offsets. Consider `@2025-01-01T00+05:30`
+and `@2025-01-01T00+05:45`. In no timezone can both values still be represented as partial date time
+values at the same precision in order to carry out the comparison algorithm.
+
+Whilst it is possible to implement
+[precision based timing in CQL](https://cql.hl7.org/05-languagesemantics.html#precision-based-timing)
+using intervals, it is not part of the FHIRPath specification. For simplicity, this implementation
+**returns an empty result for comparing partial date time values with timezone offsets**.
 
 ```
 // Indian Standard Time (IST) and Nepal Time (NPT)
