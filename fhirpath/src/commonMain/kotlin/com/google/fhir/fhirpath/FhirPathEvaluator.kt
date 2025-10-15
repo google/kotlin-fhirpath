@@ -193,11 +193,12 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
 
     val op = ctx.getChild(1)!!.text
     val negated = op.contains("!")
-    val result = when {
-      op.contains("=") -> equal(left, right)
-      op.contains("~") -> equivalent(left, right)
-      else -> error("Unknown equality operator: $op")
-    }
+    val result =
+      when {
+        op.contains("=") -> equal(left, right)
+        op.contains("~") -> equivalent(left, right)
+        else -> error("Unknown equality operator: $op")
+      }
     return when (result) {
       true -> listOf(!negated)
       false -> listOf(negated)
