@@ -1,7 +1,7 @@
 # Kotlin FHIRPath
 
 [![stability-wip](https://img.shields.io/badge/stability-wip-lightgrey.svg)](https://guidelines.denpa.pro/stability#work-in-progress)
-![Static Badge](https://img.shields.io/badge/tests_passing-732%2F915-f4d03f)
+![Static Badge](https://img.shields.io/badge/tests_passing-733%2F916-f4d03f)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/overview.html)'s
@@ -157,7 +157,6 @@ passing. The failures are documented in the table below.
 |--------------------------------------|--------------------|-----|--------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `testPolymorphismAsB`                | Test               |     | To be raised                                           | No error should be thrown according to [specification](https://hl7.org/fhirpath/#as-type-specifier).                                                                                         |
 | `testDateTimeGreaterThanDate1`       | Specification/Test |     | To be raised                                           | Unclear in the specification whether the result should still be empty if two values have different precisions but the comparison can still be "certain" (e.g. 2025 is greater than 2024-01). |
-| `testCollectionNotEqualEmpty`        | Test               |     | [PR](https://github.com/FHIR/fhir-test-cases/pull/244) | [Discussion](https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/testCollectionNotEqualEmpty/with/543927021).                                                                        |
 | `testDecimalLiteralToInteger`        | Test               |     | To be raised                                           | The result should be true.                                                                                                                                                                   |
 | `testStringIntegerLiteralToQuantity` | Specification/Test |     |                                                        | [Discussion](https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110)                                                                            |
 | `testQuantityLiteralWkToString`      | Specification/Test |     |                                                        | As above.                                                                                                                                                                                    |

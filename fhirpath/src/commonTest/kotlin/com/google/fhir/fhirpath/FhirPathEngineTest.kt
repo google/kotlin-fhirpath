@@ -49,9 +49,6 @@ val testCasesToSkip =
     // different precisions but the comparison can still be "certain" (e.g. 2025 is greater than
     // 2024-01).
     "testDateTimeGreaterThanDate1",
-    // https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/testCollectionNotEqualEmpty/with/543927021
-    // https://github.com/FHIR/fhir-test-cases/pull/244
-    "testCollectionNotEqualEmpty",
     // The result should be true
     "testDecimalLiteralToInteger",
     // Unclear if integers should be converted to decimals as part of quantity. See
