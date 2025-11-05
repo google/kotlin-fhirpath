@@ -27,6 +27,9 @@ import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Resource
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import kotlinx.datetime.YearMonth
+import kotlinx.datetime.number
 
 /** See [specification](https://build.fhir.org/fhirpath.html#types). */
 val fhirTypeToFhirPathType =
@@ -84,7 +87,7 @@ val fhirPathTypeToFhirPathType =
       SystemType.QUANTITY to
       { it ->
         Quantity(
-          value = Decimal(value = (it as Int).toDouble()),
+          value = Decimal(value = it.toString().toBigDecimal()),
           unit = com.google.fhir.model.r4.String(value = "1"),
         )
       },
@@ -93,7 +96,7 @@ val fhirPathTypeToFhirPathType =
       SystemType.QUANTITY to
       { it ->
         Quantity(
-          value = Decimal(value = (it as Double)),
+          value = Decimal(value = it.toString().toBigDecimal()),
           unit = com.google.fhir.model.r4.String(value = "1"),
         )
       },
@@ -103,7 +106,8 @@ val fhirPathTypeToFhirPathType =
         val date = it as FhirDate
         when (date) {
           is FhirDate.Year -> FhirPathDateTime(year = date.value)
-          is FhirDate.YearMonth -> FhirPathDateTime(year = date.year, month = date.month)
+          is FhirDate.YearMonth ->
+            FhirPathDateTime(year = date.value.year, month = date.value.month.number)
           is FhirDate.Date ->
             FhirPathDateTime(
               year = date.date.year,

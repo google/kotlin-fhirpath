@@ -19,16 +19,21 @@ package com.google.fhir.fhirpath.functions
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.YearMonth
 import kotlinx.datetime.minus
+import kotlinx.datetime.number
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 /** See [specification](https://hl7.org/fhirpath/N1/#now-datetime). */
+@OptIn(ExperimentalTime::class)
 internal fun now(now: Instant): Collection<FhirPathDateTime> {
   val systemTimeZone = TimeZone.currentSystemDefault()
   val localDateTime = now.toLocalDateTime(systemTimeZone)
@@ -47,6 +52,7 @@ internal fun now(now: Instant): Collection<FhirPathDateTime> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#timeofday-time). */
+@OptIn(ExperimentalTime::class)
 internal fun timeOfDay(now: Instant): Collection<Any> {
   val systemTimeZone = TimeZone.currentSystemDefault()
   val localDateTime = now.toLocalDateTime(systemTimeZone)
@@ -60,6 +66,7 @@ internal fun timeOfDay(now: Instant): Collection<Any> {
 }
 
 /** See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#today--date). */
+@OptIn(ExperimentalTime::class)
 internal fun today(now: Instant): Collection<FhirDate> {
   val systemTimeZone = TimeZone.currentSystemDefault()
   val localDateTime = now.toLocalDateTime(systemTimeZone)
@@ -88,21 +95,24 @@ internal fun Collection<Any>.lowBoundary(params: List<Any>): Collection<Any> {
             FhirDate.Year(
               when (value) {
                 is FhirDate.Year -> value.value
-                is FhirDate.YearMonth -> value.year
+                is FhirDate.YearMonth -> value.value.year
                 is FhirDate.Date -> value.date.year
               }
             )
           )
         6 ->
           when (value) {
-            is FhirDate.Year -> listOf(FhirDate.YearMonth(year = value.value, month = 1))
+            is FhirDate.Year ->
+              listOf(FhirDate.YearMonth(YearMonth(value.value, month = Month.JANUARY)))
             is FhirDate.YearMonth -> listOf(value)
-            is FhirDate.Date -> listOf(FhirDate.YearMonth(value.date.year, value.date.monthNumber))
+            is FhirDate.Date ->
+              listOf(FhirDate.YearMonth(YearMonth(value.date.year, value.date.month.number)))
           }
         8 ->
           when (value) {
             is FhirDate.Year -> listOf(FhirDate.Date(LocalDate(value.value, 1, 1)))
-            is FhirDate.YearMonth -> listOf(FhirDate.Date(LocalDate(value.year, value.month, 1)))
+            is FhirDate.YearMonth ->
+              listOf(FhirDate.Date(LocalDate(value.value.year, value.value.month, 1)))
             is FhirDate.Date -> listOf(value)
           }
         else -> error("Invalid precision value: $precision")

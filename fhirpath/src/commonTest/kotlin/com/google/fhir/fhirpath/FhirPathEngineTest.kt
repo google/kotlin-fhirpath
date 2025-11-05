@@ -18,22 +18,18 @@ package com.google.fhir.fhirpath
 
 import com.google.fhir.model.r4.Date
 import com.google.fhir.model.r4.Enumeration
+import com.google.fhir.model.r4.FhirR4Json
 import com.google.fhir.model.r4.Resource
-import com.google.fhir.model.r4.configureR4
 import evaluateFhirPath
 import io.kotest.core.spec.style.FunSpec
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
 
 private const val TEST_RESOURCE_DIR = "third_party/fhir-test-cases/r4"
 private const val TEST_INPUT_DIR = "${TEST_RESOURCE_DIR}/resources"
 
-private val jsonR4 = Json {
-  prettyPrint = true
-  configureR4()
-}
+private val jsonR4 = FhirR4Json()
 
 val testGroupsToSkip =
   listOf(

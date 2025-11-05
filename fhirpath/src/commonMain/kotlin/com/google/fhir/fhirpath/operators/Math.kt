@@ -16,9 +16,9 @@
 
 package com.google.fhir.fhirpath.operators
 
-import com.google.fhir.model.r4.DateTime
 import com.google.fhir.model.r4.Decimal
 import com.google.fhir.model.r4.Quantity
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.DatePeriod
 
 /** See [specification](https://hl7.org/fhirpath/N1/#multiplication). */
@@ -169,7 +169,11 @@ private fun Quantity.multiply(multiplier: Double): Quantity {
     extension = this.extension,
     value =
       with(this.value!!) {
-        Decimal(id = this.id, extension = this.extension, value = this.value!! * multiplier)
+        Decimal(
+          id = this.id,
+          extension = this.extension,
+          value = this.value!! * multiplier.toBigDecimal(),
+        )
       },
     comparator = this.comparator,
     unit = this.unit,

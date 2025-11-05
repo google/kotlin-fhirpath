@@ -22,6 +22,7 @@ import com.google.fhir.fhirpath.ucum.Unit
 import com.google.fhir.model.r4.Code
 import com.google.fhir.model.r4.Decimal
 import com.google.fhir.model.r4.Quantity
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.pow
 
 fun Quantity.toEqualCanonicalized() =
@@ -99,7 +100,7 @@ private fun Quantity.stripUcumPrefix(): Quantity {
     val codeWithoutPrefix = code.removePrefix(prefix.code)
     if (codeWithoutPrefix in (BaseUnit.entries.map { it.code } + Unit.entries.map { it.code })) {
       return Quantity(
-        value = Decimal(value = value!!.value!!.times(10.0.pow(prefix.power))),
+        value = Decimal(value = value!!.value!! * 10.0.pow(prefix.power).toBigDecimal()),
         unit = Code(value = "'$codeWithoutPrefix'"),
       )
     }
@@ -111,7 +112,7 @@ private fun Quantity.toCanonicalizedUcumUnit(): Quantity {
   val unitCode = unit?.value?.stripSingleQuotes() ?: return this
   val unit = Unit.fromString(unitCode) ?: return this
   return Quantity(
-    value = Decimal(value = value!!.value!!.times(unit.scalar)),
+    value = Decimal(value = value!!.value!! * unit.scalar.toBigDecimal()),
     unit = Code(value = unit.base),
   )
 }

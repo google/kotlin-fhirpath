@@ -17,12 +17,14 @@
 package com.google.fhir.fhirpath.functions
 
 import com.google.fhir.fhirpath.operators.not
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Invokes first-order functions that do not require in-context expression valuation (e.g. where) or
  * short-circuiting (e.g. iif).
  */
+@OptIn(ExperimentalTime::class)
 internal fun Collection<Any>.invoke(
   functionName: String,
   params: List<Any>,

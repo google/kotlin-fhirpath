@@ -18,7 +18,8 @@ package com.google.fhir.fhirpath.types
 
 import com.google.fhir.model.r4.FhirDateTime
 import kotlin.text.get
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.UtcOffset
@@ -53,6 +54,7 @@ internal data class FhirPathDateTime(
       else -> Precision.YEAR
     }
 
+  @OptIn(ExperimentalTime::class)
   fun compareTo(other: FhirPathDateTime): Int? {
     // A value with a timezone offset cannot be compared to a value without a timezone offset
     if ((utcOffset == null) != (other.utcOffset == null)) {
@@ -93,6 +95,7 @@ internal data class FhirPathDateTime(
    * function; in the latter case, the same timezone offset will be assumed, producing correct
    * comparison result.
    */
+  @OptIn(ExperimentalTime::class)
   private fun toInstant(): Instant {
     return LocalDateTime(
         year,

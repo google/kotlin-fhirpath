@@ -26,6 +26,7 @@ import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.FhirDateTime
 import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Time
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.LocalTime
 
 /**
@@ -374,7 +375,7 @@ internal fun Collection<Any>.convertsToTime(): Collection<Boolean> {
 
 internal fun Pair<Double, String>.toQuantity(): Quantity {
   return Quantity(
-    value = Decimal(value = first),
+    value = Decimal(value = first.toBigDecimal()),
     unit = com.google.fhir.model.r4.String(value = second),
   )
 }

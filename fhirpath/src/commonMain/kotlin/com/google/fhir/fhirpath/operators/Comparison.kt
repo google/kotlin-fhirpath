@@ -52,7 +52,7 @@ private fun FhirDate.compareTo(other: FhirDate): Int? {
   return when {
     this is FhirDate.Year && other is FhirDate.Year -> this.value compareTo other.value
     this is FhirDate.YearMonth && other is FhirDate.YearMonth ->
-      compareValuesBy(this, other, { it.year }, { it.month })
+      compareValuesBy(this, other, { it.value.year }, { it.value.month })
     this is FhirDate.Date && other is FhirDate.Date -> this.date compareTo other.date
     else -> null
   }
