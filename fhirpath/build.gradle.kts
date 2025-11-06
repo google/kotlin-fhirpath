@@ -85,6 +85,7 @@ kotlin {
         binaries.library()
     }
     androidTarget {
+        publishLibraryVariants("release")
         compilations.all {
             compileTaskProvider.configure {
                 compilerOptions {
