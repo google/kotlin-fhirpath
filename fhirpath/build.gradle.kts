@@ -120,6 +120,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotest.assertions.core)
             implementation(libs.kotest.framework.datatest)
+            implementation(libs.kotest.framework.engine)
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.xmlutil.serialization)

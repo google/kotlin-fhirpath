@@ -21,7 +21,9 @@ import com.google.fhir.model.r4.Enumeration
 import com.google.fhir.model.r4.FhirR4Json
 import com.google.fhir.model.r4.Resource
 import evaluateFhirPath
+import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.core.test.Enabled
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import nl.adaptivity.xmlutil.serialization.XML
@@ -31,33 +33,29 @@ private const val TEST_INPUT_DIR = "${TEST_RESOURCE_DIR}/resources"
 
 private val jsonR4 = FhirR4Json()
 
-val testGroupsToSkip =
-  listOf(
-    // Function `sort` is not defined in the specification
-    "testSort"
+/** A map from the test group name to the reason why the test group is skipped. */
+val skippedTestGroupToReasonMap =
+  mapOf("testSort" to "Function `sort` is not defined in the specification")
+
+/** A map from the test case name to the reason why the test case is skipped. */
+val skippedTestCaseToReasonMap =
+  mapOf(
+    "testPolymorphismAsB" to
+      "No error should be thrown according to https://hl7.org/fhirpath/#as-type-specifier",
+    "testDateTimeGreaterThanDate1" to
+      "Unclear in the specification whether the result should still be empty if two values have different precisions but the comparison can still be certain (e.g. 2025 is greater than 2024-01)",
+    "testDecimalLiteralToInteger" to "The result should be true",
+    "testStringIntegerLiteralToQuantity" to
+      "Unclear if integers should be converted to decimals as part of quantity. See https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110",
+    "testQuantityLiteralWkToString" to
+      "Unclear if integers should be converted to decimals as part of quantity. See https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110",
+    "testQuantityLiteralWeekToString" to
+      "Unclear if integers should be converted to decimals as part of quantity. See https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110",
+    "testQuantity4" to "https://github.com/FHIR/fhir-test-cases/pull/243",
+    "testNow1" to "As `testDateTimeGreaterThanDate1`",
   )
 
-val testCasesToSkip =
-  listOf(
-    // No error should be thrown according to https://hl7.org/fhirpath/#as-type-specifier
-    "testPolymorphismAsB",
-    // Unclear in the specification whether the result should still be empty if two values have
-    // different precisions but the comparison can still be "certain" (e.g. 2025 is greater than
-    // 2024-01).
-    "testDateTimeGreaterThanDate1",
-    // The result should be true
-    "testDecimalLiteralToInteger",
-    // Unclear if integers should be converted to decimals as part of quantity. See
-    // https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110.
-    "testStringIntegerLiteralToQuantity",
-    "testQuantityLiteralWkToString",
-    "testQuantityLiteralWeekToString",
-    // https://github.com/FHIR/fhir-test-cases/pull/243
-    "testQuantity4",
-    // As `testDateTimeGreaterThanDate1`
-    "testNow1",
-  )
-
+@OptIn(ExperimentalKotest::class)
 class FhirPathEngineTest :
   FunSpec({
     val inputMap: Map<String, Resource> =
@@ -67,33 +65,38 @@ class FhirPathEngineTest :
     val xmlContent = loadFile("${TEST_RESOURCE_DIR}/tests-fhir-r4.xml")
     val testSuite = XML.decodeFromString<Tests>(xmlContent)
 
-    testSuite.groups
-      .filterNot { testGroupsToSkip.contains(it.name) }
-      .forEach { group ->
-        context(group.name) {
-          group.tests
-            .filterNot { testCasesToSkip.contains(it.name) }
-            .forEach { testCase ->
-              test(testCase.name) {
-                if (testCase.expression.invalid != null) {
-                  assertFailsWith<Exception> {
-                    evaluateFhirPath(
-                      testCase.expression.value,
-                      testCase.inputfile?.let { inputMap[it] },
-                    )
-                  }
-                } else {
-                  val results =
-                    evaluateFhirPath(
-                      testCase.expression.value,
-                      testCase.inputfile?.let { inputMap[it] },
-                    )
-                  com.google.fhir.fhirpath.assertEquals(testCase.outputs, results)
-                }
-              }
+    testSuite.groups.forEach { group ->
+      context(group.name).config(
+        enabledOrReasonIf = {
+          skippedTestGroupToReasonMap[group.name]?.let { Enabled.disabled(it) } ?: Enabled.enabled
+        }
+      ) {
+        group.tests.forEach { testCase ->
+          test(testCase.name).config(
+            enabledOrReasonIf = {
+              skippedTestCaseToReasonMap[testCase.name]?.let { Enabled.disabled(it) }
+                ?: Enabled.enabled
             }
+          ) {
+            if (testCase.expression.invalid != null) {
+              assertFailsWith<Exception> {
+                evaluateFhirPath(
+                  testCase.expression.value,
+                  testCase.inputfile?.let { inputMap[it] },
+                )
+              }
+            } else {
+              val results =
+                evaluateFhirPath(
+                  testCase.expression.value,
+                  testCase.inputfile?.let { inputMap[it] },
+                )
+              com.google.fhir.fhirpath.assertEquals(testCase.outputs, results)
+            }
+          }
         }
       }
+    }
   })
 
 private fun assertEquals(expected: List<Output>, actual: Collection<Any>) {
