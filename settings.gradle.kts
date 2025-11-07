@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kotlin-fhirpath"
-include(":fhirpath")
+include(":fhir-path")

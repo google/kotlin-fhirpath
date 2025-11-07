@@ -281,7 +281,7 @@ since the `buildSrc` directory is precompiled separately in Gradle.
 `third_party` directory. To run the tests:
 
 ```shell
-./gradlew :fhirpath:jvmTest
+./gradlew :fhir-path:jvmTest
 ```
 
 The number of passing test cases is displayed on a badge at the top of this page.
@@ -291,19 +291,19 @@ The number of passing test cases is displayed on a badge at the top of this page
 To create a maven repository from the generated FHIR model, run:
 
 ```
-./gradlew :fhirpath:publish
+./gradlew :fhir-path:publish
 ```
 
-This will create a maven repository in the `fhirpath/build/repo` directory with artifacts for all
+This will create a maven repository in the `fhir-path/build/repo` directory with artifacts for all
 supported platforms.
 
 To zip the repository, run:
 
 ```
-./gradlew :fhirpath:zipRepo
+./gradlew :fhir-path:zipRepo
 ```
 
-This will generate a `.zip` file in the `fhirpath/build/repoZip` directory.
+This will generate a `.zip` file in the `fhir-path/build/repoZip` directory.
 
 ### Third Party
 
