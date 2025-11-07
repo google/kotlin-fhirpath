@@ -1,6 +1,14 @@
 # Kotlin FHIRPath
 
-[![stability-wip](https://img.shields.io/badge/stability-wip-lightgrey.svg)](https://guidelines.denpa.pro/stability#work-in-progress)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-android%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-android&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-android)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-iosarm64%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-iosarm64&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-iosarm64)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-iossimulatorarm64%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-iossimulatorarm64&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-iossimulatorarm64)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-iosx64%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-iosx64&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-iosx64)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-js%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-js&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-js)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-jvm%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-jvm&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-jvm)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-wasm-js%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-wasm-js&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-wasm-js)
+[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-wasm-wasi%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-wasm-wasi&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-wasm-wasi)
 ![Static Badge](https://img.shields.io/badge/tests_passing-729%2F916-f4d03f)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -8,7 +16,7 @@ Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/
 [FHIRPath](https://hl7.org/fhirpath/N1/) on
 [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
 
-**Warning:** The library is WIP. DO NOT USE.
+**Warning:** The library is in alpha and subject to change. Use at your own risk.
 
 ## Key features
 
@@ -243,7 +251,7 @@ To generate the lexer, parser, and visitor locally using ANTLR Kotlin:
 ./gradlew generateKotlinGrammarSource
 ```
 
-The generated code will be placed in `fhirpath/build/generated` under package
+The generated code will be placed in `fhir-path/build/generated` under package
 `com.google.fhir.fhirpath.parsers`.
 
 ### Model extensions
@@ -254,7 +262,7 @@ To run the model extension codegen in `buildSrc` locally:
 ./gradlew generateR4Helpers
 ```
 
-The generated code will be located in `fhirpath/build/generated` under packages
+The generated code will be located in `fhir-path/build/generated` under packages
 `com.google.fhir.fhirpath` and `com.google.fhir.fhirpath.ext`.
 
 ### UCUM helpers
@@ -265,7 +273,7 @@ To run the UCUM helper codegen in `buildSrc` locally:
 ./gradlew generateUcumHelpers
 ```
 
-The generated code will be located in `fhirpath/build/generated` under package
+The generated code will be located in `fhir-path/build/generated` under package
 `com.google.fhir.fhirpath.ucum`.
 
 ### Dependencies
