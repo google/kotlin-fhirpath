@@ -22,6 +22,7 @@ import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 internal fun compare(left: Any, right: Any): Int? {
   val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands()
@@ -30,8 +31,14 @@ internal fun compare(left: Any, right: Any): Int? {
     leftFhirPath is String && rightFhirPath is String -> {
       leftFhirPath.compareTo(rightFhirPath)
     }
-    leftFhirPath is Number && rightFhirPath is Number -> {
-      leftFhirPath.toDouble().compareTo(rightFhirPath.toDouble())
+    leftFhirPath is Int && rightFhirPath is Int -> {
+      leftFhirPath.compareTo(rightFhirPath)
+    }
+    leftFhirPath is Long && rightFhirPath is Long -> {
+      leftFhirPath.compareTo(rightFhirPath)
+    }
+    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+      leftFhirPath.compareTo(rightFhirPath)
     }
     leftFhirPath is Quantity && rightFhirPath is Quantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {

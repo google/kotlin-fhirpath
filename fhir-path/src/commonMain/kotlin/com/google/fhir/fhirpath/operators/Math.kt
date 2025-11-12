@@ -18,8 +18,17 @@ package com.google.fhir.fhirpath.operators
 
 import com.google.fhir.model.r4.Decimal
 import com.google.fhir.model.r4.Quantity
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
-import kotlinx.datetime.DatePeriod
+
+val DECIMAL_MODE =
+  DecimalMode(
+    decimalPrecision = 15, // TODO: clarify this with the specification
+    roundingMode =
+      RoundingMode.ROUND_HALF_AWAY_FROM_ZERO, // See https://jira.hl7.org/browse/FHIR-53159
+  )
 
 /** See [specification](https://hl7.org/fhirpath/N1/#multiplication). */
 internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
@@ -28,19 +37,25 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
 
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem * rightItem)
-    leftItem is Int && rightItem is Long -> listOf(leftItem.toLong() * rightItem)
-    leftItem is Int && rightItem is Double -> listOf(leftItem * rightItem)
-    leftItem is Long && rightItem is Int -> listOf(leftItem * rightItem.toLong())
+    leftItem is Int && rightItem is Long -> listOf(leftItem * rightItem)
+    leftItem is Int && rightItem is BigDecimal -> listOf(rightItem * leftItem)
+    leftItem is Int && rightItem is Quantity -> listOf(rightItem * leftItem.toBigDecimal())
+    leftItem is Long && rightItem is Int -> listOf(leftItem * rightItem)
     leftItem is Long && rightItem is Long -> listOf(leftItem * rightItem)
-    leftItem is Long && rightItem is Double -> listOf(leftItem.toDouble() * rightItem)
-    leftItem is Double && rightItem is Int -> listOf(leftItem * rightItem)
-    leftItem is Double && rightItem is Long -> listOf(leftItem * rightItem)
-    leftItem is Double && rightItem is Double -> listOf(leftItem * rightItem)
-    leftItem is Quantity && rightItem is Number -> {
-      listOf(leftItem.multiply(rightItem.toDouble()))
+    leftItem is Long && rightItem is BigDecimal -> listOf(rightItem * leftItem)
+    leftItem is Long && rightItem is Quantity -> listOf(rightItem * leftItem.toBigDecimal())
+    leftItem is BigDecimal && rightItem is Int -> listOf(leftItem * rightItem)
+    leftItem is BigDecimal && rightItem is Long -> listOf(leftItem * rightItem)
+    leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem * rightItem)
+    leftItem is BigDecimal && rightItem is Quantity -> listOf(rightItem * leftItem)
+    leftItem is Quantity && rightItem is Int -> {
+      listOf(leftItem * rightItem.toBigDecimal())
     }
-    leftItem is Number && rightItem is Quantity -> {
-      listOf(rightItem.multiply(leftItem.toDouble()))
+    leftItem is Quantity && rightItem is Long -> {
+      listOf(leftItem * rightItem.toBigDecimal())
+    }
+    leftItem is Quantity && rightItem is BigDecimal -> {
+      listOf(leftItem * rightItem)
     }
     leftItem is Quantity && rightItem is Quantity -> TODO("Implement multiplying two quantities")
     else -> error("Cannot multiply $leftItem and $rightItem")
@@ -51,24 +66,23 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
 internal fun division(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   val leftItem = left.singleOrNull() ?: return emptyList()
   val rightItem = right.singleOrNull() ?: return emptyList()
-  val leftDouble =
+  val leftBigDecimal =
     when (leftItem) {
-      is Int -> leftItem.toDouble()
-      is Long -> leftItem.toDouble()
-      is Double -> leftItem
+      is Int -> leftItem.toBigDecimal()
+      is Long -> leftItem.toBigDecimal()
+      is BigDecimal -> leftItem
       else -> error("Operand of division must be a number")
     }
-  val rightDouble =
+  val rightBigDecimal =
     when (rightItem) {
-      is Int -> rightItem.toDouble()
-      is Long -> rightItem.toDouble()
-      is Double -> rightItem
+      is Int -> rightItem.toBigDecimal()
+      is Long -> rightItem.toBigDecimal()
+      is BigDecimal -> rightItem
       else -> error("Operand of division must be a number")
     }
 
-  val result = leftDouble / rightDouble
-  if (result.isInfinite()) return emptyList()
-  return listOf(result)
+  if (rightBigDecimal == BigDecimal.ZERO) return emptyList()
+  return listOf(leftBigDecimal.divide(rightBigDecimal, DECIMAL_MODE))
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#addition). */
@@ -76,11 +90,16 @@ internal fun addition(left: Collection<Any>, right: Collection<Any>): Collection
   val leftItem = left.singleOrNull() ?: return emptyList()
   val rightItem = right.singleOrNull() ?: return emptyList()
 
-  DatePeriod()
-
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem + rightItem)
-    leftItem is Double && rightItem is Double -> listOf(leftItem + rightItem)
+    leftItem is Int && rightItem is Long -> listOf(leftItem + rightItem)
+    leftItem is Int && rightItem is BigDecimal -> listOf(rightItem + leftItem)
+    leftItem is Long && rightItem is Int -> listOf(leftItem + rightItem)
+    leftItem is Long && rightItem is Long -> listOf(leftItem + rightItem)
+    leftItem is Long && rightItem is BigDecimal -> listOf(rightItem + leftItem)
+    leftItem is BigDecimal && rightItem is Int -> listOf(leftItem + rightItem)
+    leftItem is BigDecimal && rightItem is Long -> listOf(leftItem + rightItem)
+    leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem + rightItem)
     leftItem is String && rightItem is String -> listOf(leftItem + rightItem)
     leftItem is Quantity && rightItem is Quantity -> TODO("Implement adding two quantities")
     else -> error("Cannot add $leftItem and $rightItem")
@@ -93,7 +112,14 @@ internal fun subtraction(left: Collection<Any>, right: Collection<Any>): Collect
   val rightItem = right.singleOrNull() ?: return emptyList()
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem - rightItem)
-    leftItem is Double && rightItem is Double -> listOf(leftItem - rightItem)
+    leftItem is Int && rightItem is Long -> listOf(leftItem - rightItem)
+    leftItem is Int && rightItem is BigDecimal -> listOf(-rightItem + leftItem)
+    leftItem is Long && rightItem is Int -> listOf(leftItem - rightItem)
+    leftItem is Long && rightItem is Long -> listOf(leftItem - rightItem)
+    leftItem is Long && rightItem is BigDecimal -> listOf(-rightItem + leftItem)
+    leftItem is BigDecimal && rightItem is Int -> listOf(leftItem - rightItem)
+    leftItem is BigDecimal && rightItem is Long -> listOf(leftItem - rightItem)
+    leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem - rightItem)
     leftItem is Quantity && rightItem is Quantity -> TODO("Implement subtracting two quantities")
     else -> error("Cannot subtract $rightItem from $leftItem")
   }
@@ -101,56 +127,57 @@ internal fun subtraction(left: Collection<Any>, right: Collection<Any>): Collect
 
 /** See [specification](https://hl7.org/fhirpath/N1/#div). */
 internal fun div(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
-  val leftDouble =
+  val leftBigDecimal =
     when (val leftItem = left.singleOrNull() ?: return emptyList()) {
-      is Int -> leftItem.toDouble()
-      is Long -> leftItem.toDouble()
-      is Double -> leftItem
+      is Int -> leftItem.toBigDecimal()
+      is Long -> leftItem.toBigDecimal()
+      is BigDecimal -> leftItem
       else -> error("Operand of div must be a number")
     }
-  val rightDouble =
+  val rightBigDecimal =
     when (val rightItem = right.singleOrNull() ?: return emptyList()) {
-      is Int -> rightItem.toDouble()
-      is Long -> rightItem.toDouble()
-      is Double -> rightItem
+      is Int -> rightItem.toBigDecimal()
+      is Long -> rightItem.toBigDecimal()
+      is BigDecimal -> rightItem
       else -> error("Operand of div must be a number")
     }
-  val result = leftDouble / rightDouble
+  if (rightBigDecimal == BigDecimal.ZERO) return emptyList()
 
-  if (result.isInfinite()) return emptyList()
-  return listOf(result.toInt())
+  val (quotient, _) = leftBigDecimal divrem rightBigDecimal
+  return listOf(quotient.intValue())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#mod). */
 internal fun mod(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   val leftItem = left.singleOrNull() ?: return emptyList()
-  val leftDouble =
+  val leftBigDecimal =
     when (leftItem) {
-      is Int -> leftItem.toDouble()
-      is Long -> leftItem.toDouble()
-      is Double -> leftItem
+      is Int -> leftItem.toBigDecimal()
+      is Long -> leftItem.toBigDecimal()
+      is BigDecimal -> leftItem
       else -> error("Operand of mod must be a number")
     }
   val rightItem = right.singleOrNull() ?: return emptyList()
-  val rightDouble =
+  val rightBigDecimal =
     when (rightItem) {
-      is Int -> rightItem.toDouble()
-      is Long -> rightItem.toDouble()
-      is Double -> rightItem
+      is Int -> rightItem.toBigDecimal()
+      is Long -> rightItem.toBigDecimal()
+      is BigDecimal -> rightItem
       else -> error("Operand of mod must be a number")
     }
-  val result = leftDouble % rightDouble
+  if (rightBigDecimal.isZero()) return emptyList()
 
-  if (result.isNaN()) return emptyList()
-  if (leftItem is Int && rightItem is Int) return listOf(result.toInt())
+  val (_, remainder) = leftBigDecimal divrem rightBigDecimal
+  if (leftItem is Int && rightItem is Int) return listOf(remainder.intValue())
   if (
     (leftItem is Long && rightItem is Long) ||
       (leftItem is Int && rightItem is Long) ||
       (leftItem is Long && rightItem is Int)
   ) {
-    return listOf(result.toLong())
+    // N.B. the specification does not specify what to do if the result is out of range for Integer.
+    return listOf(remainder.longValue())
   }
-  return listOf(result)
+  return listOf(remainder)
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#string-concatenation) */
@@ -163,17 +190,13 @@ internal fun concat(left: Collection<Any>, right: Collection<Any>): Collection<A
   return listOf(leftString + rightString)
 }
 
-private fun Quantity.multiply(multiplier: Double): Quantity {
+private operator fun Quantity.times(multiplier: BigDecimal): Quantity {
   return Quantity(
     id = this.id,
     extension = this.extension,
     value =
       with(this.value!!) {
-        Decimal(
-          id = this.id,
-          extension = this.extension,
-          value = this.value!! * multiplier.toBigDecimal(),
-        )
+        Decimal(id = this.id, extension = this.extension, value = this.value!! * multiplier)
       },
     comparator = this.comparator,
     unit = this.unit,

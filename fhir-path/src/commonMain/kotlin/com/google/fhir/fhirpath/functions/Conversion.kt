@@ -26,6 +26,7 @@ import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.FhirDateTime
 import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Time
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.LocalTime
 
@@ -61,10 +62,10 @@ internal fun Collection<Any>.toBoolean(): Collection<Boolean> {
         0 -> listOf(false)
         else -> emptyList()
       }
-    is Double ->
+    is BigDecimal ->
       when (value) {
-        1.0 -> listOf(true)
-        0.0 -> listOf(false)
+        BigDecimal.ONE -> listOf(true)
+        BigDecimal.ZERO -> listOf(false)
         else -> emptyList()
       }
     is String ->
@@ -202,17 +203,17 @@ internal fun Collection<Any>.convertsToDateTime(): Collection<Boolean> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#todecimal-decimal). */
-internal fun Collection<Any>.toDecimal(): Collection<Double> {
+internal fun Collection<Any>.toDecimal(): Collection<BigDecimal> {
   check(size <= 1) { "toDecimal() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
   return when (val value = single()) {
-    is Double -> listOf(value)
-    is Int -> listOf(value.toDouble())
-    is Boolean -> listOf(if (value) 1.0 else 0.0)
+    is BigDecimal -> listOf(value)
+    is Int -> listOf(value.toBigDecimal())
+    is Boolean -> listOf(if (value) BigDecimal.ONE else BigDecimal.ZERO)
     is String -> {
-      value.toDoubleOrNull()?.let { listOf(it) } ?: emptyList()
+      value.toDoubleOrNull()?.let { listOf(it.toBigDecimal()) } ?: emptyList()
     }
     else -> emptyList()
   }
@@ -234,13 +235,13 @@ internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<Quantit
   if (isEmpty()) return emptyList()
 
   return when (val item = single()) {
-    is Int -> listOf((item.toDouble() to DEFAULT_UNIT).toQuantity())
-    is Long -> listOf((item.toDouble() to DEFAULT_UNIT).toQuantity())
-    is Double -> listOf((item to DEFAULT_UNIT).toQuantity())
+    is Int -> listOf((item.toBigDecimal() to DEFAULT_UNIT).toQuantity())
+    is Long -> listOf((item.toBigDecimal() to DEFAULT_UNIT).toQuantity())
+    is BigDecimal -> listOf((item to DEFAULT_UNIT).toQuantity())
     is Quantity -> listOf(item)
     is String -> {
       val match = QUANTITY_REGEX.matchEntire(item.trim()) ?: return emptyList()
-      val value = match.groups["value"]?.value!!.toDouble()
+      val value = match.groups["value"]?.value!!.toBigDecimal()
       val unit =
         match.groups["unit"]?.value?.also {
           if (Unit.fromString(it) == null) {
@@ -263,7 +264,8 @@ internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<Quantit
       }
       listOf((value to (unit?.let { "'$it'" } ?: calendarDuration ?: DEFAULT_UNIT)).toQuantity())
     }
-    is Boolean -> listOf(((if (item) 1.0 else 0.0) to DEFAULT_UNIT).toQuantity())
+    is Boolean ->
+      listOf(((if (item) BigDecimal.ONE else BigDecimal.ZERO) to DEFAULT_UNIT).toQuantity())
     else -> emptyList()
   }
 }
@@ -287,7 +289,7 @@ internal fun Collection<Any>.toStringFun(): Collection<String> {
     is String -> listOf(item)
     is Int -> listOf(item.toString())
     is Long -> listOf(item.toString())
-    is Double -> listOf(item.toString())
+    is BigDecimal -> listOf(item.toString())
     is Date -> listOf(item.toString())
     is DateTime -> listOf(item.toString())
     is Time -> listOf(item.toString())
@@ -318,7 +320,7 @@ internal fun Collection<Any>.convertsToString(): Collection<Boolean> {
       is String,
       is Int,
       is Long,
-      is Double,
+      is BigDecimal,
       is Date,
       is DateTime,
       is Time,
@@ -373,9 +375,9 @@ internal fun Collection<Any>.convertsToTime(): Collection<Boolean> {
   }
 }
 
-internal fun Pair<Double, String>.toQuantity(): Quantity {
+internal fun Pair<BigDecimal, String>.toQuantity(): Quantity {
   return Quantity(
-    value = Decimal(value = first.toBigDecimal()),
+    value = Decimal(value = first),
     unit = com.google.fhir.model.r4.String(value = second),
   )
 }

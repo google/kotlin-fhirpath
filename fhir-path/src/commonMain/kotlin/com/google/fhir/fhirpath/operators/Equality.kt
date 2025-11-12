@@ -23,6 +23,7 @@ import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 /**
  * See [specification](https://hl7.org/fhirpath/N1/#equals).
@@ -87,8 +88,14 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
     leftFhirPath is String && rightFhirPath is String -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is Number && rightFhirPath is Number -> {
-      leftFhirPath.toDouble() == rightFhirPath.toDouble()
+    leftFhirPath is Int && rightFhirPath is Int -> {
+      leftFhirPath == rightFhirPath
+    }
+    leftFhirPath is Long && rightFhirPath is Long -> {
+      leftFhirPath == rightFhirPath
+    }
+    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+      leftFhirPath == rightFhirPath
     }
     leftFhirPath is Boolean && rightFhirPath is Boolean -> {
       leftFhirPath == rightFhirPath
@@ -123,8 +130,18 @@ private fun itemsEquivalent(left: Any, right: Any): Boolean {
     leftFhirPath is String && rightFhirPath is String -> {
       leftFhirPath.normalize() == rightFhirPath.normalize()
     }
-    leftFhirPath is Number && rightFhirPath is Number -> {
-      leftFhirPath.toDouble() == rightFhirPath.toDouble()
+    leftFhirPath is Int && rightFhirPath is Int -> {
+      leftFhirPath == rightFhirPath
+    }
+    leftFhirPath is Long && rightFhirPath is Long -> {
+      leftFhirPath == rightFhirPath
+    }
+    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+      // Determine decimal equivalence to the precision of the less precise operand
+      val minLastDigitPosition =
+        minOf(leftFhirPath.lastDigitPosition, rightFhirPath.lastDigitPosition)
+      leftFhirPath.roundToDigitPosition(minLastDigitPosition, DECIMAL_MODE.roundingMode) ==
+        rightFhirPath.roundToDigitPosition(minLastDigitPosition, DECIMAL_MODE.roundingMode)
     }
     leftFhirPath is Boolean && rightFhirPath is Boolean -> {
       leftFhirPath == rightFhirPath
@@ -155,3 +172,24 @@ private fun itemsEquivalent(left: Any, right: Any): Boolean {
 
 /** See [specification](https://hl7.org/fhirpath/N1/#string-equivalence). */
 private fun String.normalize() = lowercase().replace(Regex("\\s+"), " ").trim()
+
+/**
+ * The last digit position with precision. This is used to round the decimal value to the less
+ * precise operand whilst determining equivalence.
+ *
+ * This value is calculated using `precision` and `exponent` of the [BigDecimal]. For values with
+ * non-negative exponent, the last digit position is simply the precision. For values with negative
+ * exponent, the last digit position is the precision minus the exponent since there are additional
+ * zeros that are not accounted for in the precision, but should be accounted for when calculating
+ * the last digit position.
+ *
+ * For example:
+ * - 670 has precision 3, and the last digit position is 3
+ * - 6.7 has precision 2, and the last digit position is 2
+ * - 0.67 has precision 2, and the last digit position is 3
+ * - 0.0067 has precision 2, and the last digit position is 5
+ */
+private val BigDecimal.lastDigitPosition: Long
+  get() {
+    return if (exponent >= 0) precision else precision - exponent
+  }

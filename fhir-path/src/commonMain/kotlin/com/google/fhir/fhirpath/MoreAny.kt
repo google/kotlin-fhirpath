@@ -27,8 +27,8 @@ import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Resource
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
-import kotlinx.datetime.YearMonth
 import kotlinx.datetime.number
 
 /** See [specification](https://build.fhir.org/fhirpath.html#types). */
@@ -82,7 +82,7 @@ val fhirTypeToFhirPathType =
 val fhirPathTypeToFhirPathType =
   mapOf<Pair<SystemType, SystemType>, (any: Any) -> Any>(
     SystemType.INTEGER to SystemType.LONG to { it -> (it as Int).toLong() },
-    SystemType.INTEGER to SystemType.DECIMAL to { it -> (it as Int).toDouble() },
+    SystemType.INTEGER to SystemType.DECIMAL to { it -> (it as Int).toBigDecimal() },
     SystemType.INTEGER to
       SystemType.QUANTITY to
       { it ->
@@ -91,12 +91,12 @@ val fhirPathTypeToFhirPathType =
           unit = com.google.fhir.model.r4.String(value = "1"),
         )
       },
-    SystemType.LONG to SystemType.DECIMAL to { it -> (it as Long).toDouble() },
+    SystemType.LONG to SystemType.DECIMAL to { it -> (it as Long).toBigDecimal() },
     SystemType.DECIMAL to
       SystemType.QUANTITY to
       { it ->
         Quantity(
-          value = Decimal(value = it.toString().toBigDecimal()),
+          value = Decimal(value = it as BigDecimal),
           unit = com.google.fhir.model.r4.String(value = "1"),
         )
       },
@@ -152,8 +152,7 @@ internal fun Any.accessMember(fieldName: String): Any? {
 internal fun Any.toFhirPathType(): Any {
   FhirType.fromObject(this)?.let { fhirType ->
     fhirTypeToFhirPathType[fhirType]?.let { (_, transform) ->
-      val result = transform(this as Element)
-      return result
+      return@toFhirPathType transform(this as Element)
     }
   }
   return this

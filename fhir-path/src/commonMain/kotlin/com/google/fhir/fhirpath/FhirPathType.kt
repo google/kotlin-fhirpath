@@ -23,6 +23,7 @@ import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Resource
 import com.google.fhir.model.r4.terminologies.ResourceType
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 /** See [specification](https://hl7.org/fhirpath/N1/#types-and-reflection). */
 sealed interface FhirPathType {
@@ -133,7 +134,7 @@ enum class SystemType(override val typeName: String) : FhirPathType {
         is String -> STRING
         is Int -> INTEGER
         is Long -> LONG
-        is Double -> DECIMAL
+        is BigDecimal -> DECIMAL
         is FhirDate -> DATE
         is FhirPathDateTime -> DATETIME
         is FhirPathTime -> TIME

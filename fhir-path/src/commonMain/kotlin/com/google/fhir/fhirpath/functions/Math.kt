@@ -16,15 +16,14 @@
 
 package com.google.fhir.fhirpath.functions
 
+import com.google.fhir.fhirpath.operators.DECIMAL_MODE
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.exp
-import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.pow
-import kotlin.math.round
 import kotlin.math.sqrt
-import kotlin.math.truncate
 
 /** See [specification](https://hl7.org/fhirpath/N1/#abs-integer-decimal-quantity). */
 internal fun Collection<Any>.abs(): Collection<Any> {
@@ -33,7 +32,7 @@ internal fun Collection<Any>.abs(): Collection<Any> {
   return when (value) {
     is Int -> listOf(abs(value))
     is Long -> listOf(abs(value))
-    is Double -> listOf(abs(value))
+    is BigDecimal -> listOf(value.abs())
     // TODO: implement for quantity
     else -> error("abs() can only be applied to numbers")
   }
@@ -46,7 +45,8 @@ internal fun Collection<Any>.ceiling(): Collection<Any> {
   return when (value) {
     is Int,
     Long -> listOf(value)
-    is Double -> listOf(ceil(value))
+    is BigDecimal ->
+      listOf(value.ceil().intValue()) // TODO: handle the case where the value needs to be a Long
     else -> error("ceiling() can only be applied to numbers")
   }
 }
@@ -56,9 +56,9 @@ internal fun Collection<Any>.exp(): Collection<Any> {
   check(size <= 1) { "exp() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull() ?: return emptyList()
   return when (value) {
-    is Int -> listOf(exp(value.toDouble()))
-    is Long -> listOf(exp(value.toDouble()))
-    is Double -> listOf(exp(value))
+    is Int -> listOf(exp(value.toDouble()).toBigDecimal())
+    is Long -> listOf(exp(value.toDouble()).toBigDecimal())
+    is BigDecimal -> listOf(exp(value.doubleValue()).toBigDecimal())
     else -> error("exp() can only be applied to numbers")
   }
 }
@@ -70,7 +70,8 @@ internal fun Collection<Any>.floor(): Collection<Any> {
   return when (value) {
     is Int,
     Long -> listOf(value)
-    is Double -> listOf(floor(value))
+    is BigDecimal ->
+      listOf(value.floor().intValue()) // TODO: handle the case where the value needs to be a Long
     else -> error("floor() can only be applied to numbers")
   }
 }
@@ -80,9 +81,9 @@ internal fun Collection<Any>.ln(): Collection<Any> {
   check(size <= 1) { "ln() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull() ?: return emptyList()
   return when (value) {
-    is Int -> listOf(ln(value.toDouble()))
-    is Long -> listOf(ln(value.toDouble()))
-    is Double -> listOf(ln(value))
+    is Int -> listOf(ln(value.toDouble()).toBigDecimal())
+    is Long -> listOf(ln(value.toDouble()).toBigDecimal())
+    is BigDecimal -> listOf(ln(value.doubleValue()).toBigDecimal())
     else -> error("ln() can only be applied to numbers")
   }
 }
@@ -94,17 +95,17 @@ internal fun Collection<Any>.log(params: List<Any>): Collection<Any> {
     when (val value = this.singleOrNull() ?: return emptyList()) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
-      is Double -> value
+      is BigDecimal -> value.doubleValue()
       else -> error("log() can only be applied to numbers")
     }
-  val base =
+  val baseDouble =
     when (val param = params.singleOrNull() ?: return emptyList()) {
       is Int -> param.toDouble()
       is Long -> param.toDouble()
-      is Double -> param
+      is BigDecimal -> param.doubleValue()
       else -> error("log() can only be applied to numbers")
     }
-  return listOf(ln(valueDouble) / ln(base))
+  return listOf((ln(valueDouble) / ln(baseDouble)).toBigDecimal())
 }
 
 /**
@@ -118,14 +119,14 @@ internal fun Collection<Any>.power(params: List<Any>): Collection<Any> {
     when (value) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
-      is Double -> value
+      is BigDecimal -> value.doubleValue()
       else -> error("power() can only be applied to numbers")
     }
   val exponentDouble =
     when (exponent) {
       is Int -> exponent.toDouble()
       is Long -> exponent.toDouble()
-      is Double -> exponent
+      is BigDecimal -> exponent.doubleValue()
       else -> error("power() can only be applied to numbers")
     }
   val result = valueDouble.pow(exponentDouble)
@@ -137,9 +138,10 @@ internal fun Collection<Any>.power(params: List<Any>): Collection<Any> {
       (value is Int && exponent is Long) ||
       (value is Long && exponent is Int)
   ) {
+    // N.B. the specification does not specify what to do if the result is out of range for Integer.
     return listOf(result.toLong())
   }
-  return listOf(result)
+  return listOf(result.toBigDecimal())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#roundprecision-integer-decimal) */
@@ -149,9 +151,12 @@ internal fun Collection<Any>.round(params: List<Any>): Collection<Any> {
   val precision = params.singleOrNull()?.let { it as Int } ?: 0
   check(precision >= 0) { "round() precision must be non-negative" }
   return when (value) {
-    is Int -> listOf(value.toDouble())
-    is Long -> listOf(value.toDouble())
-    is Double -> listOf(round(value * 10.0.pow(precision)) / 10.0.pow(precision))
+    is Int -> listOf(value.toBigDecimal())
+    is Long -> listOf(value.toBigDecimal())
+    is BigDecimal ->
+      listOf(
+        value.roundToDigitPositionAfterDecimalPoint(precision.toLong(), DECIMAL_MODE.roundingMode)
+      )
     else -> error("round() can only be applied to numbers")
   }
 }
@@ -163,12 +168,12 @@ internal fun Collection<Any>.sqrt(): Collection<Any> {
     when (val value = this.singleOrNull() ?: return emptyList()) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
-      is Double -> value
+      is BigDecimal -> value.doubleValue()
       else -> error("power() can only be applied to numbers")
     }
   val sqrt = sqrt(valueDouble)
   if (sqrt.isNaN()) return emptyList()
-  return listOf(sqrt)
+  return listOf(sqrt.toBigDecimal())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#truncate-integer) */
@@ -178,7 +183,7 @@ internal fun Collection<Any>.truncate(): Collection<Any> {
   return when (value) {
     is Int,
     Long -> listOf(value)
-    is Double -> listOf(truncate(value))
+    is BigDecimal -> listOf(value.toBigInteger().intValue())
     else -> error("truncate() can only be applied to numbers")
   }
 }

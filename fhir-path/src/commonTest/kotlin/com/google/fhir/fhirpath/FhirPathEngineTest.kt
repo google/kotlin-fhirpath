@@ -20,6 +20,8 @@ import com.google.fhir.model.r4.Date
 import com.google.fhir.model.r4.Enumeration
 import com.google.fhir.model.r4.FhirR4Json
 import com.google.fhir.model.r4.Resource
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import evaluateFhirPath
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
@@ -205,7 +207,7 @@ private fun assertEquals(expected: Output, actual: Any) {
       }
     }
     "integer" -> assertEquals(expected.value, (actual as Int).toString())
-    "decimal" -> assertEquals(expected.value.toDouble(), actual as Double)
+    "decimal" -> assertEquals(expected.value.toBigDecimal(), actual as BigDecimal)
     "Quantity" ->
       assertEquals(
         expected.value,
