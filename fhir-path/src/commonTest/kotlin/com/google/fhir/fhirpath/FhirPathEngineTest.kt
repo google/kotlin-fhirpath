@@ -35,7 +35,11 @@ private const val TEST_INPUT_DIR = "${TEST_RESOURCE_DIR}/resources"
 
 private val jsonR4 = FhirR4Json()
 
-/** A map from the test group name to the reason why the test group is skipped. */
+/**
+ * A map from the test group name to the reason why the test group is skipped.
+ *
+ * N.B. This should be kept in sync with the conformance table in the `README.md` file.
+ */
 val skippedTestGroupToReasonMap =
   mapOf(
     "testRepeat" to "Unimplemented",
@@ -56,7 +60,11 @@ val skippedTestGroupToReasonMap =
     "testInheritance" to "Unimplemented",
   )
 
-/** A map from the test case name to the reason why the test case is skipped. */
+/**
+ * A map from the test case name to the reason why the test case is skipped.
+ *
+ * N.B. This should be kept in sync with the conformance table in the `README.md` file.
+ */
 val skippedTestCaseToReasonMap =
   mapOf(
     "testPolymorphismAsB" to
@@ -71,7 +79,6 @@ val skippedTestCaseToReasonMap =
     "testQuantityLiteralWeekToString" to
       "Unclear if integers should be converted to decimals as part of quantity. See https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110",
     "testQuantity4" to "https://github.com/FHIR/fhir-test-cases/pull/243",
-    "testExists3" to "TBD",
     "testSubSetOf3" to "TBD",
     "testQuantity9" to "TBD",
     "testQuantity10" to "TBD",

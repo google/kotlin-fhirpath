@@ -22,7 +22,6 @@ import com.google.fhir.fhirpath.ext.unwrapChoiceValue
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.BackboneElement
-import com.google.fhir.model.r4.Decimal
 import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
@@ -31,7 +30,12 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.number
 
-/** See [specification](https://build.fhir.org/fhirpath.html#types). */
+/**
+ * Maps a FHIR type to a FHIRPath system type it can be implicitly converted to and a function that
+ * does the conversion.
+ *
+ * See [specification](https://build.fhir.org/fhirpath.html#types).
+ */
 val fhirTypeToFhirPathType =
   mapOf<FhirType, Pair<SystemType, (element: Element) -> Any>>(
     // FHIR primitive types
@@ -42,7 +46,16 @@ val fhirTypeToFhirPathType =
     FhirPrimitiveType.Uri to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Uri).value!! }),
     FhirPrimitiveType.Code to
-      (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Code).value!! }),
+      (SystemType.STRING to
+        { it ->
+          // A code in the Kotlin FHIR library is represented either as an Enumeration if it is
+          // bound to a value set, or a Code if it is not.
+          when (it) {
+            is com.google.fhir.model.r4.Enumeration<*> -> it.value.toString()
+            is com.google.fhir.model.r4.Code -> it.value!!
+            else -> error("Unknown code type")
+          }
+        }),
     FhirPrimitiveType.Oid to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Oid).value!! }),
     FhirPrimitiveType.Id to
@@ -78,7 +91,12 @@ val fhirTypeToFhirPathType =
     FhirComplexType.Quantity to (SystemType.QUANTITY to { it }),
   )
 
-/** See [specification](https://hl7.org/fhirpath/#conversion). */
+/**
+ * Maps a pair of FHIRPath types where the former can be implicitly converted to the latter to a
+ * function that does the conversion.
+ *
+ * See [specification](https://hl7.org/fhirpath/#conversion).
+ */
 val fhirPathTypeToFhirPathType =
   mapOf<Pair<SystemType, SystemType>, (any: Any) -> Any>(
     SystemType.INTEGER to SystemType.LONG to { it -> (it as Int).toLong() },
@@ -87,7 +105,7 @@ val fhirPathTypeToFhirPathType =
       SystemType.QUANTITY to
       { it ->
         Quantity(
-          value = Decimal(value = it.toString().toBigDecimal()),
+          value = com.google.fhir.model.r4.Decimal(value = it.toString().toBigDecimal()),
           unit = com.google.fhir.model.r4.String(value = "1"),
         )
       },
@@ -96,7 +114,7 @@ val fhirPathTypeToFhirPathType =
       SystemType.QUANTITY to
       { it ->
         Quantity(
-          value = Decimal(value = it as BigDecimal),
+          value = com.google.fhir.model.r4.Decimal(value = it as BigDecimal),
           unit = com.google.fhir.model.r4.String(value = "1"),
         )
       },

@@ -24,7 +24,9 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
 
 object PrimitiveTypeEnumFileSpecGenerator {
@@ -99,6 +101,13 @@ object PrimitiveTypeEnumFileSpecGenerator {
                               )
                           }
                         }
+
+                        // Enumerations are a special case that should be mapped to Code
+                        addStatement(
+                          "is %T -> %N",
+                          ClassName(modelPackageName, "Enumeration").parameterizedBy(STAR),
+                          "Code",
+                        )
                       }
                       .addStatement("else -> null")
                       .endControlFlow()

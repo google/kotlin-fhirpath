@@ -157,7 +157,8 @@ abstract class R4HelperGenerationTask : DefaultTask() {
     ComplexTypeEnumFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
         fhirPathPackageName = fhirPathPackageName,
-        structureDefinitions = structureDefinitions.filter { it.kind == Kind.COMPLEX_TYPE },
+        structureDefinitions =
+          structureDefinitions.filter { it.kind == Kind.COMPLEX_TYPE && it.name != "Element" },
       )
       .writeTo(outputDir)
   }

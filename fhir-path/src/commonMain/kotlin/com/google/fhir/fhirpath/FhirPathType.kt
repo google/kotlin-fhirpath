@@ -25,7 +25,11 @@ import com.google.fhir.model.r4.Resource
 import com.google.fhir.model.r4.terminologies.ResourceType
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
-/** See [specification](https://hl7.org/fhirpath/N1/#types-and-reflection). */
+/**
+ * A FHIRPath type. It can be either a FHIR type or a system type.
+ *
+ * See [specification](https://hl7.org/fhirpath/N1/#types-and-reflection).
+ */
 sealed interface FhirPathType {
   val namespace: String
   val typeName: String
