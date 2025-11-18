@@ -16,6 +16,7 @@
 
 package com.google.fhir.fhirpath.functions
 
+import com.google.fhir.model.r4.Enumeration
 import kotlin.math.min
 
 /** See [specification](https://hl7.org/fhirpath/N1/#indexofsubstring-string-integer). */
@@ -177,6 +178,7 @@ private fun Any.unwrapString(): String? {
   return when (this) {
     is com.google.fhir.model.r4.String -> value
     is String -> this
+    is Enumeration<*> -> value.toString()
     else -> null
   }
 }
