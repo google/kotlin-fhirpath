@@ -19,6 +19,13 @@ package com.google.fhir.fhirpath.functions
 import com.google.fhir.model.r4.Enumeration
 import kotlin.math.min
 
+/**
+ * Makes the dot match all characters, including line breaks.
+ *
+ * See https://www.regular-expressions.info/modifiers.html.
+ */
+const val SINGLE_LINE_MODE_REGEX_PREFIX = "(?s)"
+
 /** See [specification](https://hl7.org/fhirpath/N1/#indexofsubstring-string-integer). */
 internal fun Collection<Any>.indexOf(params: List<Any>): Collection<Any> {
   check(size <= 1) { "indexOf() cannot be called on a collection with more than 1 item" }
@@ -69,7 +76,7 @@ internal fun Collection<Any>.strContains(params: List<Any>): Collection<Any> {
   check(size <= 1) { "contains() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString() ?: return emptyList()
   val substring = params.single().unwrapString()!!
-  return listOf(input.contains(substring.toRegex()))
+  return listOf(input.contains(substring))
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#upper-string). */
@@ -102,8 +109,8 @@ internal fun Collection<Any>.replace(params: List<Any>): Collection<Any> {
 internal fun Collection<Any>.matches(params: List<Any>): Collection<Any> {
   check(size <= 1) { "matches() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString() ?: return emptyList()
-  val regex = params.singleOrNull()?.unwrapString() ?: return emptyList()
-  return listOf(regex.toRegex().containsMatchIn(input))
+  val regexText = params.singleOrNull()?.unwrapString() ?: return emptyList()
+  return listOf(regexText.toSingleLineModeRegex().containsMatchIn(input))
 }
 
 /**
@@ -113,7 +120,7 @@ internal fun Collection<Any>.matchesFull(params: List<Any>): Collection<Any> {
   check(size <= 1) { "matches() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString() ?: return emptyList()
   val regex = params.singleOrNull()?.unwrapString() ?: return emptyList()
-  return listOf(input.matches(regex.toRegex()))
+  return listOf(input.matches(regex.toSingleLineModeRegex()))
 }
 
 /**
@@ -133,7 +140,7 @@ internal fun Collection<Any>.replaceMatches(params: List<Any>): Collection<Any> 
   if (regex.isEmpty()) {
     return this
   }
-  return listOf(input.replace(regex.toRegex(), substitution))
+  return listOf(input.replace(regex.toSingleLineModeRegex(), substitution))
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#length-integer). */
@@ -182,3 +189,5 @@ private fun Any.unwrapString(): String? {
     else -> null
   }
 }
+
+private fun String.toSingleLineModeRegex(): Regex = "$SINGLE_LINE_MODE_REGEX_PREFIX$this".toRegex()
