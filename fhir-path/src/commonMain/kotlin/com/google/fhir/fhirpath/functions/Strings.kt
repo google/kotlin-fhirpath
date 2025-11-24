@@ -100,8 +100,8 @@ internal fun Collection<Any>.lower(): Collection<Any> {
 internal fun Collection<Any>.replace(params: List<Any>): Collection<Any> {
   check(size <= 1) { "replace() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString() ?: return emptyList()
-  val pattern = params[0].unwrapString()!!
-  val substitution = params[1].unwrapString()!!
+  val pattern = params.getOrNull(0)?.unwrapString() ?: return emptyList()
+  val substitution = params.getOrNull(1)?.unwrapString() ?: return emptyList()
   return listOf(input.replace(pattern, substitution))
 }
 
