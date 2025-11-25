@@ -42,7 +42,7 @@ internal fun compare(left: Any, right: Any): Int? {
     }
     leftFhirPath is Quantity && rightFhirPath is Quantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        if (first.unit?.value!! != second.unit?.value!!) return null
+        if (first.code?.value!! != second.code?.value!!) return null
         return first.value?.value?.compareTo(second.value!!.value!!)
       }
     }

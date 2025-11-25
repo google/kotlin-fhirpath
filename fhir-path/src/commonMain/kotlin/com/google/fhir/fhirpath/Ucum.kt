@@ -41,7 +41,7 @@ fun Quantity.toEquivalentCanonicalized() =
  * Rhodes. This change has not yet been made in the latest version of the specification.
  */
 private fun Quantity.toEqualUcumDefiniteDuration(): Quantity {
-  val calendarDurationCode = unit?.value ?: return this
+  val calendarDurationCode = code?.value ?: return this
   val ucumDefinitionDurationCode =
     when (calendarDurationCode) {
       "week",
@@ -58,7 +58,7 @@ private fun Quantity.toEqualUcumDefiniteDuration(): Quantity {
       "milliseconds" -> "'ms'"
       else -> return this
     }
-  return Quantity(value = value, unit = Code(value = ucumDefinitionDurationCode))
+  return Quantity(value = value, code = Code(value = ucumDefinitionDurationCode))
 }
 
 /**
@@ -68,7 +68,7 @@ private fun Quantity.toEqualUcumDefiniteDuration(): Quantity {
  * See [specification](https://hl7.org/fhirpath/N1/#time-valued-quantities).
  */
 private fun Quantity.toEquivalentUcumDefiniteDuration(): Quantity {
-  val calendarDurationCode = unit?.value ?: return this
+  val calendarDurationCode = code?.value ?: return this
   val ucumDefinitionDurationCode =
     when (calendarDurationCode) {
       "year",
@@ -89,34 +89,61 @@ private fun Quantity.toEquivalentUcumDefiniteDuration(): Quantity {
       "milliseconds" -> "'ms'"
       else -> return this
     }
-  return Quantity(value = value, unit = Code(value = ucumDefinitionDurationCode))
+  return Quantity(value = value, code = Code(value = ucumDefinitionDurationCode))
 }
 
+/**
+ * Returns a new quantity value equal to the original value with any UCUM prefix removed.
+ *
+ * For example:
+ * - 1.0 'kg' -> 1000.0 'g'
+ */
 private fun Quantity.stripUcumPrefix(): Quantity {
   // TODO: Handle more complex UCUM strings
-  val code = unit?.value?.stripSingleQuotes() ?: return this
+  val code = code?.value?.stripSingleQuotes() ?: return this
   for (prefix in Prefix.entries) {
     if (!code.startsWith(prefix.code)) continue
     val codeWithoutPrefix = code.removePrefix(prefix.code)
     if (codeWithoutPrefix in (BaseUnit.entries.map { it.code } + Unit.entries.map { it.code })) {
       return Quantity(
         value = Decimal(value = value!!.value!! * 10.0.pow(prefix.power).toBigDecimal()),
-        unit = Code(value = "'$codeWithoutPrefix'"),
+        code = Code(value = "'$codeWithoutPrefix'"),
       )
     }
   }
   return this
 }
 
+/**
+ * Returns a new quantity value with a canonicalized unit string composed of base UCUM units.
+ *
+ * N.B. "1" will be appended to base units to make them comparable to the base unit strings of
+ * derived units.
+ *
+ * For example:
+ * - 1.0 'h' -> 3600.0 's1'
+ * - 1.0 'kg' -> 1000.0 'g1'
+ * - 1.0 'g' -> 1.0 'g1' (to be comparable to kg and other units derived from grams)
+ */
 private fun Quantity.toCanonicalizedUcumUnit(): Quantity {
-  val unitCode = unit?.value?.stripSingleQuotes() ?: return this
-  val unit = Unit.fromString(unitCode) ?: return this
-  return Quantity(
-    value = Decimal(value = value!!.value!! * unit.scalar.toBigDecimal()),
-    unit = Code(value = unit.base),
-  )
+  val unitCode = code?.value?.stripSingleQuotes() ?: return this
+
+  // Process base units
+  BaseUnit.fromString(unitCode)?.let {
+    return Quantity(value = Decimal(value = value!!.value!!), code = Code(value = "'${it.code}1'"))
+  }
+
+  // Process derived units
+  Unit.fromString(unitCode)?.let {
+    return Quantity(
+      value = Decimal(value = value!!.value!! * it.scalar.toBigDecimal()),
+      code = Code(value = "'${it.base}'"),
+    )
+  }
+
+  return this
 }
 
-private fun String.stripSingleQuotes(): String? {
-  return if (startsWith("'") && endsWith("'")) trim('\'') else null
+private fun String.stripSingleQuotes(): String {
+  return if (startsWith("'") && endsWith("'")) trim('\'') else this
 }

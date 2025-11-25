@@ -112,7 +112,7 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
     }
     leftFhirPath is Quantity && rightFhirPath is Quantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        if (first.unit?.value!! != second.unit?.value!!) return null
+        if (first.code?.value!! != second.code?.value!!) return null
         return first.value == second.value
       }
     }
@@ -159,7 +159,7 @@ private fun itemsEquivalent(left: Any, right: Any): Boolean {
     }
     leftFhirPath is Quantity && rightFhirPath is Quantity -> {
       with(leftFhirPath.toEquivalentCanonicalized() to rightFhirPath.toEquivalentCanonicalized()) {
-        return first.value == second.value && first.unit?.value!! == second.unit?.value!!
+        return first.value == second.value && first.code?.value!! == second.code?.value!!
       }
     }
     // TODO: Handle implicit conversion from Date to DateTime

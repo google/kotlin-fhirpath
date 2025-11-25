@@ -46,6 +46,7 @@ val skippedTestGroupToReasonMap =
     "testAggregate" to "Unimplemented",
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
+    "testTrace" to "Unimplemented",
     "testSort" to "Function `sort` is not defined in the specification",
     "testCombine()" to "Unimplemented",
     "testVariables" to "Unimplemented",
@@ -90,16 +91,8 @@ val skippedTestCaseToReasonMap =
     "testDistinct6" to "descendants() is unimplemented",
     "testIif11" to
       "https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/scope.20of.20this/with/531507415; https://chat.fhir.org/#narrow/stream/179266-fhirpath/topic/context.20of.20the.20.60iif.20.60; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/receiver.20of.20iif/with/558282370",
-    "testTrace2" to "TBD",
     "testNow1" to "As `testDateTimeGreaterThanDate1`",
-    "testEquality28" to "TBD",
-    "testNEquality24" to "TBD",
     "testEquivalent11" to "TBD",
-    "testEquivalent22" to "TBD",
-    "testLessThan22" to "TBD",
-    "testLessOrEqual22" to "TBD",
-    "testGreatorOrEqual22" to "TBD",
-    "testGreaterThan22" to "TBD",
     "testPlusDate1" to "TBD",
     "testPlusDate2" to "TBD",
     "testPlusDate3" to "TBD",
@@ -122,9 +115,7 @@ val skippedTestCaseToReasonMap =
     "testPlusDate20" to "TBD",
     "testPlusDate21" to "TBD",
     "testPlusDate22" to "TBD",
-    "testMinus3" to "TBD",
     "testMinus5" to "TBD",
-    "testMod4" to "TBD",
     "testAbs3" to "TBD",
     "testPrecedence3" to "TBD",
     "testPrecedence4" to "TBD",
@@ -212,7 +203,7 @@ private fun assertEquals(expected: Output, actual: Any) {
       assertEquals(
         expected.value,
         (actual as com.google.fhir.model.r4.Quantity).let {
-          "${it.value!!.value} ${it.unit!!.value}"
+          "${it.value!!.value} ${it.code!!.value}"
         },
       )
     else -> throw AssertionError("Unknown output type: ${expected.type}")
