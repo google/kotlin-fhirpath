@@ -343,9 +343,10 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
         // See
         // [specification](https://hl7.org/fhirpath/N1/#iifcriterion-expression-true-result-collection-otherwise-result-collection-collection).
         // N.B. this function is implemented here due to its short-circuiting behavior.
+        check(context.size <= 1) { "iif cannot be called on a collection with more than 1 item" }
         val params = functionNode.paramList()!!.expression()
         val criterion = visit(params[0])
-        check(criterion.size <= 1) { "iif cannot be called on a collection with more than 1 item" }
+        check(criterion.size <= 1) { "iif cannot be called with multiple expressions" }
         return when (criterion.singleOrNull()) {
           true -> visit(params[1])
           false,
