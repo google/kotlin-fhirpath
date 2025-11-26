@@ -66,7 +66,7 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
 
       val leftUnits = parseUcumUnit(leftCanonical.unit?.value ?: "")
       val rightUnits = parseUcumUnit(rightCanonical.unit?.value ?: "")
-      val combinedUnits = combineUnitsMultiply(leftUnits, rightUnits)
+      val combinedUnits = multiplyUnits(leftUnits, rightUnits)
       val resultUnitString = formatUcumUnit(combinedUnits)
 
       listOf(
@@ -95,7 +95,7 @@ internal fun division(left: Collection<Any>, right: Collection<Any>): Collection
 
     val leftUnits = parseUcumUnit(leftCanonical.unit?.value ?: "")
     val rightUnits = parseUcumUnit(rightCanonical.unit?.value ?: "")
-    val combinedUnits = combineUnitsDivide(leftUnits, rightUnits)
+    val combinedUnits = devideUnits(leftUnits, rightUnits)
     val resultUnitString = formatUcumUnit(combinedUnits)
 
     return listOf(
@@ -286,7 +286,7 @@ private fun parseUcumUnit(unitString: String): Map<String, Int> {
  *
  * Example: {m=1} × {m=1} → {m=2}
  */
-private fun combineUnitsMultiply(
+private fun multiplyUnits(
   left: Map<String, Int>,
   right: Map<String, Int>,
 ): Map<String, Int> {
@@ -302,7 +302,7 @@ private fun combineUnitsMultiply(
  *
  * Example: {m=1} ÷ {m=1} → {} (dimensionless)
  */
-private fun combineUnitsDivide(
+private fun devideUnits(
   left: Map<String, Int>,
   right: Map<String, Int>,
 ): Map<String, Int> {
