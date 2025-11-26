@@ -361,25 +361,22 @@ private fun devideUnits(
  *
  * Examples:
  * - {m=2} → "'m2'"
- * - {g=1, m=-1} → "'g/m'"
+ * - {g=1, m=-1} → "'g.m-1'"
+ * - {m=2, s=-2} → "'m2.s-2'"
+ * - {m=1, s=-1, kg=-1} → "'m.kg-1.s-1'"
  * - {} → "'1'" (dimensionless)
  */
 private fun formatUcumUnit(units: Map<String, Int>): String {
   if (units.isEmpty()) return "'1'"
 
-  val positive = units.filter { it.value > 0 }.entries.sortedBy { it.key }
-  val negative = units.filter { it.value < 0 }.entries.sortedBy { it.key }
-
-  val positivePart =
-    positive.joinToString(".") { (unit, exp) -> if (exp == 1) unit else "$unit$exp" }
-
-  val negativePart =
-    negative.joinToString(".") { (unit, exp) -> if (exp == -1) unit else "$unit${-exp}" }
-
-  val unitString = when {
-    positive.isEmpty() -> "1/$negativePart"
-    negative.isEmpty() -> positivePart
-    else -> "$positivePart/$negativePart"
+  val unitString = units.entries.sortedBy { it.key }.joinToString(".") { (unit, exp) ->
+      when {
+          exp > 1 -> "$unit$exp" // m2
+          exp == 1 -> unit // m
+          exp < 0 -> "$unit$exp" // m-1, m-2
+          exp == 0 -> error("Malformed unit: $unit$exp") // m0
+          else -> ""
+      }
   }
 
   return "'$unitString'"
