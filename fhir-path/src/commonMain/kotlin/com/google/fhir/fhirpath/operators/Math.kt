@@ -273,8 +273,8 @@ private fun parseUcumUnit(unitString: String): Map<String, Int> {
       val exponentStr = match.groupValues[2]
       val exponent = if (exponentStr.isEmpty()) 1 else exponentStr.toInt()
       val finalExponent = if (isDivision) -exponent else exponent
-
-      result[unit] = (result[unit] ?: 0) + finalExponent
+      if (result.containsKey(unit)) error("Duplicate unit '$unit' in UCUM unit string '$unitString'")
+      result[unit] = finalExponent
     }
   }
 
