@@ -294,6 +294,7 @@ private fun parseUnitAndExponent(component: String): Pair<String, Int>? {
  * - "m2" → {m=2}
  * - "g/m" → {g=1, m=-1}
  * - "m2.s-2" → {m=2, s=-2}
+ * - "m/s.kg" → {m=1, s=-1, kg=-1}
  */
 private fun parseUcumUnit(unitString: String): Map<String, Int> {
   // Strip single quotes if present
@@ -303,14 +304,18 @@ private fun parseUcumUnit(unitString: String): Map<String, Int> {
   val result = mutableMapOf<String, Int>()
   val components = splitUcumComponents(cleanString)
 
+  var inDenominator = false
   for (component in components) {
-    val isDivision = component.startsWith("/")
+    if (component.startsWith("/")) {
+      inDenominator = true
+    }
+
     val cleanComponent = component.removePrefix("/").removePrefix(".")
 
     val parsed = parseUnitAndExponent(cleanComponent)
     if (parsed != null) {
       val (unit, exponent) = parsed
-      val finalExponent = if (isDivision) -exponent else exponent
+      val finalExponent = if (inDenominator) -exponent else exponent
       if (result.containsKey(unit)) error("Duplicate unit '$unit' in UCUM unit string '$unitString'")
       result[unit] = finalExponent
     }
