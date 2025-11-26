@@ -246,6 +246,47 @@ private operator fun Quantity.times(multiplier: BigDecimal): Quantity {
 }
 
 /**
+ * Splits a UCUM unit string into components while preserving delimiters.
+ *
+ * Uses a positive lookahead regex to split before '/' or '.' characters,
+ * keeping the delimiters attached to the components that follow them.
+ *
+ * Examples:
+ * - "m" → ["m"]
+ * - "m/s" → ["m", "/s"]
+ * - "m.s-2" → ["m", ".s-2"]
+ * - "m/s.kg" → ["m", "/s", ".kg"]
+ */
+private fun splitUcumComponents(unitString: String): List<String> {
+  return unitString.split(Regex("(?=[./])"))
+}
+
+/**
+ * Parses a unit component to extract the unit name and exponent.
+ *
+ * The regex captures:
+ * - Group 1: Unit name (one or more letters)
+ * - Group 2: Optional exponent (optional minus sign followed by digits)
+ *
+ * If no exponent is present, defaults to 1.
+ *
+ * Examples:
+ * - "m" → Pair("m", 1)
+ * - "m2" → Pair("m", 2)
+ * - "s-1" → Pair("s", -1)
+ * - "kg-2" → Pair("kg", -2)
+ *
+ * @return Pair of (unit name, exponent) if match succeeds, null otherwise
+ */
+private fun parseUnitAndExponent(component: String): Pair<String, Int>? {
+  val match = Regex("([a-zA-Z]+)(-?\\d*)").matchEntire(component) ?: return null
+  val unit = match.groupValues[1]
+  val exponentStr = match.groupValues[2]
+  val exponent = if (exponentStr.isEmpty()) 1 else exponentStr.toInt()
+  return Pair(unit, exponent)
+}
+
+/**
  * Parses a UCUM unit string into a map of base units to their exponents.
  *
  * Examples:
@@ -260,18 +301,15 @@ private fun parseUcumUnit(unitString: String): Map<String, Int> {
   if (cleanString.isEmpty() || cleanString == "1") return emptyMap()
 
   val result = mutableMapOf<String, Int>()
-  val components = cleanString.split(Regex("(?=[./])"))
+  val components = splitUcumComponents(cleanString)
 
   for (component in components) {
     val isDivision = component.startsWith("/")
     val cleanComponent = component.removePrefix("/").removePrefix(".")
 
-    // Match pattern: unit name followed by optional exponent
-    val match = Regex("([a-zA-Z]+)(-?\\d*)").matchEntire(cleanComponent)
-    if (match != null) {
-      val unit = match.groupValues[1]
-      val exponentStr = match.groupValues[2]
-      val exponent = if (exponentStr.isEmpty()) 1 else exponentStr.toInt()
+    val parsed = parseUnitAndExponent(cleanComponent)
+    if (parsed != null) {
+      val (unit, exponent) = parsed
       val finalExponent = if (isDivision) -exponent else exponent
       if (result.containsKey(unit)) error("Duplicate unit '$unit' in UCUM unit string '$unitString'")
       result[unit] = finalExponent
