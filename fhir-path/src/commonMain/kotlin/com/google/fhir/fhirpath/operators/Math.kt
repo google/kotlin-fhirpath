@@ -263,8 +263,6 @@ private fun parseUcumUnit(unitString: String): Map<String, Int> {
   val components = cleanString.split(Regex("(?=[./])"))
 
   for (component in components) {
-    if (component.isEmpty()) continue
-
     val isDivision = component.startsWith("/")
     val cleanComponent = component.removePrefix("/").removePrefix(".")
 
