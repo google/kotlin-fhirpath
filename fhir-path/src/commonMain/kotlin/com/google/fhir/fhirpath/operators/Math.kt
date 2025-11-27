@@ -246,37 +246,29 @@ private operator fun Quantity.times(multiplier: BigDecimal): Quantity {
 }
 
 /**
- * Splits a UCUM unit string into components while preserving delimiters.
- *
- * Uses a positive lookahead regex to split before '/' or '.' characters,
- * keeping the delimiters attached to the components that follow them.
+ * Splits a UCUM unit string into components, preserving the separator (`.` or `/`) with each component.
  *
  * Examples:
- * - "m" → ["m"]
- * - "m/s" → ["m", "/s"]
- * - "m.s-2" → ["m", ".s-2"]
- * - "m/s.kg" → ["m", "/s", ".kg"]
+ * - `"m"` → `["m"]`
+ * - `"m/s"` → `["m", "/s"]`
+ * - `"m.s-2"` → `["m", ".s-2"]`
+ * - `"m/s.kg"` → `["m", "/s", ".kg"]`
+ *
+ * Uses lookahead regex to split before separators without consuming them.
  */
 private fun splitUcumComponents(unitString: String): List<String> {
   return unitString.split(Regex("(?=[./])"))
 }
 
 /**
- * Parses a unit component to extract the unit name and exponent.
- *
- * The regex captures:
- * - Group 1: Unit name (one or more letters)
- * - Group 2: Optional exponent (optional minus sign followed by digits)
- *
- * If no exponent is present, defaults to 1.
+ * Parses a unit component (e.g., "m2", "s-1") into unit name and exponent. Defaults to exponent 1 if not specified.
  *
  * Examples:
- * - "m" → Pair("m", 1)
- * - "m2" → Pair("m", 2)
- * - "s-1" → Pair("s", -1)
- * - "kg-2" → Pair("kg", -2)
- *
- * @return Pair of (unit name, exponent) if match succeeds, null otherwise
+ * - `"m"` → `Pair("m", 1)`
+ * - `"m2"` → `Pair("m", 2)`
+ * - `"s-1"` → `Pair("s", -1)`
+ * - `"kg-2"` → `Pair("kg", -2)`
+ * - `"123"` → `null` (no unit letters)
  */
 private fun parseUnitAndExponent(component: String): Pair<String, Int>? {
   val match = Regex("([a-zA-Z]+)(-?\\d*)").matchEntire(component) ?: return null
@@ -287,14 +279,18 @@ private fun parseUnitAndExponent(component: String): Pair<String, Int>? {
 }
 
 /**
- * Parses a UCUM unit string into a map of base units to their exponents.
+ * Parses a UCUM unit string into a map of unit names to exponents.
+ * Once `/` is encountered, all subsequent units (even after `.`) become negative (denominator).
  *
  * Examples:
- * - "'m'" → {m=1}
- * - "m2" → {m=2}
- * - "g/m" → {g=1, m=-1}
- * - "m2.s-2" → {m=2, s=-2}
- * - "m/s.kg" → {m=1, s=-1, kg=-1}
+ * - `"'m'"` → `{m=1}`
+ * - `"m2"` → `{m=2}`
+ * - `"g/m"` → `{g=1, m=-1}`
+ * - `"m2.s-2"` → `{m=2, s=-2}`
+ * - `"m/s.kg"` → `{m=1, s=-1, kg=-1}` (both s and kg in denominator)
+ * - `"'1'"` → `{}` (dimensionless)
+ *
+ * Throws error if duplicate units found (e.g., "m.m").
  */
 private fun parseUcumUnit(unitString: String): Map<String, Int> {
   // Strip single quotes if present
@@ -325,9 +321,13 @@ private fun parseUcumUnit(unitString: String): Map<String, Int> {
 }
 
 /**
- * Combines two unit maps by adding their exponents (for multiplication).
+ * Multiplies two unit maps by adding exponents (a^m × a^n = a^(m+n)). Filters out units that cancel to zero.
  *
- * Example: {m=1} × {m=1} → {m=2}
+ * Examples:
+ * - `{m=1} × {m=1}` → `{m=2}`
+ * - `{m=2, s=-1} × {s=1}` → `{m=2}` (s cancels)
+ * - `{g=1} × {m=1}` → `{g=1, m=1}`
+ * - `{m=1} × {m=-1}` → `{}` (dimensionless)
  */
 private fun multiplyUnits(
   left: Map<String, Int>,
@@ -341,9 +341,14 @@ private fun multiplyUnits(
 }
 
 /**
- * Combines two unit maps by subtracting their exponents (for division).
+ * Divides two unit maps by subtracting exponents (a^m ÷ a^n = a^(m-n)). Filters out units that cancel to zero.
  *
- * Example: {m=1} ÷ {m=1} → {} (dimensionless)
+ * Examples:
+ * - `{m=1} ÷ {m=1}` → `{}` (dimensionless)
+ * - `{m=2} ÷ {m=1}` → `{m=1}`
+ * - `{g=1, m=1} ÷ {m=1}` → `{g=1}` (m cancels)
+ * - `{m=1} ÷ {s=1}` → `{m=1, s=-1}`
+ * - `{}` ÷ `{s=1}` → `{s=-1}`
  */
 private fun devideUnits(
   left: Map<String, Int>,
@@ -357,25 +362,30 @@ private fun devideUnits(
 }
 
 /**
- * Formats a unit map into a UCUM unit string with single quotes.
+ * Formats a unit map into a UCUM string with inline notation. Units sorted alphabetically, joined with `.`.
+ * Omits exponent when it's 1.
  *
  * Examples:
- * - {m=2} → "'m2'"
- * - {g=1, m=-1} → "'g.m-1'"
- * - {m=2, s=-2} → "'m2.s-2'"
- * - {m=1, s=-1, kg=-1} → "'m.kg-1.s-1'"
- * - {} → "'1'" (dimensionless)
+ * - `{}` → `"'1'"` (dimensionless)
+ * - `{m=1}` → `"'m'"`
+ * - `{m=2}` → `"'m2'"`
+ * - `{g=1, m=-1}` → `"'g.m-1'"`
+ * - `{m=2, s=-2}` → `"'m2.s-2'"`
+ * - `{kg=-1, m=1, s=-1}` → `"'kg-1.m.s-1'"`
+ * - `{s=-1}` → `"'s-1'"` (Hz frequency)
+ *
+ * Throws error if any unit has exponent 0 (should never happen due to filtering).
  */
 private fun formatUcumUnit(units: Map<String, Int>): String {
   if (units.isEmpty()) return "'1'"
 
   val unitString = units.entries.sortedBy { it.key }.joinToString(".") { (unit, exp) ->
       when {
-          exp > 1 -> "$unit$exp" // m2
           exp == 1 -> unit // m
-          exp < 0 -> "$unit$exp" // m-1, m-2
-          exp == 0 -> error("Malformed unit: $unit$exp") // m0
-          else -> ""
+          exp > 1 -> "$unit$exp" // m2
+          exp < 0 -> "$unit$exp" // m-2
+          exp == 0 -> error("Unit with zero exponent should have been filtered: $unit")
+          else -> error("Unreachable")
       }
   }
 
