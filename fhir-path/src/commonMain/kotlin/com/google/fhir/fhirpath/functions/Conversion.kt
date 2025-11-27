@@ -19,6 +19,7 @@ package com.google.fhir.fhirpath.functions
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.fhirpath.ucum.Unit
+import com.google.fhir.model.r4.Code
 import com.google.fhir.model.r4.Date
 import com.google.fhir.model.r4.DateTime
 import com.google.fhir.model.r4.Decimal
@@ -297,7 +298,7 @@ internal fun Collection<Any>.toStringFun(): Collection<String> {
     is FhirPathDateTime -> listOf(item.toString())
     is FhirPathTime -> listOf(item.toString())
     is Boolean -> listOf(item.toString())
-    is Quantity -> listOf("${item.value?.value} ${item.unit?.value}")
+    is Quantity -> listOf("${item.value?.value} ${item.code?.value}")
     else -> emptyList()
   }
 }
@@ -376,8 +377,5 @@ internal fun Collection<Any>.convertsToTime(): Collection<Boolean> {
 }
 
 internal fun Pair<BigDecimal, String>.toQuantity(): Quantity {
-  return Quantity(
-    value = Decimal(value = first),
-    unit = com.google.fhir.model.r4.String(value = second),
-  )
+  return Quantity(value = Decimal(value = first), code = Code.of(value = second, element = null))
 }

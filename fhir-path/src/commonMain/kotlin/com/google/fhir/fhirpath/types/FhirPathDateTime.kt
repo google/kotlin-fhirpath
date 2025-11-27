@@ -67,7 +67,7 @@ internal data class FhirPathDateTime(
 
     // Partial date times with timezone offsets cannot be compared
     // See
-    // https://github.com/jingtang10/kotlin-fhirpath/tree/main?tab=readme-ov-file#timezone-offset-in-date-time-values
+    // https://github.com/google/kotlin-fhirpath/tree/main?tab=readme-ov-file#timezone-offset-in-date-time-values
     if (utcOffset != null) return null
 
     year.compareTo(other.year).let { if (it != 0) return it }
@@ -84,6 +84,7 @@ internal data class FhirPathDateTime(
     if ((minute == null) != (other.minute == null)) return null
     minute?.compareTo(other.minute!!).let { if (it != 0) return it }
 
+    if ((second == null) != (other.second == null)) return null
     return 0 // Precision.SECOND is already covered above
   }
 
