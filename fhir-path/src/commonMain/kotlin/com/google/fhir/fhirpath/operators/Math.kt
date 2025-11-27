@@ -17,6 +17,7 @@
 package com.google.fhir.fhirpath.operators
 
 import com.google.fhir.fhirpath.toEqualCanonicalized
+import com.google.fhir.model.r4.Code
 import com.google.fhir.model.r4.Decimal
 import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -64,15 +65,15 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
 
       val resultValue = leftCanonical.value!!.value!! * rightCanonical.value!!.value!!
 
-      val leftUnits = parseUcumUnit(leftCanonical.unit?.value ?: "")
-      val rightUnits = parseUcumUnit(rightCanonical.unit?.value ?: "")
+      val leftUnits = parseUcumUnit(leftCanonical.code?.value ?: "")
+      val rightUnits = parseUcumUnit(rightCanonical.code?.value ?: "")
       val combinedUnits = multiplyUnits(leftUnits, rightUnits)
       val resultUnitString = formatUcumUnit(combinedUnits)
 
       listOf(
         Quantity(
           value = Decimal(value = resultValue),
-          unit = com.google.fhir.model.r4.String(value = resultUnitString),
+          code = Code(value = resultUnitString),
         )
       )
     }
@@ -93,15 +94,15 @@ internal fun division(left: Collection<Any>, right: Collection<Any>): Collection
 
     val resultValue = leftCanonical.value!!.value!!.divide(rightCanonical.value!!.value!!, DECIMAL_MODE)
 
-    val leftUnits = parseUcumUnit(leftCanonical.unit?.value ?: "")
-    val rightUnits = parseUcumUnit(rightCanonical.unit?.value ?: "")
+    val leftUnits = parseUcumUnit(leftCanonical.code?.value ?: "")
+    val rightUnits = parseUcumUnit(rightCanonical.code?.value ?: "")
     val combinedUnits = devideUnits(leftUnits, rightUnits)
     val resultUnitString = formatUcumUnit(combinedUnits)
 
     return listOf(
       Quantity(
         value = Decimal(value = resultValue),
-        unit = com.google.fhir.model.r4.String(value = resultUnitString),
+        code = Code(value = resultUnitString),
       )
     )
   }
