@@ -71,8 +71,7 @@ val skippedTestCaseToReasonMap =
     "testPolymorphismAsB" to
       "No error should be thrown according to https://hl7.org/fhirpath/#as-type-specifier",
     "testDateTimeGreaterThanDate1" to
-      "Unclear in the specification whether the result should still be empty if two values have different precisions but the comparison can still be certain (e.g. 2025 is greater than 2024-01)",
-    "testDecimalLiteralToInteger" to "The result should be true",
+      "Comparison of two date time values, one with a timezone offset one without",
     "testStringIntegerLiteralToQuantity" to
       "Unclear if integers should be converted to decimals as part of quantity. See https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Quantity.20and.20Decimal/near/543270110",
     "testQuantityLiteralWkToString" to
@@ -92,7 +91,6 @@ val skippedTestCaseToReasonMap =
     "testIif11" to
       "https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/scope.20of.20this/with/531507415; https://chat.fhir.org/#narrow/stream/179266-fhirpath/topic/context.20of.20the.20.60iif.20.60; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/receiver.20of.20iif/with/558282370",
     "testNow1" to "As `testDateTimeGreaterThanDate1`",
-    "testEquivalent11" to "TBD",
     "testPlusDate1" to "TBD",
     "testPlusDate2" to "TBD",
     "testPlusDate3" to "TBD",
