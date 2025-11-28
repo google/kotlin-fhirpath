@@ -480,7 +480,7 @@ Any text enclosed within is ignored
 		<test name="testQuantity7" inputfile="patient-example.xml"><expression>6 days &lt; 1 week</expression><output type="boolean">true</output></test>
 		<test name="testQuantity8" inputfile="patient-example.xml"><expression>8 days &gt; 1 week</expression><output type="boolean">true</output></test>
 		<test name="testQuantity9" inputfile="patient-example.xml"><expression>2.0 'cm' * 2.0 'm' = 0.040 'm2'</expression><output type="boolean">true</output></test>
-		<test name="testQuantity10" inputfile="patient-example.xml"><expression>4.0 'g' / 2.0 'm' = 2 'g.m-1'</expression><output type="boolean">true</output></test>
+		<test name="testQuantity10" inputfile="patient-example.xml"><expression>4.0 'g' / 2.0 'm' = 2 'g/m'</expression><output type="boolean">true</output></test>
 		<test name="testQuantity11" inputfile="patient-example.xml"><expression>1.0 'm' / 1.0 'm' = 1 '1'</expression><output type="boolean">true</output></test>
 	</group>
 
