@@ -67,7 +67,7 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
 
       val leftUnits = parseUcumUnit(leftCanonical.code?.value ?: "")
       val rightUnits = parseUcumUnit(rightCanonical.code?.value ?: "")
-      val combinedUnits = multiplyUnits(leftUnits, rightUnits)
+      val combinedUnits = leftUnits * rightUnits
       val resultUnitString = formatUcumUnit(combinedUnits)
 
       listOf(
@@ -96,7 +96,7 @@ internal fun division(left: Collection<Any>, right: Collection<Any>): Collection
 
     val leftUnits = parseUcumUnit(leftCanonical.code?.value ?: "")
     val rightUnits = parseUcumUnit(rightCanonical.code?.value ?: "")
-    val combinedUnits = devideUnits(leftUnits, rightUnits)
+    val combinedUnits = leftUnits / rightUnits
     val resultUnitString = formatUcumUnit(combinedUnits)
 
     return listOf(
@@ -325,17 +325,14 @@ internal fun parseUcumUnit(unitString: String): Map<String, Int> {
  * Multiplies two unit maps by adding exponents (a^m × a^n = a^(m+n)). Filters out units that cancel to zero.
  *
  * Examples:
- * - `{m=1} × {m=1}` → `{m=2}`
- * - `{m=2, s=-1} × {s=1}` → `{m=2}` (s cancels)
- * - `{g=1} × {m=1}` → `{g=1, m=1}`
- * - `{m=1} × {m=-1}` → `{}` (dimensionless)
+ * - `{m=1} * {m=1}` → `{m=2}`
+ * - `{m=2, s=-1} * {s=1}` → `{m=2}` (s cancels)
+ * - `{g=1} * {m=1}` → `{g=1, m=1}`
+ * - `{m=1} * {m=-1}` → `{}` (dimensionless)
  */
-private fun multiplyUnits(
-  left: Map<String, Int>,
-  right: Map<String, Int>,
-): Map<String, Int> {
-  val result = left.toMutableMap()
-  for ((unit, exponent) in right) {
+private operator fun Map<String, Int>.times(other: Map<String, Int>): Map<String, Int> {
+  val result = this.toMutableMap()
+  for ((unit, exponent) in other) {
     result[unit] = (result[unit] ?: 0) + exponent
   }
   return result.filterValues { it != 0 }
@@ -345,18 +342,15 @@ private fun multiplyUnits(
  * Divides two unit maps by subtracting exponents (a^m ÷ a^n = a^(m-n)). Filters out units that cancel to zero.
  *
  * Examples:
- * - `{m=1} ÷ {m=1}` → `{}` (dimensionless)
- * - `{m=2} ÷ {m=1}` → `{m=1}`
- * - `{g=1, m=1} ÷ {m=1}` → `{g=1}` (m cancels)
- * - `{m=1} ÷ {s=1}` → `{m=1, s=-1}`
- * - `{}` ÷ `{s=1}` → `{s=-1}`
+ * - `{m=1} / {m=1}` → `{}` (dimensionless)
+ * - `{m=2} / {m=1}` → `{m=1}`
+ * - `{g=1, m=1} / {m=1}` → `{g=1}` (m cancels)
+ * - `{m=1} / {s=1}` → `{m=1, s=-1}`
+ * - `{}` / `{s=1}` → `{s=-1}`
  */
-private fun devideUnits(
-  left: Map<String, Int>,
-  right: Map<String, Int>,
-): Map<String, Int> {
-  val result = left.toMutableMap()
-  for ((unit, exponent) in right) {
+private operator fun Map<String, Int>.div(other: Map<String, Int>): Map<String, Int> {
+  val result = this.toMutableMap()
+  for ((unit, exponent) in other) {
     result[unit] = (result[unit] ?: 0) - exponent
   }
   return result.filterValues { it != 0 }
