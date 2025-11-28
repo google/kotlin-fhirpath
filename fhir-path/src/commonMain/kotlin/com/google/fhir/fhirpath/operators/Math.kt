@@ -324,6 +324,10 @@ internal fun parseUcumUnit(unitString: String): Map<String, Int> {
 /**
  * Multiplies two unit maps by adding exponents (a^m × a^n = a^(m+n)). Filters out units that cancel to zero.
  *
+ * UCUM units are handled naively without canonicalization in this operation.
+ * For example, `kg` and `g` are considered separate units. Similarly, `W` is not
+ * handled as `J/s` (therefore cannot be multiplied with `s` to get `J`).
+ *
  * Examples:
  * - `{m=1} * {m=1}` → `{m=2}`
  * - `{m=2, s=-1} * {s=1}` → `{m=2}` (s cancels)
@@ -340,6 +344,10 @@ private operator fun Map<String, Int>.times(other: Map<String, Int>): Map<String
 
 /**
  * Divides two unit maps by subtracting exponents (a^m ÷ a^n = a^(m-n)). Filters out units that cancel to zero.
+ *
+ * UCUM units are handled naively without canonicalization in this operation.
+ * For example, `kg` and `g` are considered separate units. Similarly, `W` is not
+ * handled as `J/s` (therefore cannot be multiplied with `s` to get `J`).
  *
  * Examples:
  * - `{m=1} / {m=1}` → `{}` (dimensionless)
