@@ -385,8 +385,8 @@ private fun formatUcumUnit(units: Map<String, Int>): String {
           exp == 1 -> unit // m
           exp > 1 -> "$unit$exp" // m2
           exp < 0 -> "$unit$exp" // m-2
-          exp == 0 -> error("Unit with zero exponent should have been filtered: $unit")
-          else -> error("Unreachable")
+          exp == 0 -> error("Unit should not have zero exponent: $unit")
+          else -> error("Unit must be an integer: $unit")
       }
   }
 
