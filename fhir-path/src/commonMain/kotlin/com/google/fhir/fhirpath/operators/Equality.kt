@@ -112,7 +112,9 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
     }
     leftFhirPath is Quantity && rightFhirPath is Quantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        if (first.code?.value!! != second.code?.value!!) return null
+        val leftUnits = parseUcumUnit(first.code?.value!!)
+        val rightUnits = parseUcumUnit(second.code?.value!!)
+        if (leftUnits != rightUnits) return null
         return first.value == second.value
       }
     }

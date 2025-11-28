@@ -293,7 +293,7 @@ private fun parseUnitAndExponent(component: String): Pair<String, Int>? {
  *
  * Throws error if duplicate units found (e.g., "m.m").
  */
-private fun parseUcumUnit(unitString: String): Map<String, Int> {
+internal fun parseUcumUnit(unitString: String): Map<String, Int> {
   // Strip single quotes if present
   val cleanString = unitString.trim('\'')
   if (cleanString.isEmpty() || cleanString == "1") return emptyMap()
