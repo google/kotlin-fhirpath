@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import com.google.fhir.fhirpath.FhirPathEvaluator
+package com.google.fhir.fhirpath
+
 import com.google.fhir.fhirpath.parsers.fhirpathLexer
 import com.google.fhir.fhirpath.parsers.fhirpathParser
 import com.google.fhir.model.r4.Resource

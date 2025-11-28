@@ -211,6 +211,64 @@ specification itself. But we track the ongoing discussions and resolutions in th
 
 ## User Guide
 
+### Adding the library dependency to your project
+
+To use Kotlin FHIRPath, add it to the dependencies in your project. To do that, first make sure to
+include the [Google Maven](https://maven.google.com/) repository in the `build.gradle.kts` file in
+your project root.
+
+```
+// build.gradle.kts
+repositories {
+    // Other repositories such as mavenCentral() and gradlePluginPortal()
+    google()
+}
+```
+
+Next, follow the instructions for your specific project type.
+
+#### Kotlin Multiplatform Projects
+
+For Kotlin Multiplatform projects, add the dependency to the shared `commonMain` source set within
+the `kotlin` block of the module's `build.gradle.kts` file (e.g., `composeApp/build.gradle.kts` or
+`shared/build.gradle.kts`). This makes the library available across all platforms in your project.
+
+```
+// e.g., composeApp/build.gradle.kts or shared/build.gradle.kts
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("com.google.fhir:fhir-path:1.0.0-alpha02")
+        }
+    }
+}
+```
+
+#### Android projects
+
+For Android projects, add the dependency to the `dependency` block in the module's
+`build.gradle.kts` file (e.g., `app/build.gradle.kts`).
+
+```
+// e.g., app/build.gradle.kts
+dependencies {
+    implementation("com.google.fhir:fhir-path:1.0.0-alpha02")
+}
+```
+
+### Evaluating FHIRPath expressions
+
+To evaluate a FHIRPath expression, use `evaluateFhirPath` function:
+
+```
+import com.google.fhir.fhirpath.evaluateFhirPath
+import com.google.fhir.model.r4.FhirR4Json
+
+val patientExampleJson = ... // Load "patient-example.json"
+val patient = FhirR4Json().decodeFromString(patientExampleJson)
+val results = evaluateFhirPath("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
+```
+
 ## Developer Guide
 
 ### ANTLR

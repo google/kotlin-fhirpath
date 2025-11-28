@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "com.google.fhir"
-version = "1.0.0-alpha01"
+version = "1.0.0-alpha02"
 
 // Run `./gradlew generateR4Helpers` to generate helper functions for R4 in `fhirpath/build/generated`
 val generateR4Helpers = tasks.register<R4HelperGenerationTask>("generateR4Helpers") {

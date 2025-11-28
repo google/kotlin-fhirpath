@@ -22,7 +22,6 @@ import com.google.fhir.model.r4.FhirR4Json
 import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
-import evaluateFhirPath
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.test.Enabled
