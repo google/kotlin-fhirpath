@@ -22,6 +22,8 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.LIST
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.asTypeName
 
 object ComplexTypeExtensionFileSpecGenerator {
@@ -46,6 +48,24 @@ object ComplexTypeExtensionFileSpecGenerator {
               )
             }
             addStatement("else -> null")
+          }
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
+        FunSpec.builder("getAllChildren")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(ClassName(modelPackageName, "Element"))
+          .returns(LIST.parameterizedBy(Any::class.asTypeName()))
+          .beginControlFlow("return when(this)")
+          .apply {
+            for (structureDefinition in structureDefinitions) {
+              addStatement(
+                "is %T -> getAllChildren()",
+                ClassName(modelPackageName, structureDefinition.name.capitalized()),
+              )
+            }
+            addStatement("else -> emptyList()")
           }
           .endControlFlow()
           .build()

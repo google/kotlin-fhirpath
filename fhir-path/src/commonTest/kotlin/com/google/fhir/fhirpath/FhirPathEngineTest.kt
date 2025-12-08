@@ -80,10 +80,6 @@ val skippedTestCaseToReasonMap =
     "testQuantity4" to "https://github.com/FHIR/fhir-test-cases/pull/243",
     "testSubSetOf3" to
       "The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of \"\$this\" is unclear (https://jira.hl7.org/browse/FHIR-44601)",
-    "testDistinct2" to "descendants() is unimplemented",
-    "testDistinct3" to "descendants() is unimplemented",
-    "testDistinct5" to "descendants() is unimplemented",
-    "testDistinct6" to "descendants() is unimplemented",
     "testIif11" to
       "https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/scope.20of.20this/with/531507415; https://chat.fhir.org/#narrow/stream/179266-fhirpath/topic/context.20of.20the.20.60iif.20.60; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/receiver.20of.20iif/with/558282370",
     "testNow1" to "As `testDateTimeGreaterThanDate1`",
