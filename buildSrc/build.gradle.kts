@@ -3,6 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
 }
 
+kotlin {
+    jvmToolchain(21)
+}
+
 repositories {
     mavenCentral()
     google()
