@@ -46,22 +46,7 @@ internal fun Collection<Any>.children(): Collection<Any> {
  * See [specification](https://hl7.org/fhirpath/N1/#tree-navigation).
  */
 internal fun Collection<Any>.descendants(): Collection<Any> {
-  val result = mutableListOf<Any>()
-  val queue = ArrayDeque(this.children())
-
-  while (queue.isNotEmpty()) {
-    val item = queue.removeFirst()
-    result.add(item)
-
-    val itemChildren =
-      when (item) {
-        is Resource -> item.getAllChildren()
-        is BackboneElement -> item.getAllChildren()
-        is Element -> item.getAllChildren()
-        else -> emptyList()
-      }
-    queue.addAll(itemChildren)
-  }
-
-  return result
+  val childList = this.children().toList()
+  if (childList.isEmpty()) return emptyList()
+  return childList + childList.descendants()
 }
