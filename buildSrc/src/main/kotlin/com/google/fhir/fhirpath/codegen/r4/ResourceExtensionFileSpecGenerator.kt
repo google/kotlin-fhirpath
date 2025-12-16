@@ -84,6 +84,25 @@ object ResourceExtensionFileSpecGenerator {
           .build()
       )
       .addFunction(
+        FunSpec.builder("hasProperty")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(resourceType)
+          .returns(Boolean::class)
+          .addParameter(name = "name", type = String::class)
+          .beginControlFlow("return when(this)")
+          .apply {
+            for (structureDefinition in structureDefinitions) {
+              addStatement(
+                "is %T -> hasProperty(name)",
+                ClassName(modelPackageName, structureDefinition.name.capitalized()),
+              )
+            }
+            addStatement("else -> false")
+          }
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
         FunSpec.builder("getAllChildren")
           .addModifiers(KModifier.INTERNAL)
           .receiver(resourceType)

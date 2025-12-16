@@ -60,6 +60,29 @@ object BackboneElementExtensionFileSpecGenerator {
           .build()
       )
       .addFunction(
+        FunSpec.builder("hasProperty")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(ClassName(modelPackageName, "BackboneElement"))
+          .returns(Boolean::class)
+          .addParameter(name = "name", type = String::class)
+          .beginControlFlow("return when(this)")
+          .apply {
+            for (structureDefinition in structureDefinitions) {
+              val modelClassName =
+                ClassName(modelPackageName, structureDefinition.name.capitalized())
+              for (backboneElement in structureDefinition.backboneElements) {
+                addStatement(
+                  "is %T -> hasProperty(name)",
+                  backboneElement.key.getNestedClassName(modelClassName),
+                )
+              }
+            }
+            addStatement("else -> false")
+          }
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
         FunSpec.builder("getAllChildren")
           .addModifiers(KModifier.INTERNAL)
           .receiver(ClassName(modelPackageName, "BackboneElement"))

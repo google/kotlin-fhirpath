@@ -18,6 +18,8 @@ package com.google.fhir.fhirpath
 
 import com.google.fhir.fhirpath.ext.getProperty
 import com.google.fhir.fhirpath.ext.getPropertyInChoiceValue
+import com.google.fhir.fhirpath.ext.hasProperty
+import com.google.fhir.fhirpath.ext.hasPropertyInChoiceValue
 import com.google.fhir.fhirpath.ext.unwrapChoiceValue
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
@@ -137,6 +139,17 @@ val fhirPathTypeToFhirPathType =
   )
 
 internal fun Any.accessMember(fieldName: String): Any? {
+  // Check if the object has the property before accessing it
+  val hasProperty =
+    when (this) {
+      is Resource -> this.hasProperty(fieldName)
+      is BackboneElement -> this.hasProperty(fieldName)
+      is Element -> this.hasProperty(fieldName)
+      else -> this.hasPropertyInChoiceValue(fieldName)
+    }
+
+  if (!hasProperty) return null
+
   val element =
     when (this) {
       is Resource -> {

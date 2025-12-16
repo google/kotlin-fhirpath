@@ -54,7 +54,23 @@ object ModelExtensionFileSpecGenerator {
             for (element in structureDefinition.rootElements) {
               addStatement("%S -> this.%N", element.getElementName(), element.getElementName())
             }
-            addStatement("else -> null")
+            addStatement("else -> error(\"\${name} is not a valid property name\")")
+          }
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
+        FunSpec.builder("hasProperty")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(modelClassName)
+          .addParameter(name = "name", type = String::class)
+          .returns(Boolean::class)
+          .beginControlFlow("return when(name)")
+          .apply {
+            for (element in structureDefinition.rootElements) {
+              addStatement("%S -> true", element.getElementName())
+            }
+            addStatement("else -> false")
           }
           .endControlFlow()
           .build()
@@ -90,7 +106,23 @@ object ModelExtensionFileSpecGenerator {
                 for (element in backboneElement.value) {
                   addStatement("%S -> %N", element.getElementName(), element.getElementName())
                 }
-                addStatement("else -> null")
+                addStatement("else -> error(\"\${name} is not a valid property name\")")
+              }
+              .endControlFlow()
+              .build()
+          )
+          addFunction(
+            FunSpec.builder("hasProperty")
+              .addModifiers(KModifier.INTERNAL)
+              .receiver(backboneElement.key.getNestedClassName(modelClassName))
+              .addParameter(name = "name", type = String::class)
+              .returns(Boolean::class)
+              .beginControlFlow("return when(name)")
+              .apply {
+                for (element in backboneElement.value) {
+                  addStatement("%S -> true", element.getElementName())
+                }
+                addStatement("else -> false")
               }
               .endControlFlow()
               .build()
