@@ -46,4 +46,6 @@ internal fun Collection<Any>.children(): Collection<Any> {
  * See [specification](https://hl7.org/fhirpath/N1/#tree-navigation).
  */
 internal fun Collection<Any>.descendants(): Collection<Any> =
-  children().toList().let { children -> if (children.isEmpty()) emptyList() else children + children.descendants() }
+  children().let { children ->
+    if (children.isEmpty()) emptyList() else children + children.descendants()
+  }
