@@ -55,7 +55,6 @@ val skippedTestGroupToReasonMap =
     "HighBoundary" to "Unimplemented",
     "Comparable" to "Unimplemented",
     "Precision" to "Unimplemented",
-    "period" to "Unimplemented",
     "testInheritance" to "Unimplemented",
   )
 
@@ -106,6 +105,8 @@ val skippedTestCaseToReasonMap =
     "testPrecedence4" to "TBD",
     "testPrecedence6" to "TBD",
     "testIndex" to "TBD",
+    "testPeriodInvariantOld" to "hasValue() is not implemented.",
+    "testPeriodInvariantNew" to "lowBoundary() and lowBoundary() are not implemented.",
     "testContainedId" to "TBD",
   )
 
