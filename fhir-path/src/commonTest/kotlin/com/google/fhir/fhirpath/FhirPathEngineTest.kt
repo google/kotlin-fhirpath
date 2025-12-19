@@ -97,9 +97,9 @@ val skippedTestCaseToReasonMap =
     "testPlusDate22" to
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
     "testMinus5" to
-    "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
     "testDollarOrderNotAllowed" to
-            "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
+      "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
     "testSimpleFail" to "Strict mode is not implemented yet",
     "testSimpleWithWrongContext" to "Strict mode is not implemented yet",
     "testPolymorphismB" to "Strict mode is not implemented yet",
