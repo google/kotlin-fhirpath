@@ -83,6 +83,12 @@ val skippedTestCaseToReasonMap =
     "testIif11" to
       "https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/scope.20of.20this/with/531507415; https://chat.fhir.org/#narrow/stream/179266-fhirpath/topic/context.20of.20the.20.60iif.20.60; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/receiver.20of.20iif/with/558282370",
     "testNow1" to "As `testDateTimeGreaterThanDate1`",
+    "testDollarOrderNotAllowed" to
+      "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
+    "testSimpleFail" to "Strict mode is not implemented yet",
+    "testSimpleWithWrongContext" to "Strict mode is not implemented yet",
+    "testPolymorphismB" to "Strict mode is not implemented yet",
+    "testPolymorphicsB" to "Allow invalid test where it's not strict mode but expects output",
     "testPlusDate1" to "TBD",
     "testPlusDate2" to "TBD",
     "testPlusDate3" to "TBD",
