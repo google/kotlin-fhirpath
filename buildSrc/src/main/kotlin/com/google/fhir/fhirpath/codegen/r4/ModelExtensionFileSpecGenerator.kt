@@ -54,7 +54,7 @@ object ModelExtensionFileSpecGenerator {
             for (element in structureDefinition.rootElements) {
               addStatement("%S -> this.%N", element.getElementName(), element.getElementName())
             }
-            addStatement("else -> error(\"\${name} is not a valid property name\")")
+            addStatement("else -> error(\"\$name is not a valid property name\")")
           }
           .endControlFlow()
           .build()
@@ -106,7 +106,7 @@ object ModelExtensionFileSpecGenerator {
                 for (element in backboneElement.value) {
                   addStatement("%S -> %N", element.getElementName(), element.getElementName())
                 }
-                addStatement("else -> error(\"\${name} is not a valid property name\")")
+                addStatement("else -> error(\"\$name is not a valid property name\")")
               }
               .endControlFlow()
               .build()
