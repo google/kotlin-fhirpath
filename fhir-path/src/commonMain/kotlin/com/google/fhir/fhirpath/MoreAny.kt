@@ -33,8 +33,8 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.number
 
 /**
- * Set to true for strict mode (throws on invalid property access).
- * Set to false for lenient mode (returns empty for invalid properties).
+ * Set to true for strict mode (throws on invalid property access). Set to false for lenient mode
+ * (returns empty for invalid properties).
  */
 private const val STRICT_MODE = false
 
