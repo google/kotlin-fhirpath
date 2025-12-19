@@ -168,7 +168,7 @@ internal fun Any.accessMember(fieldName: String): Any? {
       is Element -> {
         this.getProperty(fieldName)
       }
-      // TODO: get value from FHIR primitive types
+      // TODO: get value from FHIR primitive types (e.g. extension value)
 
       // Sealed interface
       else -> this.getPropertyInChoiceValue(fieldName)
@@ -177,7 +177,7 @@ internal fun Any.accessMember(fieldName: String): Any? {
   // Always unwrap choice type values. For example, the expression `Patient.multipleBirth` will
   // be of type `Boolean` or `Integer` rather than `Patient.MultipleBirth.Boolean` or
   // `Patient.MultipleBirth.Integer`.
-  return element?.unwrapChoiceValue() ?: element
+  return (element?.unwrapChoiceValue() ?: element)?.toFhirPathType()
 }
 
 /**

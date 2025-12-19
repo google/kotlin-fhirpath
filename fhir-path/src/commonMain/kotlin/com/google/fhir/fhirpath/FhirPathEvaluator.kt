@@ -40,6 +40,7 @@ import com.google.fhir.fhirpath.parsers.fhirpathParser
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
+import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
@@ -115,7 +116,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
           is Int -> listOf(-item)
           is Long -> listOf(-item)
           is BigDecimal -> listOf(-item)
-          // TODO: Add support for quantity
+          is Quantity -> listOf(item.negate())
           else -> error("Polarity expression cannot be applied to: $item")
         }
       }
@@ -452,6 +453,10 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     return listOf(identifierText.removeSurrounding("`"))
   }
 }
+
+/** Returns a new [Quantity] object with the numeric value negated. */
+private fun Quantity.negate(): Quantity =
+  toBuilder().apply { value?.apply { value = value?.negate() } }.build()
 
 /** See [specification](https://hl7.org/fhirpath/#string). */
 private fun unescapeFhirPathString(string: String) =

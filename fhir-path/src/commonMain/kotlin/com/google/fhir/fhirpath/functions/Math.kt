@@ -17,6 +17,7 @@
 package com.google.fhir.fhirpath.functions
 
 import com.google.fhir.fhirpath.operators.DECIMAL_MODE
+import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.abs
@@ -33,7 +34,7 @@ internal fun Collection<Any>.abs(): Collection<Any> {
     is Int -> listOf(abs(value))
     is Long -> listOf(abs(value))
     is BigDecimal -> listOf(value.abs())
-    // TODO: implement for quantity
+    is Quantity -> listOf(value.abs())
     else -> error("abs() can only be applied to numbers")
   }
 }
@@ -187,3 +188,7 @@ internal fun Collection<Any>.truncate(): Collection<Any> {
     else -> error("truncate() can only be applied to numbers")
   }
 }
+
+/** Returns a new [Quantity] that is the absolute value of this quantity. */
+private fun Quantity.abs(): Quantity =
+  toBuilder().apply { this.value?.apply { this.value = this.value?.abs() } }.build()
