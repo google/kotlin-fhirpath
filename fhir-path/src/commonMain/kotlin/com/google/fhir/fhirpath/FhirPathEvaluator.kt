@@ -403,6 +403,42 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
           projectionResult
         }
       }
+      "repeat" -> {
+        // See [specification](https://hl7.org/fhirpath/N1/#repeatexpression-collection).
+        val expression = functionNode.paramList()!!.expression().single()
+        val seenPrimitives = mutableSetOf<Any>()
+        val queue = ArrayDeque(context)
+        val results = mutableListOf<Any>()
+
+        while (queue.isNotEmpty()) {
+          val item = queue.removeFirst()
+
+          thisStack.addLast(item)
+          contextStack.addLast(listOf(item))
+          val children = visit(expression)
+          contextStack.removeLast()
+          thisStack.removeLast()
+
+          for (child in children) {
+            val isPrimitive =
+              child is String ||
+                child is Boolean ||
+                child is Int ||
+                child is Long ||
+                child is BigDecimal
+            if (isPrimitive) {
+              // Deduplicate primitives to prevent infinite loops
+              if (seenPrimitives.add(child)) results.add(child)
+            } else {
+              // Non-primitives are always added and queued for further processing
+              results.add(child)
+              queue.addLast(child)
+            }
+          }
+        }
+
+        results
+      }
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
