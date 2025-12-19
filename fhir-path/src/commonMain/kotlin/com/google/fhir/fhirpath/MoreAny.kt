@@ -33,6 +33,12 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.number
 
 /**
+ * Set to true for strict mode (throws on invalid property access).
+ * Set to false for lenient mode (returns empty for invalid properties).
+ */
+private const val STRICT_MODE = false
+
+/**
  * Maps a FHIR type to a FHIRPath system type it can be implicitly converted to and a function that
  * does the conversion.
  *
@@ -139,16 +145,17 @@ val fhirPathTypeToFhirPathType =
   )
 
 internal fun Any.accessMember(fieldName: String): Any? {
-  // Check if the object has the property before accessing it
-  val hasProperty =
-    when (this) {
-      is Resource -> this.hasProperty(fieldName)
-      is BackboneElement -> this.hasProperty(fieldName)
-      is Element -> this.hasProperty(fieldName)
-      else -> this.hasPropertyInChoiceValue(fieldName)
-    }
-
-  if (!hasProperty) return null
+  // Allows graceful handling of invalid property access (returns null instead of throwing).
+  if (!STRICT_MODE) {
+    val hasProperty =
+      when (this) {
+        is Resource -> this.hasProperty(fieldName)
+        is BackboneElement -> this.hasProperty(fieldName)
+        is Element -> this.hasProperty(fieldName)
+        else -> this.hasPropertyInChoiceValue(fieldName)
+      }
+    if (!hasProperty) return null
+  }
 
   val element =
     when (this) {
