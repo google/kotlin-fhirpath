@@ -55,7 +55,6 @@ val skippedTestGroupToReasonMap =
     "HighBoundary" to "Unimplemented",
     "Comparable" to "Unimplemented",
     "Precision" to "Unimplemented",
-    "period" to "Unimplemented",
     "testInheritance" to "Unimplemented",
   )
 
@@ -98,16 +97,19 @@ val skippedTestCaseToReasonMap =
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
     "testMinus5" to
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+    "testPrecedence3" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251",
+    "testPrecedence4" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251",
     "testDollarOrderNotAllowed" to
       "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
     "testSimpleFail" to "Strict mode is not implemented yet",
     "testSimpleWithWrongContext" to "Strict mode is not implemented yet",
     "testPolymorphismB" to "Strict mode is not implemented yet",
     "testPolymorphicsB" to "Allow invalid test where it's not strict mode but expects output",
-    "testPrecedence3" to "TBD",
-    "testPrecedence4" to "TBD",
-    "testPrecedence6" to "TBD",
     "testIndex" to "TBD",
+    "testPeriodInvariantOld" to "hasValue() is not implemented.",
+    "testPeriodInvariantNew" to "lowBoundary() and lowBoundary() are not implemented.",
     "testContainedId" to "TBD",
   )
 
