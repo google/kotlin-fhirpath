@@ -407,10 +407,30 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
-        val name = visit(functionNode.paramList()!!.expression()[0])
-        val projection = functionNode.paramList()!!.expression().getOrNull(1)?.let { visit(it) }
-        // TODO: implement this for multiplatform.
-        println("$name $projection")
+
+        // Logger label
+        val name = visit(functionNode.paramList()!!.expression()[0]).single() as String
+
+        // If projection is provided, evaluate it for each item in context; otherwise log context
+        val projectionExpr = functionNode.paramList()!!.expression().getOrNull(1)
+        val logValue =
+          if (projectionExpr != null) {
+            context.flatMap { item ->
+              thisStack.addLast(item)
+              contextStack.addLast(listOf(item))
+              val result = visit(projectionExpr)
+              contextStack.removeLast()
+              thisStack.removeLast()
+              result
+            }
+          } else {
+            context
+          }
+
+        // Convert to readable values for logging (e.g., FHIR String -> Kotlin String)
+        val readableValues = logValue.map { it.toFhirPathType() }
+        println("trace[$name]: $readableValues")
+
         context
       }
       "is" -> {
