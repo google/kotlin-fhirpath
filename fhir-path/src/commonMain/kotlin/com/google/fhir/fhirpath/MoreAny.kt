@@ -18,6 +18,8 @@ package com.google.fhir.fhirpath
 
 import com.google.fhir.fhirpath.ext.getProperty
 import com.google.fhir.fhirpath.ext.getPropertyInChoiceValue
+import com.google.fhir.fhirpath.ext.hasProperty
+import com.google.fhir.fhirpath.ext.hasPropertyInChoiceValue
 import com.google.fhir.fhirpath.ext.unwrapChoiceValue
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
@@ -29,6 +31,12 @@ import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.datetime.number
+
+/**
+ * Set to true for strict mode (throws on invalid property access). Set to false for lenient mode
+ * (returns empty for invalid properties).
+ */
+private const val STRICT_MODE = false
 
 /**
  * Maps a FHIR type to a FHIRPath system type it can be implicitly converted to and a function that
@@ -137,6 +145,18 @@ val fhirPathTypeToFhirPathType =
   )
 
 internal fun Any.accessMember(fieldName: String): Any? {
+  // Allows graceful handling of invalid property access (returns null instead of throwing).
+  if (!STRICT_MODE) {
+    val hasProperty =
+      when (this) {
+        is Resource -> this.hasProperty(fieldName)
+        is BackboneElement -> this.hasProperty(fieldName)
+        is Element -> this.hasProperty(fieldName)
+        else -> this.hasPropertyInChoiceValue(fieldName)
+      }
+    if (!hasProperty) return null
+  }
+
   val element =
     when (this) {
       is Resource -> {

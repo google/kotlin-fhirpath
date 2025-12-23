@@ -155,6 +155,10 @@ using intervals, it is not part of the FHIRPath specification. For simplicity, t
 @2025-01-01T00+05:30 = @2025-01-01T00+05:45   // returns {}
 ```
 
+### Error handling
+
+The FHIRPath specification [does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws an exception) or a lenient (e.g. returns an empty collection) approach. However, the [official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require lenient type checking. To accommodate such cases, this implementation returns an empty collection when the FHIRPath expression attempts to access a data element that does not exist.
+
 ## Conformance
 
 Due to the library's WIP status, not all test cases from the published official test suites are
@@ -169,10 +173,6 @@ passing. The failures are documented in the table below.
 | `testQuantityLiteralWeekToString`    | Specification/Test |     |                                                        | As above.                                                                                                                                                               |
 | `testQuantity4`                      | Test               |     | [PR](https://github.com/FHIR/fhir-test-cases/pull/243) |                                                                                                                                                                         |
 | `testSubSetOf3`                      | Specification/Test |     |                                                        | The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of "$this" is unclear (https://jira.hl7.org/browse/FHIR-44601) |
-| `testDistinct2`                      | Implementation     |     |                                                        | Function `descendants` is not implemented.                                                                                                                              |
-| `testDistinct3`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testDistinct5`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testDistinct6`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
 | `testRepeat*`                        | Implementation     |     |                                                        | Function `repeat` is not implemented.                                                                                                                                   |
 | `testAggregate*`                     | Implementation     |     |                                                        | Function `aggregate` is not implemented.                                                                                                                                |
 | `testIif11`                          | Implementation     |     |                                                        | https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601                                                                                          |

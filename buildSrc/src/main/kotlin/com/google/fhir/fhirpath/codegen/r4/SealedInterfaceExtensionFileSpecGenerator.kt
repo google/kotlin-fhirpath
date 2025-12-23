@@ -62,6 +62,36 @@ object SealedInterfaceExtensionFileSpecGenerator {
           .build()
       )
       .addFunction(
+        FunSpec.builder("hasPropertyInChoiceValue")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(Any::class.asTypeName())
+          .returns(Boolean::class)
+          .addParameter(name = "name", type = String::class)
+          .beginControlFlow("return when(this)")
+          .apply {
+            for (structureDefinition in structureDefinitions) {
+              val modelClassName =
+                ClassName(modelPackageName, structureDefinition.name.capitalized())
+              for (sealedInterface in
+                structureDefinition.snapshot!!.element.filter { it.path.endsWith("[x]") }) {
+                val sealedInterfaceClassName =
+                  sealedInterface.id.removeSuffix("[x]").split('.').drop(1).fold(modelClassName) {
+                    acc,
+                    it ->
+                    acc.nestedClass(it.capitalized())
+                  }
+                for (type in sealedInterface.type!!) {
+                  val typeClassName = sealedInterfaceClassName.nestedClass(type.code.capitalized())
+                  addStatement("is %T -> this.value.hasProperty(name)", typeClassName)
+                }
+              }
+            }
+            addStatement("else -> false")
+          }
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
         FunSpec.builder("unwrapChoiceValue")
           .addModifiers(KModifier.INTERNAL)
           .receiver(Any::class.asTypeName())
