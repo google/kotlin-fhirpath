@@ -62,6 +62,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
 
   private val contextStack = ArrayDeque<Collection<Any>>()
   private val thisStack = ArrayDeque<Any>()
+  private val totalStack = ArrayDeque<Collection<Any>>()
 
   // Ensure determinism of current date and time functions by getting the current timestamp once.
   // See https://hl7.org/fhirpath/N1/#current-date-and-time-functions.
@@ -404,6 +405,24 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
           projectionResult
         }
       }
+      "aggregate" -> {
+        // See
+        // [specification](https://hl7.org/fhirpath/N1/#aggregateaggregator-expression-init-value-value).
+        val params = functionNode.paramList()!!.expression()
+        val aggregator = params[0]
+        var total: Collection<Any> = if (params.size > 1) visit(params[1]) else emptyList()
+
+        for (item in context) {
+          contextStack.addLast(listOf(item))
+          thisStack.addLast(item)
+          totalStack.addLast(total)
+          total = visit(aggregator)
+          totalStack.removeLast()
+          thisStack.removeLast()
+          contextStack.removeLast()
+        }
+        total
+      }
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
@@ -438,6 +457,10 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
 
   override fun visitThisInvocation(ctx: fhirpathParser.ThisInvocationContext): Collection<Any> {
     return listOf(thisStack.last())
+  }
+
+  override fun visitTotalInvocation(ctx: fhirpathParser.TotalInvocationContext): Collection<Any> {
+    return totalStack.last()
   }
 
   // typeSpecifier

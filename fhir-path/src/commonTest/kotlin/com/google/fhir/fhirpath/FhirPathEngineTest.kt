@@ -41,7 +41,6 @@ private val jsonR4 = FhirR4Json()
 val skippedTestGroupToReasonMap =
   mapOf(
     "testRepeat" to "Unimplemented",
-    "testAggregate" to "Unimplemented",
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
     "testTrace" to "Unimplemented",
