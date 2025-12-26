@@ -413,6 +413,20 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
         println("$name $projection")
         context
       }
+      "sort" -> {
+        // See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#sort).
+        if (context.size <= 1) return context.toList()
+
+        val keySelectors = functionNode.paramList()?.expression() ?: emptyList()
+
+        if (keySelectors.isEmpty()) {
+          // sort() with no arguments: sort by $this ascending
+          context.sortedWith { a, b -> compare(a.toFhirPathType(), b.toFhirPathType()) ?: 0 }
+        } else {
+          // sort(key1, -key2, ...) with one or more key selectors
+          context.sortedWith { a, b -> compareByKeySelectors(a, b, keySelectors) }
+        }
+      }
       "is" -> {
         val type = FhirPathType.fromString(functionNode.paramList()!!.expression().single().text)
         return context.`is`(listOf(type))
@@ -435,6 +449,59 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
       }
     }
   }
+
+  /**
+   * Compares two items using multiple key selectors for sorting.
+   *
+   * Example: sort(-family, given) compares by family descending, then by given ascending.
+   * Per FHIRPath spec, empty values are always sorted first regardless of sort direction.
+   */
+  private fun compareByKeySelectors(
+    a: Any,
+    b: Any,
+    keySelectors: List<fhirpathParser.ExpressionContext>,
+  ): Int {
+    for (selector in keySelectors) {
+      val isDescending = selector.isDescendingSort()
+      val expression = if (isDescending) selector.unwrapPolarity() else selector
+
+      val aKey = evaluateWithThis(a) { visit(expression).singleOrNull()?.toFhirPathType() }
+      val bKey = evaluateWithThis(b) { visit(expression).singleOrNull()?.toFhirPathType() }
+
+      val result = compareKeys(aKey, bKey, isDescending)
+      if (result != 0) return result
+    }
+    return 0
+  }
+
+  /** Checks if this expression is a descending sort (prefixed with -). */
+  private fun fhirpathParser.ExpressionContext.isDescendingSort(): Boolean =
+    this is fhirpathParser.PolarityExpressionContext && getChild(0)?.text == "-"
+
+  /** Unwraps the inner expression from a polarity expression (-expr -> expr). */
+  private fun fhirpathParser.ExpressionContext.unwrapPolarity(): fhirpathParser.ExpressionContext =
+    (this as fhirpathParser.PolarityExpressionContext).expression()
+
+  /** Evaluates a block with the given item pushed onto thisStack. */
+  private fun <T> evaluateWithThis(item: Any, block: () -> T): T {
+    thisStack.addLast(item)
+    return block().also { thisStack.removeLast() }
+  }
+
+  /**
+   * Compares two keys for sorting.
+   * Empty values always come first per FHIRPath spec.
+   */
+  private fun compareKeys(aKey: Any?, bKey: Any?, isDescending: Boolean): Int =
+    when {
+      aKey == null && bKey == null -> 0
+      aKey == null -> -1 // Empty always first
+      bKey == null -> 1 // Empty always first
+      else -> {
+        val cmp = compare(aKey, bKey) ?: 0
+        if (isDescending) -cmp else cmp
+      }
+    }
 
   override fun visitThisInvocation(ctx: fhirpathParser.ThisInvocationContext): Collection<Any> {
     return listOf(thisStack.last())
