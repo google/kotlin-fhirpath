@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ val skippedTestGroupToReasonMap =
     "testEscapeUnescape" to "Unimplemented",
     "testTrace" to "Unimplemented",
     "testSort" to "Function `sort` is not defined in the specification",
-    "testCombine()" to "Unimplemented",
     "testVariables" to "Unimplemented",
     "testExtension" to "Unimplemented",
     "testType" to "Unimplemented",
@@ -108,6 +107,7 @@ val skippedTestCaseToReasonMap =
     "testIndex" to "TBD",
     "testPeriodInvariantOld" to "hasValue() is not implemented.",
     "testPeriodInvariantNew" to "lowBoundary() and lowBoundary() are not implemented.",
+    "testCombine1" to "Test file values does not match the expected test case.",
     "testContainedId" to "TBD",
   )
 

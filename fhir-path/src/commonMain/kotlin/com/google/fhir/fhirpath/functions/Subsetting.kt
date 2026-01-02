@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.google.fhir.fhirpath.functions
+
+import com.google.fhir.fhirpath.toFhirPathType
 
 /** See [specification](https://hl7.org/fhirpath/N1/#single-collection). */
 internal fun Collection<Any>.singleFun(): Collection<Any> =
@@ -47,5 +49,7 @@ internal fun Collection<Any>.intersectFun(other: Collection<Any>): Collection<An
 
 /** See [specification](https://hl7.org/fhirpath/N1/#excludeother-collection-collection). */
 internal fun Collection<Any>.exclude(other: Collection<Any>): Collection<Any> {
-  return this.toMutableList().apply { removeAll(other) }
+  return this.toMutableList().apply {
+    removeAll { context -> other.contains(context.toFhirPathType()) }
+  }
 }
