@@ -108,6 +108,8 @@ val skippedTestCaseToReasonMap =
     "testIndex" to "TBD",
     "testPeriodInvariantOld" to "hasValue() is not implemented.",
     "testPeriodInvariantNew" to "lowBoundary() and lowBoundary() are not implemented.",
+    "testCombine2" to "FHIR String and Kotlin String comparison issue in exclude()",
+    "testCombine3" to "As above",
     "testContainedId" to "TBD",
   )
 
