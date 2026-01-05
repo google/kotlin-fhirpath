@@ -363,6 +363,10 @@ repositories for code generation and testing purposes:
   [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
 - [`hl7.fhir.r4.core`](third_party/hl7.fhir.r4.core/): content from
   [FHIR R4](https://hl7.org/fhir/R4/) for code generation
+- [`hl7.fhir.r4b.core`](third_party/hl7.fhir.r4b.core/): content from
+  [FHIR R4B](https://hl7.org/fhir/R4B/) for code generation
+- [`hl7.fhir.r5.core`](third_party/hl7.fhir.r5.core/): content from
+  [FHIR R5](https://hl7.org/fhir/R5/) for code generation
 - [`ucum`](third_party/ucum/): content from the [UCUM](https://github.com/ucum-org/ucum) repo
 
 ## Disclaimer
