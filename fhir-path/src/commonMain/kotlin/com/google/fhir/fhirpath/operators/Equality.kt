@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package com.google.fhir.fhirpath.operators
 import com.google.fhir.fhirpath.asComparableOperands
 import com.google.fhir.fhirpath.toEqualCanonicalized
 import com.google.fhir.fhirpath.toEquivalentCanonicalized
+import com.google.fhir.fhirpath.toFhirPathType
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
-import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 /**
@@ -82,7 +83,8 @@ internal fun equivalent(left: Collection<Any>, right: Collection<Any>): Boolean 
 
 /** See [specification](https://hl7.org/fhirpath/N1/#equals). */
 private fun itemsEqual(left: Any, right: Any): Boolean? {
-  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands()
+  val (leftFhirPath, rightFhirPath) =
+    (left.toFhirPathType() to right.toFhirPathType()).asComparableOperands()
 
   return when {
     leftFhirPath is String && rightFhirPath is String -> {
@@ -110,10 +112,10 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
     leftFhirPath is FhirPathTime && rightFhirPath is FhirPathTime -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is Quantity && rightFhirPath is Quantity -> {
+    leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        val leftUnits = parseUcumUnit(first.code?.value!!)
-        val rightUnits = parseUcumUnit(second.code?.value!!)
+        val leftUnits = parseUcumUnit(first.code!!)
+        val rightUnits = parseUcumUnit(second.code!!)
         if (leftUnits != rightUnits) return null
         return first.value == second.value
       }
@@ -126,7 +128,8 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
 
 /** See [specification](https://hl7.org/fhirpath/N1/#equivalent). */
 private fun itemsEquivalent(left: Any, right: Any): Boolean {
-  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands()
+  val (leftFhirPath, rightFhirPath) =
+    (left.toFhirPathType() to right.toFhirPathType()).asComparableOperands()
 
   return when {
     leftFhirPath is String && rightFhirPath is String -> {
@@ -159,9 +162,9 @@ private fun itemsEquivalent(left: Any, right: Any): Boolean {
     leftFhirPath is FhirPathTime && rightFhirPath is FhirPathTime -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is Quantity && rightFhirPath is Quantity -> {
+    leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
       with(leftFhirPath.toEquivalentCanonicalized() to rightFhirPath.toEquivalentCanonicalized()) {
-        return first.value == second.value && first.code?.value!! == second.code?.value!!
+        return first.value == second.value && first.code!! == second.code!!
       }
     }
     // TODO: Handle implicit conversion from Date to DateTime

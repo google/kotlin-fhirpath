@@ -87,7 +87,7 @@ The following table lists the chosen internal types for the FHIRPath primitive t
 | Date                                                                        | FhirDate(*)                                                                   |
 | DateTime                                                                    | FhirPathDateTime(**)                                                          |
 | Time                                                                        | FhirPathTime(**)                                                              |
-| Quantity                                                                    | Quantity(*)                                                                   |
+| Quantity                                                                    | FhirPathQuantity(**)                                                          |
 
 (*): Classes defined in [Kotlin FHIR](https://github.com/google/kotlin-fhir)
 (**): Classes defined in this project

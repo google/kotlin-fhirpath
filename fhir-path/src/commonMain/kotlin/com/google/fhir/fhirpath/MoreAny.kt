@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import com.google.fhir.fhirpath.ext.getPropertyInChoiceValue
 import com.google.fhir.fhirpath.ext.hasProperty
 import com.google.fhir.fhirpath.ext.hasPropertyInChoiceValue
 import com.google.fhir.fhirpath.ext.unwrapChoiceValue
+import com.google.fhir.fhirpath.functions.DEFAULT_UNIT
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.BackboneElement
 import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.FhirDate
-import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
@@ -96,7 +97,14 @@ val fhirTypeToFhirPathType =
         }),
 
     // FHIR complex types
-    FhirComplexType.Quantity to (SystemType.QUANTITY to { it }),
+    FhirComplexType.Quantity to
+      (SystemType.QUANTITY to
+        {
+          (it as com.google.fhir.model.r4.Quantity).let {
+            val pair = (it.value!!.value!! to it.code!!.value!!)
+            FhirPathQuantity(value = pair.first, code = pair.second)
+          }
+        }),
   )
 
 /**
@@ -112,19 +120,13 @@ val fhirPathTypeToFhirPathType =
     SystemType.INTEGER to
       SystemType.QUANTITY to
       { it ->
-        Quantity(
-          value = com.google.fhir.model.r4.Decimal(value = it.toString().toBigDecimal()),
-          unit = com.google.fhir.model.r4.String(value = "1"),
-        )
+        FhirPathQuantity(value = it.toString().toBigDecimal(), code = DEFAULT_UNIT)
       },
     SystemType.LONG to SystemType.DECIMAL to { it -> (it as Long).toBigDecimal() },
     SystemType.DECIMAL to
       SystemType.QUANTITY to
       { it ->
-        Quantity(
-          value = com.google.fhir.model.r4.Decimal(value = it as BigDecimal),
-          unit = com.google.fhir.model.r4.String(value = "1"),
-        )
+        FhirPathQuantity(value = it as BigDecimal, code = DEFAULT_UNIT)
       },
     SystemType.DATE to
       SystemType.DATETIME to
@@ -177,7 +179,10 @@ internal fun Any.accessMember(fieldName: String): Any? {
   // Always unwrap choice type values. For example, the expression `Patient.multipleBirth` will
   // be of type `Boolean` or `Integer` rather than `Patient.MultipleBirth.Boolean` or
   // `Patient.MultipleBirth.Integer`.
-  return (element?.unwrapChoiceValue() ?: element)?.toFhirPathType()
+  // FHIR types are not converted to FHIRPath types at this point since information such as id and
+  // extension as well as type information need to be preserved. The implicit conversion only
+  // happens at the last minute when necessary (e.g. when FHIR type is compared to FHIRPath type).
+  return element?.unwrapChoiceValue() ?: element
 }
 
 /**

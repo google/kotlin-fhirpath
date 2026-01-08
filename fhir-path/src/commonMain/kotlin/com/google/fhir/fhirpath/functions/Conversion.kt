@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package com.google.fhir.fhirpath.functions
 
+import com.google.fhir.fhirpath.toFhirPathType
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.fhirpath.ucum.Unit
-import com.google.fhir.model.r4.Code
 import com.google.fhir.model.r4.Date
 import com.google.fhir.model.r4.DateTime
-import com.google.fhir.model.r4.Decimal
 import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.FhirDateTime
-import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Time
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
@@ -37,17 +36,17 @@ import kotlinx.datetime.LocalTime
  * NB: The regular expression is slightly modified from the original in order for it to work in
  * Kotlin.
  */
-val QUANTITY_REGEX =
+private val QUANTITY_REGEX =
   """(?<value>[+-]?\d+(\.\d+)?)\s*('(?<unit>[^']+)'|(?<time>[a-zA-Z]+))?""".toRegex()
 
 /** See [specification](https://hl7.org/fhirpath/N1/#toquantityunit-string-quantity). */
-const val DEFAULT_UNIT = "'1'"
+internal const val DEFAULT_UNIT = "'1'"
 
-val SINGULAR_CALENDAR_DURATION_LIST =
+private val SINGULAR_CALENDAR_DURATION_LIST =
   listOf("year", "month", "week", "day", "hour", "minute", "second", "millisecond")
-val PLURAL_CALENDAR_DURATION_LIST =
+private val PLURAL_CALENDAR_DURATION_LIST =
   listOf("years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds")
-val CALENDAR_DURATION_LIST = SINGULAR_CALENDAR_DURATION_LIST + PLURAL_CALENDAR_DURATION_LIST
+private val CALENDAR_DURATION_LIST = SINGULAR_CALENDAR_DURATION_LIST + PLURAL_CALENDAR_DURATION_LIST
 
 /** See [specification](https://hl7.org/fhirpath/N1/#toboolean-boolean). */
 internal fun Collection<Any>.toBoolean(): Collection<Boolean> {
@@ -55,7 +54,7 @@ internal fun Collection<Any>.toBoolean(): Collection<Boolean> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is Boolean -> listOf(value)
     is Int ->
       when (value) {
@@ -104,7 +103,7 @@ internal fun Collection<Any>.toInteger(): Collection<Int> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is Int -> listOf(value)
     is String -> {
       value.toIntOrNull()?.let { listOf(it) } ?: emptyList()
@@ -129,7 +128,7 @@ internal fun Collection<Any>.toDate(): Collection<FhirDate> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is FhirDate -> listOf(value)
     is FhirDateTime -> TODO("Clarify the requirement in the specification")
     is String ->
@@ -148,7 +147,7 @@ internal fun Collection<Any>.convertsToDate(): Collection<Boolean> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is FhirDate -> listOf(true)
     is FhirDateTime -> listOf(true)
     is String ->
@@ -168,7 +167,7 @@ internal fun Collection<Any>.toDateTime(): Collection<FhirPathDateTime> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is FhirPathDateTime -> listOf(value)
     is FhirDateTime -> listOf(FhirPathDateTime.fromFhirDateTime(value))
     is FhirDate -> listOf(FhirPathDateTime.fromString(value.toString()))
@@ -188,7 +187,7 @@ internal fun Collection<Any>.convertsToDateTime(): Collection<Boolean> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is FhirPathDateTime -> listOf(true)
     is FhirDateTime -> listOf(true)
     is FhirDate -> listOf(true)
@@ -209,7 +208,7 @@ internal fun Collection<Any>.toDecimal(): Collection<BigDecimal> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single()) {
+  return when (val value = single().toFhirPathType()) {
     is BigDecimal -> listOf(value)
     is Int -> listOf(value.toBigDecimal())
     is Boolean -> listOf(if (value) BigDecimal.ONE else BigDecimal.ZERO)
@@ -230,16 +229,25 @@ internal fun Collection<Any>.convertsToDecimal(): Collection<Boolean> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#toquantityunit-string-quantity). */
-internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<Quantity> {
+internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<FhirPathQuantity> {
   check(size <= 1) { "toQuantity() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single()) {
-    is Int -> listOf((item.toBigDecimal() to DEFAULT_UNIT).toQuantity())
-    is Long -> listOf((item.toBigDecimal() to DEFAULT_UNIT).toQuantity())
-    is BigDecimal -> listOf((item to DEFAULT_UNIT).toQuantity())
-    is Quantity -> listOf(item)
+  return when (val item = single().toFhirPathType()) {
+    is Int -> {
+      val pair = (item.toBigDecimal() to DEFAULT_UNIT)
+      listOf(FhirPathQuantity(value = pair.first, code = pair.second))
+    }
+    is Long -> {
+      val pair1 = (item.toBigDecimal() to DEFAULT_UNIT)
+      listOf(FhirPathQuantity(value = pair1.first, code = pair1.second))
+    }
+    is BigDecimal -> {
+      val pair1 = (item to DEFAULT_UNIT)
+      listOf(FhirPathQuantity(value = pair1.first, code = pair1.second))
+    }
+    is FhirPathQuantity -> listOf(item)
     is String -> {
       val match = QUANTITY_REGEX.matchEntire(item.trim()) ?: return emptyList()
       val value = match.groups["value"]?.value!!.toBigDecimal()
@@ -263,10 +271,13 @@ internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<Quantit
           TODO("Handle calendar duration conversion")
         }
       }
-      listOf((value to (unit?.let { "'$it'" } ?: calendarDuration ?: DEFAULT_UNIT)).toQuantity())
+      val pair = (value to (unit?.let { "'$it'" } ?: calendarDuration ?: DEFAULT_UNIT))
+      listOf(FhirPathQuantity(value = pair.first, code = pair.second))
     }
-    is Boolean ->
-      listOf(((if (item) BigDecimal.ONE else BigDecimal.ZERO) to DEFAULT_UNIT).toQuantity())
+    is Boolean -> {
+      val pair1 = ((if (item) BigDecimal.ONE else BigDecimal.ZERO) to DEFAULT_UNIT)
+      listOf(FhirPathQuantity(value = pair1.first, code = pair1.second))
+    }
     else -> emptyList()
   }
 }
@@ -286,7 +297,7 @@ internal fun Collection<Any>.toStringFun(): Collection<String> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single()) {
+  return when (val item = single().toFhirPathType()) {
     is String -> listOf(item)
     is Int -> listOf(item.toString())
     is Long -> listOf(item.toString())
@@ -298,7 +309,7 @@ internal fun Collection<Any>.toStringFun(): Collection<String> {
     is FhirPathDateTime -> listOf(item.toString())
     is FhirPathTime -> listOf(item.toString())
     is Boolean -> listOf(item.toString())
-    is Quantity -> listOf("${item.value?.value} ${item.code?.value}")
+    is FhirPathQuantity -> listOf("${item.value} ${item.code}")
     else -> emptyList()
   }
 }
@@ -317,7 +328,7 @@ internal fun Collection<Any>.convertsToString(): Collection<Boolean> {
   if (isEmpty()) return emptyList()
 
   val isConvertible =
-    when (single()) {
+    when (single().toFhirPathType()) {
       is String,
       is Int,
       is Long,
@@ -329,7 +340,7 @@ internal fun Collection<Any>.convertsToString(): Collection<Boolean> {
       is FhirPathDateTime,
       is FhirPathTime,
       is Boolean,
-      is Quantity -> true
+      is FhirPathQuantity -> true
       else -> false
     }
 
@@ -342,7 +353,7 @@ internal fun Collection<Any>.toTime(): Collection<FhirPathTime> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single()) {
+  return when (val item = single().toFhirPathType()) {
     is LocalTime -> listOf(FhirPathTime.fromLocalTime(item))
     is FhirPathTime -> listOf(item)
     is String ->
@@ -361,7 +372,7 @@ internal fun Collection<Any>.convertsToTime(): Collection<Boolean> {
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single()) {
+  return when (val item = single().toFhirPathType()) {
     is LocalTime -> listOf(true)
     is FhirPathTime -> listOf(true)
     is String ->
@@ -374,8 +385,4 @@ internal fun Collection<Any>.convertsToTime(): Collection<Boolean> {
 
     else -> listOf(false)
   }
-}
-
-internal fun Pair<BigDecimal, String>.toQuantity(): Quantity {
-  return Quantity(value = Decimal(value = first), code = Code.of(value = second, element = null))
 }

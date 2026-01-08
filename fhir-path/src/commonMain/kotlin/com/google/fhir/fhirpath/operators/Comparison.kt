@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package com.google.fhir.fhirpath.operators
 import com.google.fhir.fhirpath.asComparableOperands
 import com.google.fhir.fhirpath.toEqualCanonicalized
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
-import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 internal fun compare(left: Any, right: Any): Int? {
@@ -40,10 +40,10 @@ internal fun compare(left: Any, right: Any): Int? {
     leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
       leftFhirPath.compareTo(rightFhirPath)
     }
-    leftFhirPath is Quantity && rightFhirPath is Quantity -> {
+    leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        if (first.code?.value!! != second.code?.value!!) return null
-        return first.value?.value?.compareTo(second.value!!.value!!)
+        if (first.code!! != second.code!!) return null
+        return first.value?.compareTo(second.value!!)
       }
     }
     leftFhirPath is FhirDate && rightFhirPath is FhirDate -> leftFhirPath.compareTo(rightFhirPath)
