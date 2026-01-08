@@ -214,10 +214,6 @@ The root cause column documents if the test failure is caused by issues with the
 or is under investigation. We exclude test cases that would fail due to issues in the tests and the
 specification itself. But we track the ongoing discussions and resolutions in this table.
 
-### Test resource files
-
-The [fhir-test-cases](https://github.com/FHIR/fhir-test-cases) repository contains inconsistent XML and JSON resource files (e.g., `codesystem-example`). We currently use XML files converted to JSON. Once the fhir-test-cases repository fixes their inconsistency, we will switch to using the JSON files directly.
-
 ## User Guide
 
 ### Adding the library dependency to your project
@@ -362,7 +358,7 @@ repositories for code generation and testing purposes:
   - [`resources`](third_party/fhir-test-cases/r4/resources) JSON versions of the relevant test
     resources generated using [Anton V.](https://www.antvaset.com/)'s
     [FHIR Converter](https://www.antvaset.com/fhir-converter) alongside the XML versions
-    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4))
+    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4)). The XML and JSON resource files in the fhir-test-cases repository are inconsistent; we use XML files converted to JSON.
 - [`fhirpath-2.0.0`](third_party/fhirpath-2.0.0/): the formal
   [antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
   [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
