@@ -214,6 +214,10 @@ The root cause column documents if the test failure is caused by issues with the
 or is under investigation. We exclude test cases that would fail due to issues in the tests and the
 specification itself. But we track the ongoing discussions and resolutions in this table.
 
+### Test resource files
+
+The [fhir-test-cases](https://github.com/FHIR/fhir-test-cases) repository contains inconsistent XML and JSON resource files (e.g., `codesystem-example`). We currently use XML files converted to JSON. Once the fhir-test-cases repository fixes their inconsistency, we will switch to using the JSON files directly.
+
 ## User Guide
 
 ### Adding the library dependency to your project
