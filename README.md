@@ -98,6 +98,8 @@ FHIRPath are more lenient than in the FHIR specification. As a result, custom cl
 authored to handle cases where the minutes, seconds, or milliseconds are not present (allowed in
 FHIRPath but not allowed in FHIR).
 
+**Note on type conversion**: FHIR primitive types (e.g., `com.google.fhir.model.r4.String`) are not immediately converted to Kotlin primitives when extracted from resources. This is because FHIR primitives can have extensions that users may need to access. Instead, conversion to Kotlin primitives happens at the last moment—when values need to be compared for equality or membership operations. The `toFhirPathType()` function in `MoreAny.kt` handles this conversion.
+
 ### Timezone offset in date time values
 
 This FHIRPath implementation adopts a strict, safety-first approach to date time comparisons,
