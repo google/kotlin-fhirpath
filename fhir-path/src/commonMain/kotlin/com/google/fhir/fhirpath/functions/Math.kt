@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package com.google.fhir.fhirpath.functions
 
 import com.google.fhir.fhirpath.operators.DECIMAL_MODE
-import com.google.fhir.model.r4.Quantity
+import com.google.fhir.fhirpath.toFhirPathType
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.abs
@@ -29,12 +30,12 @@ import kotlin.math.sqrt
 /** See [specification](https://hl7.org/fhirpath/N1/#abs-integer-decimal-quantity). */
 internal fun Collection<Any>.abs(): Collection<Any> {
   check(size <= 1) { "abs() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
   return when (value) {
     is Int -> listOf(abs(value))
     is Long -> listOf(abs(value))
     is BigDecimal -> listOf(value.abs())
-    is Quantity -> listOf(value.abs())
+    is FhirPathQuantity -> listOf(value.abs())
     else -> error("abs() can only be applied to numbers")
   }
 }
@@ -42,7 +43,7 @@ internal fun Collection<Any>.abs(): Collection<Any> {
 /** See [specification](https://hl7.org/fhirpath/N1/#ceiling-integer) */
 internal fun Collection<Any>.ceiling(): Collection<Any> {
   check(size <= 1) { "ceiling() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
   return when (value) {
     is Int,
     Long -> listOf(value)
@@ -55,7 +56,7 @@ internal fun Collection<Any>.ceiling(): Collection<Any> {
 /** See [specification](https://hl7.org/fhirpath/N1/#exp-decimal) */
 internal fun Collection<Any>.exp(): Collection<Any> {
   check(size <= 1) { "exp() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
   return when (value) {
     is Int -> listOf(exp(value.toDouble()).toBigDecimal())
     is Long -> listOf(exp(value.toDouble()).toBigDecimal())
@@ -67,7 +68,7 @@ internal fun Collection<Any>.exp(): Collection<Any> {
 /** See [specification](https://hl7.org/fhirpath/N1/#floor-integer) */
 internal fun Collection<Any>.floor(): Collection<Any> {
   check(size <= 1) { "floor() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
   return when (value) {
     is Int,
     Long -> listOf(value)
@@ -80,7 +81,7 @@ internal fun Collection<Any>.floor(): Collection<Any> {
 /** See [specification](https://hl7.org/fhirpath/N1/#ln-decimal) */
 internal fun Collection<Any>.ln(): Collection<Any> {
   check(size <= 1) { "ln() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
   return when (value) {
     is Int -> listOf(ln(value.toDouble()).toBigDecimal())
     is Long -> listOf(ln(value.toDouble()).toBigDecimal())
@@ -93,14 +94,14 @@ internal fun Collection<Any>.ln(): Collection<Any> {
 internal fun Collection<Any>.log(params: List<Any>): Collection<Any> {
   check(size <= 1) { "log() cannot be called on a collection with more than 1 item" }
   val valueDouble =
-    when (val value = this.singleOrNull() ?: return emptyList()) {
+    when (val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
       is BigDecimal -> value.doubleValue()
       else -> error("log() can only be applied to numbers")
     }
   val baseDouble =
-    when (val param = params.singleOrNull() ?: return emptyList()) {
+    when (val param = params.singleOrNull()?.toFhirPathType() ?: return emptyList()) {
       is Int -> param.toDouble()
       is Long -> param.toDouble()
       is BigDecimal -> param.doubleValue()
@@ -114,8 +115,8 @@ internal fun Collection<Any>.log(params: List<Any>): Collection<Any> {
  */
 internal fun Collection<Any>.power(params: List<Any>): Collection<Any> {
   check(size <= 1) { "power() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
-  val exponent = params.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val exponent = params.singleOrNull()?.toFhirPathType() ?: return emptyList()
   val valueDouble =
     when (value) {
       is Int -> value.toDouble()
@@ -148,8 +149,8 @@ internal fun Collection<Any>.power(params: List<Any>): Collection<Any> {
 /** See [specification](https://hl7.org/fhirpath/N1/#roundprecision-integer-decimal) */
 internal fun Collection<Any>.round(params: List<Any>): Collection<Any> {
   check(size <= 1) { "round() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
-  val precision = params.singleOrNull()?.let { it as Int } ?: 0
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val precision = params.singleOrNull()?.toFhirPathType()?.let { it as Int } ?: 0
   check(precision >= 0) { "round() precision must be non-negative" }
   return when (value) {
     is Int -> listOf(value.toBigDecimal())
@@ -166,7 +167,7 @@ internal fun Collection<Any>.round(params: List<Any>): Collection<Any> {
 internal fun Collection<Any>.sqrt(): Collection<Any> {
   check(size <= 1) { "sqrt() cannot be called on a collection with more than 1 item" }
   val valueDouble =
-    when (val value = this.singleOrNull() ?: return emptyList()) {
+    when (val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
       is BigDecimal -> value.doubleValue()
@@ -180,7 +181,7 @@ internal fun Collection<Any>.sqrt(): Collection<Any> {
 /** See [specification](https://hl7.org/fhirpath/N1/#truncate-integer) */
 internal fun Collection<Any>.truncate(): Collection<Any> {
   check(size <= 1) { "truncate() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
   return when (value) {
     is Int,
     Long -> listOf(value)
@@ -189,6 +190,6 @@ internal fun Collection<Any>.truncate(): Collection<Any> {
   }
 }
 
-/** Returns a new [Quantity] that is the absolute value of this quantity. */
-private fun Quantity.abs(): Quantity =
-  toBuilder().apply { this.value?.apply { this.value = this.value?.abs() } }.build()
+/** Returns a new [FhirPathQuantity] that is the absolute value of this quantity. */
+private fun FhirPathQuantity.abs(): FhirPathQuantity =
+  FhirPathQuantity(value = value!!.abs(), code = code)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,7 @@ package com.google.fhir.fhirpath.types
 import kotlin.text.get
 import kotlinx.datetime.LocalTime
 
-internal data class FhirPathTime(
-  val hour: Int,
-  val minute: Int? = null,
-  val second: Double? = null,
-) {
-
+data class FhirPathTime(val hour: Int, val minute: Int? = null, val second: Double? = null) {
   enum class Precision {
     HOUR,
     MINUTE,

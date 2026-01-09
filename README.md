@@ -87,7 +87,7 @@ The following table lists the chosen internal types for the FHIRPath primitive t
 | Date                                                                        | FhirDate(*)                                                                   |
 | DateTime                                                                    | FhirPathDateTime(**)                                                          |
 | Time                                                                        | FhirPathTime(**)                                                              |
-| Quantity                                                                    | Quantity(*)                                                                   |
+| Quantity                                                                    | FhirPathQuantity(**)                                                          |
 
 (*): Classes defined in [Kotlin FHIR](https://github.com/google/kotlin-fhir)
 (**): Classes defined in this project
@@ -157,6 +157,10 @@ using intervals, it is not part of the FHIRPath specification. For simplicity, t
 @2025-01-01T00+05:30 = @2025-01-01T00+05:45   // returns {}
 ```
 
+### Error handling
+
+The FHIRPath specification [does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws an exception) or a lenient (e.g. returns an empty collection) approach. However, the [official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require lenient type checking. To accommodate such cases, this implementation returns an empty collection when the FHIRPath expression attempts to access a data element that does not exist.
+
 ## Conformance
 
 Due to the library's WIP status, not all test cases from the published official test suites are
@@ -171,12 +175,7 @@ passing. The failures are documented in the table below.
 | `testQuantityLiteralWeekToString`    | Specification/Test |     |                                                        | As above.                                                                                                                                                               |
 | `testQuantity4`                      | Test               |     | [PR](https://github.com/FHIR/fhir-test-cases/pull/243) |                                                                                                                                                                         |
 | `testSubSetOf3`                      | Specification/Test |     |                                                        | The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of "$this" is unclear (https://jira.hl7.org/browse/FHIR-44601) |
-| `testDistinct2`                      | Implementation     |     |                                                        | Function `descendants` is not implemented.                                                                                                                              |
-| `testDistinct3`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testDistinct5`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testDistinct6`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
 | `testRepeat*`                        | Implementation     |     |                                                        | Function `repeat` is not implemented.                                                                                                                                   |
-| `testAggregate*`                     | Implementation     |     |                                                        | Function `aggregate` is not implemented.                                                                                                                                |
 | `testIif11`                          | Implementation     |     |                                                        | https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601                                                                                          |
 | `testEncode*`                        | Implementation     | STU |                                                        | Function `encode` is not implemented.                                                                                                                                   |
 | `testDecode*`                        | Implementation     | STU |                                                        | Function `decode` is not implemented.                                                                                                                                   |
@@ -209,7 +208,6 @@ passing. The failures are documented in the table below.
 | `testFHIRPathIsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
-| `testCombine1`                       | Implementation     |     |                                                        | Test file values does not match the expected test case.                                                                                                                 |
 
 The root cause column documents if the test failure is caused by issues with the implementation
 (this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
@@ -360,12 +358,16 @@ repositories for code generation and testing purposes:
   - [`resources`](third_party/fhir-test-cases/r4/resources) JSON versions of the relevant test
     resources generated using [Anton V.](https://www.antvaset.com/)'s
     [FHIR Converter](https://www.antvaset.com/fhir-converter) alongside the XML versions
-    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4))
+    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4)). The XML and JSON resource files in the fhir-test-cases repository are inconsistent; we use XML files converted to JSON.
 - [`fhirpath-2.0.0`](third_party/fhirpath-2.0.0/): the formal
   [antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
   [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
 - [`hl7.fhir.r4.core`](third_party/hl7.fhir.r4.core/): content from
   [FHIR R4](https://hl7.org/fhir/R4/) for code generation
+- [`hl7.fhir.r4b.core`](third_party/hl7.fhir.r4b.core/): content from
+  [FHIR R4B](https://hl7.org/fhir/R4B/) for code generation
+- [`hl7.fhir.r5.core`](third_party/hl7.fhir.r5.core/): content from
+  [FHIR R5](https://hl7.org/fhir/R5/) for code generation
 - [`ucum`](third_party/ucum/): content from the [UCUM](https://github.com/ucum-org/ucum) repo
 
 ## Disclaimer

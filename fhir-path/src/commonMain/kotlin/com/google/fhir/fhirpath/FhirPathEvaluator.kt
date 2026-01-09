@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.google.fhir.fhirpath
 
 import com.google.fhir.fhirpath.functions.invoke
-import com.google.fhir.fhirpath.functions.toQuantity
 import com.google.fhir.fhirpath.functions.union
 import com.google.fhir.fhirpath.operators.addition
 import com.google.fhir.fhirpath.operators.and
@@ -38,9 +37,9 @@ import com.google.fhir.fhirpath.operators.xor
 import com.google.fhir.fhirpath.parsers.fhirpathBaseVisitor
 import com.google.fhir.fhirpath.parsers.fhirpathParser
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
-import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
@@ -62,6 +61,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
 
   private val contextStack = ArrayDeque<Collection<Any>>()
   private val thisStack = ArrayDeque<Any>()
+  private val totalStack = ArrayDeque<Collection<Any>>()
 
   // Ensure determinism of current date and time functions by getting the current timestamp once.
   // See https://hl7.org/fhirpath/N1/#current-date-and-time-functions.
@@ -116,7 +116,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
           is Int -> listOf(-item)
           is Long -> listOf(-item)
           is BigDecimal -> listOf(-item)
-          is Quantity -> listOf(item.negate())
+          is FhirPathQuantity -> listOf(item.negate())
           else -> error("Polarity expression cannot be applied to: $item")
         }
       }
@@ -221,8 +221,9 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     val right = visit(ctx.expression(1)!!)
     val op = ctx.getChild(1)!!.text
     return when (op) {
-      "in" -> listOf(right.contains(left.single()))
-      "contains" -> listOf(left.contains(right.single()))
+      "in" -> listOf(right.map { it.toFhirPathType() }.contains(left.single().toFhirPathType()))
+      "contains" ->
+        listOf(left.map { it.toFhirPathType() }.contains(right.single().toFhirPathType()))
       else -> error("Unknown membership operator: $op")
     }
   }
@@ -297,7 +298,8 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
   override fun visitQuantityLiteral(ctx: fhirpathParser.QuantityLiteralContext): Collection<Any> {
     val number = ctx.quantity().NUMBER().text.toBigDecimal()
     val unit = ctx.quantity().unit()?.text!!
-    return listOf((number to unit).toQuantity())
+    val pair = (number to unit)
+    return listOf(FhirPathQuantity(value = pair.first, code = pair.second))
   }
 
   // invocation
@@ -404,6 +406,24 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
           projectionResult
         }
       }
+      "aggregate" -> {
+        // See
+        // [specification](https://hl7.org/fhirpath/N1/#aggregateaggregator-expression-init-value-value).
+        val params = functionNode.paramList()!!.expression()
+        val aggregator = params[0]
+        var total: Collection<Any> = if (params.size > 1) visit(params[1]) else emptyList()
+
+        for (item in context) {
+          contextStack.addLast(listOf(item))
+          thisStack.addLast(item)
+          totalStack.addLast(total)
+          total = visit(aggregator)
+          totalStack.removeLast()
+          thisStack.removeLast()
+          contextStack.removeLast()
+        }
+        total
+      }
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
@@ -440,6 +460,10 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     return listOf(thisStack.last())
   }
 
+  override fun visitTotalInvocation(ctx: fhirpathParser.TotalInvocationContext): Collection<Any> {
+    return totalStack.last()
+  }
+
   // typeSpecifier
 
   override fun visitTypeSpecifier(ctx: fhirpathParser.TypeSpecifierContext): Collection<Any> {
@@ -454,9 +478,9 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
   }
 }
 
-/** Returns a new [Quantity] object with the numeric value negated. */
-private fun Quantity.negate(): Quantity =
-  toBuilder().apply { value?.apply { value = value?.negate() } }.build()
+/** Returns a new [FhirPathQuantity] object with the numeric value negated. */
+private fun FhirPathQuantity.negate(): FhirPathQuantity =
+  FhirPathQuantity(value = value?.negate(), code = code)
 
 /** See [specification](https://hl7.org/fhirpath/#string). */
 private fun unescapeFhirPathString(string: String) =

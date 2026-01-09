@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,13 @@ fun evaluateFhirPath(expression: String, resource: Resource?): Collection<Any> {
   }
 
   val evaluator = FhirPathEvaluator(initialContext = resource)
-  val result = evaluator.visit(parsedExpression)
+
+  // Convert the items in the result collection from FHIR types to FHIRPath types if it has not
+  // occurred in FHIRPath evaluation. Without this conversion, `Patient.name.given` would return
+  // results of type FHIR.string but `Patient.name.given.select(substring(0))` would return results
+  // of type FHIRPath.string. With this conversion, both expressions would return FHIRPath.string.
+  // This is necessary because we lazily convert FHIR types to FHIRPath types in the evaluation in
+  // order to preserve data elements such as `id` and `extension` in case they are needed.
+  val result = evaluator.visit(parsedExpression).map { it.toFhirPathType() }
   return result
 }
