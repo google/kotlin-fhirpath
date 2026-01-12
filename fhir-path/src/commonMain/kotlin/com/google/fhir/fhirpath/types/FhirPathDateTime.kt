@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.toInstant
 
-internal data class FhirPathDateTime(
+data class FhirPathDateTime(
   val year: Int,
   val month: Int? = null,
   val day: Int? = null,
@@ -34,7 +34,6 @@ internal data class FhirPathDateTime(
   val second: Double? = null,
   val utcOffset: UtcOffset? = null,
 ) {
-
   enum class Precision {
     YEAR,
     MONTH,

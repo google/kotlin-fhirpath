@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 
 package com.google.fhir.fhirpath
 
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.ucum.BaseUnit
 import com.google.fhir.fhirpath.ucum.Prefix
 import com.google.fhir.fhirpath.ucum.Unit
-import com.google.fhir.model.r4.Code
-import com.google.fhir.model.r4.Decimal
-import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.pow
 
-fun Quantity.toEqualCanonicalized() =
+internal fun FhirPathQuantity.toEqualCanonicalized() =
   toEqualUcumDefiniteDuration().stripUcumPrefix().toCanonicalizedUcumUnit()
 
-fun Quantity.toEquivalentCanonicalized() =
+internal fun FhirPathQuantity.toEquivalentCanonicalized() =
   toEquivalentUcumDefiniteDuration().stripUcumPrefix().toCanonicalizedUcumUnit()
 
 /**
@@ -40,8 +38,8 @@ fun Quantity.toEquivalentCanonicalized() =
  * N.B. The equality relationship is maintained for up to `weeks` following discussions with Bryn
  * Rhodes. This change has not yet been made in the latest version of the specification.
  */
-private fun Quantity.toEqualUcumDefiniteDuration(): Quantity {
-  val calendarDurationCode = code?.value ?: return this
+private fun FhirPathQuantity.toEqualUcumDefiniteDuration(): FhirPathQuantity {
+  val calendarDurationCode = code ?: return this
   val ucumDefinitionDurationCode =
     when (calendarDurationCode) {
       "week",
@@ -58,7 +56,7 @@ private fun Quantity.toEqualUcumDefiniteDuration(): Quantity {
       "milliseconds" -> "'ms'"
       else -> return this
     }
-  return Quantity(value = value, code = Code(value = ucumDefinitionDurationCode))
+  return FhirPathQuantity(value = value, code = ucumDefinitionDurationCode)
 }
 
 /**
@@ -67,8 +65,8 @@ private fun Quantity.toEqualUcumDefiniteDuration(): Quantity {
  *
  * See [specification](https://hl7.org/fhirpath/N1/#time-valued-quantities).
  */
-private fun Quantity.toEquivalentUcumDefiniteDuration(): Quantity {
-  val calendarDurationCode = code?.value ?: return this
+private fun FhirPathQuantity.toEquivalentUcumDefiniteDuration(): FhirPathQuantity {
+  val calendarDurationCode = code ?: return this
   val ucumDefinitionDurationCode =
     when (calendarDurationCode) {
       "year",
@@ -89,7 +87,7 @@ private fun Quantity.toEquivalentUcumDefiniteDuration(): Quantity {
       "milliseconds" -> "'ms'"
       else -> return this
     }
-  return Quantity(value = value, code = Code(value = ucumDefinitionDurationCode))
+  return FhirPathQuantity(value = value, code = ucumDefinitionDurationCode)
 }
 
 /**
@@ -98,16 +96,16 @@ private fun Quantity.toEquivalentUcumDefiniteDuration(): Quantity {
  * For example:
  * - 1.0 'kg' -> 1000.0 'g'
  */
-private fun Quantity.stripUcumPrefix(): Quantity {
+private fun FhirPathQuantity.stripUcumPrefix(): FhirPathQuantity {
   // TODO: Handle more complex UCUM strings
-  val code = code?.value?.stripSingleQuotes() ?: return this
+  val code = code?.stripSingleQuotes() ?: return this
   for (prefix in Prefix.entries) {
     if (!code.startsWith(prefix.code)) continue
     val codeWithoutPrefix = code.removePrefix(prefix.code)
     if (codeWithoutPrefix in (BaseUnit.entries.map { it.code } + Unit.entries.map { it.code })) {
-      return Quantity(
-        value = Decimal(value = value!!.value!! * 10.0.pow(prefix.power).toBigDecimal()),
-        code = Code(value = "'$codeWithoutPrefix'"),
+      return FhirPathQuantity(
+        value = value!! * 10.0.pow(prefix.power).toBigDecimal(),
+        code = "'$codeWithoutPrefix'",
       )
     }
   }
@@ -125,20 +123,17 @@ private fun Quantity.stripUcumPrefix(): Quantity {
  * - 1.0 'kg' -> 1000.0 'g1'
  * - 1.0 'g' -> 1.0 'g1' (to be comparable to kg and other units derived from grams)
  */
-private fun Quantity.toCanonicalizedUcumUnit(): Quantity {
-  val unitCode = code?.value?.stripSingleQuotes() ?: return this
+private fun FhirPathQuantity.toCanonicalizedUcumUnit(): FhirPathQuantity {
+  val unitCode = code?.stripSingleQuotes() ?: return this
 
   // Process base units
   BaseUnit.fromString(unitCode)?.let {
-    return Quantity(value = Decimal(value = value!!.value!!), code = Code(value = "'${it.code}1'"))
+    return FhirPathQuantity(value = value!!, code = "'${it.code}1'")
   }
 
   // Process derived units
   Unit.fromString(unitCode)?.let {
-    return Quantity(
-      value = Decimal(value = value!!.value!! * it.scalar.toBigDecimal()),
-      code = Code(value = "'${it.base}'"),
-    )
+    return FhirPathQuantity(value = value!! * it.scalar.toBigDecimal(), code = "'${it.base}'")
   }
 
   return this

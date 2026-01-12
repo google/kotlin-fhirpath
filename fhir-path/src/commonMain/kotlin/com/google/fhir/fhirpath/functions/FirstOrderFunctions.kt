@@ -121,6 +121,8 @@ internal fun Collection<Any>.invoke(
 
     // Tree navigation
     // https://hl7.org/fhirpath/N1/#tree-navigation
+    "children" -> this.children()
+    "descendants" -> this.descendants()
 
     // Utility functions
     // https://hl7.org/fhirpath/N1/#utility-functions

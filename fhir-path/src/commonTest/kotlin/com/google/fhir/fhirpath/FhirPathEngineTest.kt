@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package com.google.fhir.fhirpath
 
-import com.google.fhir.model.r4.Date
-import com.google.fhir.model.r4.Enumeration
+import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.model.r4.FhirR4Json
 import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -41,12 +40,10 @@ private val jsonR4 = FhirR4Json()
  */
 val skippedTestGroupToReasonMap =
   mapOf(
-    "testAggregate" to "Unimplemented",
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
     "testTrace" to "Unimplemented",
     "testSort" to "Function `sort` is not defined in the specification",
-    "testCombine()" to "Unimplemented",
     "testVariables" to "Unimplemented",
     "testExtension" to "Unimplemented",
     "testType" to "Unimplemented",
@@ -55,7 +52,6 @@ val skippedTestGroupToReasonMap =
     "HighBoundary" to "Unimplemented",
     "Comparable" to "Unimplemented",
     "Precision" to "Unimplemented",
-    "period" to "Unimplemented",
     "testInheritance" to "Unimplemented",
   )
 
@@ -79,41 +75,40 @@ val skippedTestCaseToReasonMap =
     "testQuantity4" to "https://github.com/FHIR/fhir-test-cases/pull/243",
     "testSubSetOf3" to
       "The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of \"\$this\" is unclear (https://jira.hl7.org/browse/FHIR-44601)",
-    "testDistinct2" to "descendants() is unimplemented",
-    "testDistinct3" to "descendants() is unimplemented",
-    "testDistinct5" to "descendants() is unimplemented",
-    "testDistinct6" to "descendants() is unimplemented",
     "testIif11" to
       "https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/scope.20of.20this/with/531507415; https://chat.fhir.org/#narrow/stream/179266-fhirpath/topic/context.20of.20the.20.60iif.20.60; https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/receiver.20of.20iif/with/558282370",
     "testNow1" to "As `testDateTimeGreaterThanDate1`",
-    "testPlusDate1" to "TBD",
-    "testPlusDate2" to "TBD",
-    "testPlusDate3" to "TBD",
-    "testPlusDate4" to "TBD",
-    "testPlusDate5" to "TBD",
-    "testPlusDate6" to "TBD",
-    "testPlusDate7" to "TBD",
-    "testPlusDate8" to "TBD",
-    "testPlusDate9" to "TBD",
-    "testPlusDate10" to "TBD",
-    "testPlusDate11" to "TBD",
-    "testPlusDate12" to "TBD",
-    "testPlusDate13" to "TBD",
-    "testPlusDate14" to "TBD",
-    "testPlusDate15" to "TBD",
-    "testPlusDate16" to "TBD",
-    "testPlusDate17" to "TBD",
-    "testPlusDate18" to "TBD",
-    "testPlusDate19" to "TBD",
-    "testPlusDate20" to "TBD",
-    "testPlusDate21" to "TBD",
-    "testPlusDate22" to "TBD",
-    "testMinus5" to "TBD",
-    "testAbs3" to "TBD",
-    "testPrecedence3" to "TBD",
-    "testPrecedence4" to "TBD",
-    "testPrecedence6" to "TBD",
+    "testPlusDate13" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+    "testPlusDate15" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+    "testPlusDate18" to
+      "To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.",
+    "testPlusDate19" to
+      "To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.",
+    "testPlusDate20" to
+      "To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.",
+    "testPlusDate21" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+    "testPlusDate22" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+    "testMinus5" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
+    "testPrecedence3" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251",
+    "testPrecedence4" to
+      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251",
+    "testDollarOrderNotAllowed" to
+      "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
+    "testSimpleFail" to "Strict mode is not implemented yet",
+    "testSimpleWithWrongContext" to "Strict mode is not implemented yet",
+    "testPolymorphismB" to "Strict mode is not implemented yet",
+    "testPolymorphicsB" to "Allow invalid test where it's not strict mode but expects output",
     "testIndex" to "TBD",
+    "testPeriodInvariantOld" to "hasValue() is not implemented.",
+    "testPeriodInvariantNew" to "lowBoundary() and lowBoundary() are not implemented.",
+    "testCombine2" to "FHIR String and Kotlin String comparison issue in exclude()",
+    "testCombine3" to "As above",
     "testContainedId" to "TBD",
   )
 
@@ -168,8 +163,9 @@ private fun assertEquals(expected: List<Output>, actual: Collection<Any>) {
 
 private fun assertEquals(expected: Output, actual: Any) {
   when (expected.type) {
-    "date" -> assertEquals(expected.value, "@${(actual as Date).value.toString()}")
-    "code" -> assertEquals(expected.value, (actual as Enumeration<*>).value.toString())
+    "date" -> assertEquals(expected.value, "@$actual")
+    "dateTime" -> assertEquals(FhirPathDateTime.fromString(expected.value.trimStart('@')), actual)
+    "code" -> assertEquals(expected.value, actual)
     "string" -> {
       when (actual) {
         is String -> {
