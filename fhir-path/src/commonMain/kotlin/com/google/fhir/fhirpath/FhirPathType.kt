@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package com.google.fhir.fhirpath
 
 import com.google.fhir.fhirpath.ext.getFhirType
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
-import com.google.fhir.model.r4.FhirDate
-import com.google.fhir.model.r4.Quantity
 import com.google.fhir.model.r4.Resource
 import com.google.fhir.model.r4.terminologies.ResourceType
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -58,21 +58,21 @@ sealed interface FhirPathType {
         }
       }
 
-      // Unqualified type names are resolved as FHIRPath system types first and then FHIR types.
-      SystemType.fromString(name)?.let {
-        return it
-      }
+      // Unqualified type names are resolved as FHIR types first and then FHIRPath system types, as
+      // specified in https://hl7.org/fhirpath/#models.
       FhirPrimitiveType.fromString(name)?.let {
         return it
       }
       FhirComplexType.fromString(name)?.let {
         return it
       }
-      return try {
-        FhirResourceType(ResourceType.fromCode(name))
-      } catch (_: Exception) {
-        error("Unknown type $string")
+      try {
+        return FhirResourceType(ResourceType.fromCode(name))
+      } catch (_: Exception) {}
+      SystemType.fromString(name)?.let {
+        return it
       }
+      error("Unknown type $string")
     }
 
     fun fromObject(value: Any): FhirPathType? {
@@ -139,10 +139,10 @@ enum class SystemType(override val typeName: String) : FhirPathType {
         is Int -> INTEGER
         is Long -> LONG
         is BigDecimal -> DECIMAL
-        is FhirDate -> DATE
+        is FhirPathDate -> DATE
         is FhirPathDateTime -> DATETIME
         is FhirPathTime -> TIME
-        is Quantity -> QUANTITY
+        is FhirPathQuantity -> QUANTITY
         else -> null
       }
     }

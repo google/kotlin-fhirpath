@@ -114,8 +114,8 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
     }
     leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        val leftUnits = parseUcumUnit(first.code!!)
-        val rightUnits = parseUcumUnit(second.code!!)
+        val leftUnits = parseUcumUnit(first.unit!!)
+        val rightUnits = parseUcumUnit(second.unit!!)
         if (leftUnits != rightUnits) return null
         return first.value == second.value
       }
@@ -164,7 +164,7 @@ private fun itemsEquivalent(left: Any, right: Any): Boolean {
     }
     leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
       with(leftFhirPath.toEquivalentCanonicalized() to rightFhirPath.toEquivalentCanonicalized()) {
-        return first.value == second.value && first.code!! == second.code!!
+        return first.value == second.value && first.unit!! == second.unit!!
       }
     }
     // TODO: Handle implicit conversion from Date to DateTime

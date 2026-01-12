@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.google.fhir.fhirpath.functions
 
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.FhirDate
@@ -67,10 +68,10 @@ internal fun timeOfDay(now: Instant): Collection<Any> {
 
 /** See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#today--date). */
 @OptIn(ExperimentalTime::class)
-internal fun today(now: Instant): Collection<FhirDate> {
+internal fun today(now: Instant): Collection<FhirPathDate> {
   val systemTimeZone = TimeZone.currentSystemDefault()
   val localDateTime = now.toLocalDateTime(systemTimeZone)
-  return listOf(FhirDate.Date(localDateTime.date))
+  return listOf(FhirPathDate.fromString(localDateTime.date.toString()))
 }
 
 /**

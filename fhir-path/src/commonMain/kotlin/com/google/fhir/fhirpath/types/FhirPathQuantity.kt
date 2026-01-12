@@ -18,4 +18,4 @@ package com.google.fhir.fhirpath.types
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
-data class FhirPathQuantity(val value: BigDecimal? = null, val code: String? = null)
+data class FhirPathQuantity(val value: BigDecimal? = null, val unit: String? = null)

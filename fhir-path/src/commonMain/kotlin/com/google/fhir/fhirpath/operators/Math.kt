@@ -18,12 +18,12 @@ package com.google.fhir.fhirpath.operators
 
 import com.google.fhir.fhirpath.toEqualCanonicalized
 import com.google.fhir.fhirpath.toFhirPathType
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.Code
 import com.google.fhir.model.r4.Decimal
-import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Quantity
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
@@ -87,8 +87,8 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
 
       val resultValue = leftCanonical.value!! * rightCanonical.value!!
 
-      val leftUnits = parseUcumUnit(leftCanonical.code ?: "")
-      val rightUnits = parseUcumUnit(rightCanonical.code ?: "")
+      val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
+      val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
       val combinedUnits = leftUnits * rightUnits
       val resultUnitString = formatUcumUnit(combinedUnits)
 
@@ -111,8 +111,8 @@ internal fun division(left: Collection<Any>, right: Collection<Any>): Collection
 
     val resultValue = leftCanonical.value!!.divide(rightCanonical.value, DECIMAL_MODE)
 
-    val leftUnits = parseUcumUnit(leftCanonical.code ?: "")
-    val rightUnits = parseUcumUnit(rightCanonical.code ?: "")
+    val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
+    val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
     val combinedUnits = leftUnits / rightUnits
     val resultUnitString = formatUcumUnit(combinedUnits)
 
@@ -158,7 +158,7 @@ internal fun addition(left: Collection<Any>, right: Collection<Any>): Collection
     leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem + rightItem)
     leftItem is String && rightItem is String -> listOf(leftItem + rightItem)
     leftItem is Quantity && rightItem is FhirPathQuantity -> TODO("Implement adding two quantities")
-    leftItem is FhirDate && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
+    leftItem is FhirPathDate && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
     leftItem is FhirPathDateTime && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
     leftItem is FhirPathTime && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
     else -> error("Cannot add $leftItem and $rightItem")
@@ -181,7 +181,7 @@ internal fun subtraction(left: Collection<Any>, right: Collection<Any>): Collect
     leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem - rightItem)
     leftItem is Quantity && rightItem is FhirPathQuantity ->
       TODO("Implement subtracting two quantities")
-    leftItem is FhirDate && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)
+    leftItem is FhirPathDate && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)
     leftItem is FhirPathDateTime && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)
     leftItem is FhirPathTime && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)
     else -> error("Cannot subtract $rightItem from $leftItem")
@@ -254,7 +254,7 @@ internal fun concat(left: Collection<Any>, right: Collection<Any>): Collection<A
 }
 
 private operator fun FhirPathQuantity.times(multiplier: BigDecimal): FhirPathQuantity {
-  return FhirPathQuantity(value = this.value!! * multiplier, code = this.code)
+  return FhirPathQuantity(value = this.value!! * multiplier, unit = this.unit)
 }
 
 /**
@@ -414,26 +414,30 @@ private fun formatUcumUnit(units: Map<String, Int>): String {
   return "'$unitString'"
 }
 
-private operator fun FhirDate.plus(duration: FhirPathQuantity): FhirDate {
-  check(duration.code!! in DATE_ARITHMETIC_UNITS)
-  return when (this) {
-    is FhirDate.Year -> {
-      FhirDate.Year(value + convertToYear(duration))
+private operator fun FhirPathDate.plus(duration: FhirPathQuantity): FhirPathDate {
+  check(duration.unit!! in DATE_ARITHMETIC_UNITS)
+  return when (precision) {
+    FhirPathDate.Precision.YEAR -> {
+      FhirPathDate(year + convertToYear(duration))
     }
-    is FhirDate.YearMonth -> {
+    FhirPathDate.Precision.MONTH -> {
       val (increment, unit) = convertToMonth(duration)
-      FhirDate.YearMonth(value.plus(increment, unit))
+      YearMonth(year = year, month = month!!).plus(increment, unit).let {
+        FhirPathDate(year = it.year, month = it.month.number)
+      }
     }
-    is FhirDate.Date -> {
+    FhirPathDate.Precision.DAY -> {
       val (increment, unit) = convertToDay(duration)
-      FhirDate.Date(date.plus(increment, unit))
+      LocalDate(year = year, month = month!!, day = day!!).plus(increment, unit).let {
+        FhirPathDate(year = it.year, month = it.month.number, day = it.day)
+      }
     }
   }
 }
 
 @OptIn(ExperimentalTime::class)
 private operator fun FhirPathDateTime.plus(duration: FhirPathQuantity): FhirPathDateTime {
-  check(duration.code!! in DATETIME_ARITHMETIC_UNITS)
+  check(duration.unit!! in DATETIME_ARITHMETIC_UNITS)
   return when (precision) {
     FhirPathDateTime.Precision.YEAR ->
       FhirPathDateTime(year = year + convertToYear(duration), utcOffset = utcOffset)
@@ -518,7 +522,7 @@ private operator fun FhirPathDateTime.plus(duration: FhirPathQuantity): FhirPath
 
 @OptIn(ExperimentalTime::class)
 private operator fun FhirPathTime.plus(duration: FhirPathQuantity): FhirPathTime {
-  check(duration.code!! in TIME_ARITHMETIC_UNITS)
+  check(duration.unit!! in TIME_ARITHMETIC_UNITS)
   return when (precision) {
     FhirPathTime.Precision.HOUR ->
       LocalDateTime(
@@ -561,14 +565,14 @@ private operator fun FhirPathTime.plus(duration: FhirPathQuantity): FhirPathTime
   }
 }
 
-private operator fun FhirDate.minus(duration: FhirPathQuantity): FhirDate =
-  this + duration.let { FhirPathQuantity(value = -it.value!!, code = it.code) }
+private operator fun FhirPathDate.minus(duration: FhirPathQuantity): FhirPathDate =
+  this + duration.let { FhirPathQuantity(value = -it.value!!, unit = it.unit) }
 
 private operator fun FhirPathDateTime.minus(duration: FhirPathQuantity): FhirPathDateTime =
-  this + duration.let { FhirPathQuantity(value = -it.value!!, code = it.code) }
+  this + duration.let { FhirPathQuantity(value = -it.value!!, unit = it.unit) }
 
 private operator fun FhirPathTime.minus(duration: FhirPathQuantity): FhirPathTime =
-  this + duration.let { FhirPathQuantity(value = -it.value!!, code = it.code) }
+  this + duration.let { FhirPathQuantity(value = -it.value!!, unit = it.unit) }
 
 /**
  * Returns the number of years in the calendar duration.
@@ -576,7 +580,7 @@ private operator fun FhirPathTime.minus(duration: FhirPathQuantity): FhirPathTim
  * Used for date/time arithmetic with precision of year.
  */
 private fun convertToYear(quantity: FhirPathQuantity): Int {
-  val unit = quantity.code!!
+  val unit = quantity.unit!!
   // TODO: Clarify how to handle decimal values e.g. 1.5 years
   val intValue = quantity.value!!.intValue(true)
   return when (unit) {
@@ -606,7 +610,7 @@ private fun convertToYear(quantity: FhirPathQuantity): Int {
  * Used for date/time arithmetic with precision of month.
  */
 private fun convertToMonth(quantity: FhirPathQuantity): Pair<Int, DateTimeUnit.MonthBased> {
-  val unit = quantity.code!!
+  val unit = quantity.unit!!
   // TODO: Clarify how to handle decimal values e.g. 1.5 years
   val intValue = quantity.value!!.intValue(true)
   return when (unit) {
@@ -636,7 +640,7 @@ private fun convertToMonth(quantity: FhirPathQuantity): Pair<Int, DateTimeUnit.M
  * Used for date/time arithmetic with precision of day.
  */
 private fun convertToDay(quantity: FhirPathQuantity): Pair<Int, DateTimeUnit.DateBased> {
-  val unit = quantity.code!!
+  val unit = quantity.unit!!
   // TODO: Clarify how to handle decimal values e.g. 1.5 years
   val intValue = quantity.value!!.intValue(exactRequired = false)
   return when (unit) {
@@ -666,7 +670,7 @@ private fun convertToDay(quantity: FhirPathQuantity): Pair<Int, DateTimeUnit.Dat
  * Used for date/time arithmetic with precision of hour.
  */
 private fun convertToHour(quantity: FhirPathQuantity): DateTimePeriod {
-  val unit = quantity.code!!
+  val unit = quantity.unit!!
   // TODO: Clarify how to handle decimal values e.g. 1.5 years
   val intValue = quantity.value!!.intValue(exactRequired = false)
   return when (unit) {
@@ -696,7 +700,7 @@ private fun convertToHour(quantity: FhirPathQuantity): DateTimePeriod {
  * Used for date/time arithmetic with precision of minute.
  */
 private fun convertToMinute(quantity: FhirPathQuantity): DateTimePeriod {
-  val unit = quantity.code!!
+  val unit = quantity.unit!!
   // TODO: Clarify how to handle decimal values e.g. 1.5 years
   val intValue = quantity.value!!.intValue(exactRequired = false)
   return when (unit) {
@@ -727,7 +731,7 @@ private fun convertToMinute(quantity: FhirPathQuantity): DateTimePeriod {
  * Used for date/time arithmetic with precision of second.
  */
 private fun convertToSecond(quantity: FhirPathQuantity): DateTimePeriod {
-  val unit = quantity.code!!
+  val unit = quantity.unit!!
   // TODO: Clarify how to handle decimal values e.g. 1.5 years
   val intValue = quantity.value!!.intValue(exactRequired = false)
   return when (unit) {
