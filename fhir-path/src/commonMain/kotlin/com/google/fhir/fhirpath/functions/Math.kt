@@ -192,4 +192,4 @@ internal fun Collection<Any>.truncate(): Collection<Any> {
 
 /** Returns a new [FhirPathQuantity] that is the absolute value of this quantity. */
 private fun FhirPathQuantity.abs(): FhirPathQuantity =
-  FhirPathQuantity(value = value!!.abs(), code = code)
+  FhirPathQuantity(value = value!!.abs(), unit = unit)

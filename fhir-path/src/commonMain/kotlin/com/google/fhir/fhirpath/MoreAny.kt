@@ -22,16 +22,15 @@ import com.google.fhir.fhirpath.ext.hasProperty
 import com.google.fhir.fhirpath.ext.hasPropertyInChoiceValue
 import com.google.fhir.fhirpath.ext.unwrapChoiceValue
 import com.google.fhir.fhirpath.functions.DEFAULT_UNIT
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.BackboneElement
 import com.google.fhir.model.r4.Element
-import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
-import kotlinx.datetime.number
 
 /**
  * Set to true for strict mode (throws on invalid property access). Set to false for lenient mode
@@ -84,7 +83,10 @@ val fhirTypeToFhirPathType =
     FhirPrimitiveType.Decimal to
       (SystemType.DECIMAL to { it -> (it as com.google.fhir.model.r4.Decimal).value!! }),
     FhirPrimitiveType.Date to
-      (SystemType.DATE to { it -> (it as com.google.fhir.model.r4.Date).value!! }),
+      (SystemType.DATE to
+        { it ->
+          FhirPathDate.fromFhirDate((it as com.google.fhir.model.r4.Date).value!!)
+        }),
     FhirPrimitiveType.DateTime to
       (SystemType.DATETIME to
         { it ->
@@ -102,7 +104,7 @@ val fhirTypeToFhirPathType =
         {
           (it as com.google.fhir.model.r4.Quantity).let {
             val pair = (it.value!!.value!! to it.code!!.value!!)
-            FhirPathQuantity(value = pair.first, code = pair.second)
+            FhirPathQuantity(value = pair.first, unit = pair.second)
           }
         }),
   )
@@ -120,29 +122,19 @@ val fhirPathTypeToFhirPathType =
     SystemType.INTEGER to
       SystemType.QUANTITY to
       { it ->
-        FhirPathQuantity(value = it.toString().toBigDecimal(), code = DEFAULT_UNIT)
+        FhirPathQuantity(value = it.toString().toBigDecimal(), unit = DEFAULT_UNIT)
       },
     SystemType.LONG to SystemType.DECIMAL to { it -> (it as Long).toBigDecimal() },
     SystemType.DECIMAL to
       SystemType.QUANTITY to
       { it ->
-        FhirPathQuantity(value = it as BigDecimal, code = DEFAULT_UNIT)
+        FhirPathQuantity(value = it as BigDecimal, unit = DEFAULT_UNIT)
       },
     SystemType.DATE to
       SystemType.DATETIME to
       { it ->
-        val date = it as FhirDate
-        when (date) {
-          is FhirDate.Year -> FhirPathDateTime(year = date.value)
-          is FhirDate.YearMonth ->
-            FhirPathDateTime(year = date.value.year, month = date.value.month.number)
-          is FhirDate.Date ->
-            FhirPathDateTime(
-              year = date.date.year,
-              month = date.date.monthNumber,
-              day = date.date.dayOfMonth,
-            )
-        }
+        val date = it as FhirPathDate
+        FhirPathDateTime(year = date.year, month = date.month, day = date.day)
       },
   )
 
@@ -193,6 +185,7 @@ internal fun Any.accessMember(fieldName: String): Any? {
  * Kotlin.String (the internal representation of FHIRPath system type System.String).
  */
 internal fun Any.toFhirPathType(): Any {
+  // TODO: convert types such as FhirDate to FhirPathDate
   FhirType.fromObject(this)?.let { fhirType ->
     fhirTypeToFhirPathType[fhirType]?.let { (_, transform) ->
       return@toFhirPathType transform(this as Element)

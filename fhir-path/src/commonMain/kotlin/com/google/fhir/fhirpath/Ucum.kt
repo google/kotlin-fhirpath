@@ -39,7 +39,7 @@ internal fun FhirPathQuantity.toEquivalentCanonicalized() =
  * Rhodes. This change has not yet been made in the latest version of the specification.
  */
 private fun FhirPathQuantity.toEqualUcumDefiniteDuration(): FhirPathQuantity {
-  val calendarDurationCode = code ?: return this
+  val calendarDurationCode = unit ?: return this
   val ucumDefinitionDurationCode =
     when (calendarDurationCode) {
       "week",
@@ -56,7 +56,7 @@ private fun FhirPathQuantity.toEqualUcumDefiniteDuration(): FhirPathQuantity {
       "milliseconds" -> "'ms'"
       else -> return this
     }
-  return FhirPathQuantity(value = value, code = ucumDefinitionDurationCode)
+  return FhirPathQuantity(value = value, unit = ucumDefinitionDurationCode)
 }
 
 /**
@@ -66,7 +66,7 @@ private fun FhirPathQuantity.toEqualUcumDefiniteDuration(): FhirPathQuantity {
  * See [specification](https://hl7.org/fhirpath/N1/#time-valued-quantities).
  */
 private fun FhirPathQuantity.toEquivalentUcumDefiniteDuration(): FhirPathQuantity {
-  val calendarDurationCode = code ?: return this
+  val calendarDurationCode = unit ?: return this
   val ucumDefinitionDurationCode =
     when (calendarDurationCode) {
       "year",
@@ -87,7 +87,7 @@ private fun FhirPathQuantity.toEquivalentUcumDefiniteDuration(): FhirPathQuantit
       "milliseconds" -> "'ms'"
       else -> return this
     }
-  return FhirPathQuantity(value = value, code = ucumDefinitionDurationCode)
+  return FhirPathQuantity(value = value, unit = ucumDefinitionDurationCode)
 }
 
 /**
@@ -98,14 +98,14 @@ private fun FhirPathQuantity.toEquivalentUcumDefiniteDuration(): FhirPathQuantit
  */
 private fun FhirPathQuantity.stripUcumPrefix(): FhirPathQuantity {
   // TODO: Handle more complex UCUM strings
-  val code = code?.stripSingleQuotes() ?: return this
+  val code = unit?.stripSingleQuotes() ?: return this
   for (prefix in Prefix.entries) {
     if (!code.startsWith(prefix.code)) continue
     val codeWithoutPrefix = code.removePrefix(prefix.code)
     if (codeWithoutPrefix in (BaseUnit.entries.map { it.code } + Unit.entries.map { it.code })) {
       return FhirPathQuantity(
         value = value!! * 10.0.pow(prefix.power).toBigDecimal(),
-        code = "'$codeWithoutPrefix'",
+        unit = "'$codeWithoutPrefix'",
       )
     }
   }
@@ -124,16 +124,16 @@ private fun FhirPathQuantity.stripUcumPrefix(): FhirPathQuantity {
  * - 1.0 'g' -> 1.0 'g1' (to be comparable to kg and other units derived from grams)
  */
 private fun FhirPathQuantity.toCanonicalizedUcumUnit(): FhirPathQuantity {
-  val unitCode = code?.stripSingleQuotes() ?: return this
+  val unitCode = unit?.stripSingleQuotes() ?: return this
 
   // Process base units
   BaseUnit.fromString(unitCode)?.let {
-    return FhirPathQuantity(value = value!!, code = "'${it.code}1'")
+    return FhirPathQuantity(value = value!!, unit = "'${it.code}1'")
   }
 
   // Process derived units
   Unit.fromString(unitCode)?.let {
-    return FhirPathQuantity(value = value!! * it.scalar.toBigDecimal(), code = "'${it.base}'")
+    return FhirPathQuantity(value = value!! * it.scalar.toBigDecimal(), unit = "'${it.base}'")
   }
 
   return this

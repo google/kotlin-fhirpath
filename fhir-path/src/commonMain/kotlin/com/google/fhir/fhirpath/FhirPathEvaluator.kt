@@ -36,12 +36,12 @@ import com.google.fhir.fhirpath.operators.subtraction
 import com.google.fhir.fhirpath.operators.xor
 import com.google.fhir.fhirpath.parsers.fhirpathBaseVisitor
 import com.google.fhir.fhirpath.parsers.fhirpathParser
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.BackboneElement
 import com.google.fhir.model.r4.Element
-import com.google.fhir.model.r4.FhirDate
 import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
@@ -285,7 +285,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
 
   override fun visitDateLiteral(ctx: fhirpathParser.DateLiteralContext): Collection<Any> {
     val dateString = ctx.text.removePrefix("@")
-    return listOf(FhirDate.fromString(dateString)!!)
+    return listOf(FhirPathDate.fromString(dateString))
   }
 
   override fun visitDateTimeLiteral(ctx: fhirpathParser.DateTimeLiteralContext): Collection<Any> {
@@ -302,7 +302,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     val number = ctx.quantity().NUMBER().text.toBigDecimal()
     val unit = ctx.quantity().unit()?.text!!
     val pair = (number to unit)
-    return listOf(FhirPathQuantity(value = pair.first, code = pair.second))
+    return listOf(FhirPathQuantity(value = pair.first, unit = pair.second))
   }
 
   // invocation
@@ -517,7 +517,7 @@ private fun Any.hasChildren(): Boolean =
 
 /** Returns a new [FhirPathQuantity] object with the numeric value negated. */
 private fun FhirPathQuantity.negate(): FhirPathQuantity =
-  FhirPathQuantity(value = value?.negate(), code = code)
+  FhirPathQuantity(value = value?.negate(), unit = unit)
 
 /** See [specification](https://hl7.org/fhirpath/#string). */
 private fun unescapeFhirPathString(string: String) =

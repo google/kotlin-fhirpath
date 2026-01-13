@@ -84,19 +84,15 @@ The following table lists the chosen internal types for the FHIRPath primitive t
 | Integer                                                                     | kotlin.Int                                                                    |
 | Long                                                                        | kotlin.Long                                                                   |
 | Decimal                                                                     | com.ionspin.kotlin.bignum.decimal.BigDecimal                                  |
-| Date                                                                        | FhirDate(*)                                                                   |
-| DateTime                                                                    | FhirPathDateTime(**)                                                          |
-| Time                                                                        | FhirPathTime(**)                                                              |
-| Quantity                                                                    | FhirPathQuantity(**)                                                          |
+| Date                                                                        | FhirPathDate                                                                  |
+| DateTime                                                                    | FhirPathDateTime                                                              |
+| Time                                                                        | FhirPathTime                                                                  |
+| Quantity                                                                    | FhirPathQuantity                                                              |
 
-(*): Classes defined in [Kotlin FHIR](https://github.com/google/kotlin-fhir)
-(**): Classes defined in this project
-
-Classes from the [Kotlin FHIR](https://github.com/google/kotlin-fhir) are used for more complex
-types that do not have direct representations in Kotlin. For DateTime and Time, the requirements in
-FHIRPath are more lenient than in the FHIR specification. As a result, custom classes need to be
-authored to handle cases where the minutes, seconds, or milliseconds are not present (allowed in
-FHIRPath but not allowed in FHIR).
+This project defines Date, DateTime, Time, and Quantity classes in order to implement the FHIRPath
+specification across different FHIR versions. In particular, DateTime and Time in FHIRPath may
+include partial time (e.g. missing minutes and seconds), which is not allowed in FHIR. Therefore,
+new implementations are needed.
 
 ### Timezone offset in date time values
 
