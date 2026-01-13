@@ -94,6 +94,8 @@ specification across different FHIR versions. In particular, DateTime and Time i
 include partial time (e.g. missing minutes and seconds), which is not allowed in FHIR. Therefore,
 new implementations are needed.
 
+**Note on type conversion**: FHIR primitive types (e.g., `com.google.fhir.model.r4.String`) are not immediately converted to Kotlin primitives when extracted from resources. This is because FHIR primitives can have extensions that users may need to access. Instead, conversion to Kotlin primitives happens at the last moment—when values need to be compared for equality or membership operations. The `toFhirPathType()` function in `MoreAny.kt` handles this conversion.
+
 ### Timezone offset in date time values
 
 This FHIRPath implementation adopts a strict, safety-first approach to date time comparisons,
@@ -202,8 +204,6 @@ passing. The failures are documented in the table below.
 | `testFHIRPathIsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
-| `testCombine2`                       | Implementation     |     |                                                        | FHIR String and Kotlin String comparison issue in `exclude()` function.                                                                                                 |
-| `testCombine3`                       | Implementation     |     |                                                        | As above.                                                                                                                                                               |
 
 The root cause column documents if the test failure is caused by issues with the implementation
 (this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
