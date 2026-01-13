@@ -39,7 +39,10 @@ import com.google.fhir.fhirpath.parsers.fhirpathParser
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
+import com.google.fhir.model.r4.BackboneElement
+import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.FhirDate
+import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
@@ -427,7 +430,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
       "repeat" -> {
         // See [specification](https://hl7.org/fhirpath/N1/#repeatexpression-collection).
         val expression = functionNode.paramList()!!.expression().single()
-        val seenPrimitives = mutableSetOf<Any>()
+        val seen = mutableSetOf<Any>()
         val queue = ArrayDeque(context)
         val results = mutableListOf<Any>()
 
@@ -441,19 +444,13 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
           thisStack.removeLast()
 
           for (child in children) {
-            val isPrimitive =
-              child is String ||
-                child is Boolean ||
-                child is Int ||
-                child is Long ||
-                child is BigDecimal
-            if (isPrimitive) {
-              // Deduplicate primitives to prevent infinite loops
-              if (seenPrimitives.add(child)) results.add(child)
-            } else {
-              // Non-primitives are always added and queued for further processing
+            if (child.hasChildren()) {
               results.add(child)
               queue.addLast(child)
+            } else {
+              if (seen.add(child)) {
+                results.add(child)
+              }
             }
           }
         }
@@ -513,6 +510,10 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     return listOf(identifierText.removeSurrounding("`"))
   }
 }
+
+/** Returns true if the object can have children. */
+private fun Any.hasChildren(): Boolean =
+  this is Resource || this is BackboneElement || this is Element
 
 /** Returns a new [FhirPathQuantity] object with the numeric value negated. */
 private fun FhirPathQuantity.negate(): FhirPathQuantity =
