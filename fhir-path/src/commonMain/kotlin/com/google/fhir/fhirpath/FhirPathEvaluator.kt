@@ -40,6 +40,9 @@ import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
+import com.google.fhir.model.r4.BackboneElement
+import com.google.fhir.model.r4.Element
+import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
@@ -424,6 +427,36 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
         }
         total
       }
+      "repeat" -> {
+        // See [specification](https://hl7.org/fhirpath/N1/#repeatexpression-collection).
+        val expression = functionNode.paramList()!!.expression().single()
+        val seen = mutableSetOf<Any>()
+        val queue = ArrayDeque(context)
+        val results = mutableListOf<Any>()
+
+        while (queue.isNotEmpty()) {
+          val item = queue.removeFirst()
+
+          thisStack.addLast(item)
+          contextStack.addLast(listOf(item))
+          val children = visit(expression)
+          contextStack.removeLast()
+          thisStack.removeLast()
+
+          for (child in children) {
+            if (child.hasChildren()) {
+              results.add(child)
+              queue.addLast(child)
+            } else {
+              if (seen.add(child)) {
+                results.add(child)
+              }
+            }
+          }
+        }
+
+        results
+      }
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
@@ -477,6 +510,10 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     return listOf(identifierText.removeSurrounding("`"))
   }
 }
+
+/** Returns true if the object can have children. */
+private fun Any.hasChildren(): Boolean =
+  this is Resource || this is BackboneElement || this is Element
 
 /** Returns a new [FhirPathQuantity] object with the numeric value negated. */
 private fun FhirPathQuantity.negate(): FhirPathQuantity =
