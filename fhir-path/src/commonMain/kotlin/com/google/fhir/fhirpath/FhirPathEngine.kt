@@ -29,10 +29,14 @@ import org.antlr.v4.kotlinruntime.Token
  *
  * @param expression The FHIRPath string to evaluate (e.g., "Patient.name.given").
  * @param resource The initial FHIR resource to run the expression against.
- * @return A com.google.fhir.fhirpath.codegen.collection of `Base` FHIR elements that result from
- *   the evaluation. Non-FHIR results (literals) are filtered out.
+ * @param variables Custom variables accessible via %name syntax in the expression.
+ * @return A collection of elements that result from the evaluation.
  */
-fun evaluateFhirPath(expression: String, resource: Resource?): Collection<Any> {
+fun evaluateFhirPath(
+  expression: String,
+  resource: Resource?,
+  variables: Map<String, Any?> = emptyMap(),
+): Collection<Any> {
   val lexer = fhirpathLexer(CharStreams.fromString(expression))
   val tokenStream = CommonTokenStream(lexer)
   val parser =
@@ -51,7 +55,7 @@ fun evaluateFhirPath(expression: String, resource: Resource?): Collection<Any> {
     )
   }
 
-  val evaluator = FhirPathEvaluator(initialContext = resource)
+  val evaluator = FhirPathEvaluator(initialContext = resource, variables = variables)
 
   // Convert the items in the result collection from FHIR types to FHIRPath types if it has not
   // occurred in FHIRPath evaluation. Without this conversion, `Patient.name.given` would return
