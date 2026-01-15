@@ -24,31 +24,28 @@ class CustomVariablesTest {
 
   @Test
   fun `should resolve custom variable`() {
-    val result = evaluateFhirPath(
-      expression = "%myString",
-      resource = null,
-      variables = mapOf("myString" to "hello")
-    )
+    val result =
+      evaluateFhirPath(
+        expression = "%myString",
+        resource = null,
+        variables = mapOf("myString" to "hello"),
+      )
     assertEquals(listOf("hello"), result.toList())
   }
 
   @Test
   fun `should resolve null variable as empty`() {
-    val result = evaluateFhirPath(
-      expression = "%nullVar",
-      resource = null,
-      variables = mapOf("nullVar" to null)
-    )
+    val result =
+      evaluateFhirPath(
+        expression = "%nullVar",
+        resource = null,
+        variables = mapOf("nullVar" to null),
+      )
     assertEquals(emptyList<Any>(), result.toList())
   }
 
   @Test
   fun `should throw for unknown variable`() {
-    assertFailsWith<Exception> {
-      evaluateFhirPath(
-        expression = "%unknownVar",
-        resource = null,
-      )
-    }
+    assertFailsWith<Exception> { evaluateFhirPath(expression = "%unknownVar", resource = null) }
   }
 }
