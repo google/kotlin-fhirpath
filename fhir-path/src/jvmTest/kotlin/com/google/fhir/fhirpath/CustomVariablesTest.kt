@@ -22,74 +22,159 @@ import org.junit.jupiter.api.Test
 
 class CustomVariablesTest {
 
+  // identifier path tests
+
   @Test
-  fun `should resolve camelCase variable`() {
+  fun `1 - identifier - camelCase`() {
     val result =
       evaluateFhirPath(
-        expression = "%myString",
+        expression = "%myVar",
         resource = null,
-        variables = mapOf("myString" to "hello"),
+        variables = mapOf("myVar" to "hello"),
       )
     assertEquals(listOf("hello"), result.toList())
   }
 
   @Test
-  fun `should resolve snake_case variable`() {
+  fun `2 - identifier - snake_case`() {
     val result =
       evaluateFhirPath(
-        expression = "%my_string",
+        expression = "%my_var",
         resource = null,
-        variables = mapOf("my_string" to "hello"),
+        variables = mapOf("my_var" to "hello"),
       )
     assertEquals(listOf("hello"), result.toList())
   }
 
   @Test
-  fun `should resolve lowercase variable`() {
+  fun `3 - identifier - mixed case with numbers`() {
     val result =
       evaluateFhirPath(
-        expression = "%mystring",
+        expression = "%MyVar123",
         resource = null,
-        variables = mapOf("mystring" to "hello"),
+        variables = mapOf("MyVar123" to "hello"),
       )
     assertEquals(listOf("hello"), result.toList())
   }
 
   @Test
-  fun `should fail for kebab-case without quotes`() {
+  fun `4 - identifier - underscore prefix`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%_private",
+        resource = null,
+        variables = mapOf("_private" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `5 - delimited identifier - kebab-case in backticks`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%`my-var`",
+        resource = null,
+        variables = mapOf("my-var" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `6 - delimited identifier - spaces in backticks`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%`has spaces`",
+        resource = null,
+        variables = mapOf("has spaces" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `7 - delimited identifier - number prefix in backticks`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%`123start`",
+        resource = null,
+        variables = mapOf("123start" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  // STRING path tests
+
+  @Test
+  fun `8 - string - kebab-case in single quotes`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%'my-var'",
+        resource = null,
+        variables = mapOf("my-var" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `9 - string - spaces in single quotes`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%'has spaces'",
+        resource = null,
+        variables = mapOf("has spaces" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `10 - string - number prefix in single quotes`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%'123start'",
+        resource = null,
+        variables = mapOf("123start" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `11 - string - special characters in single quotes`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%'any.thing!@#'",
+        resource = null,
+        variables = mapOf("any.thing!@#" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  // Invalid (parse errors)
+
+  @Test
+  fun `12 - invalid - kebab-case without quotes`() {
     assertFailsWith<Exception> {
       evaluateFhirPath(
-        expression = "%my-string",
+        expression = "%my-var",
         resource = null,
-        variables = mapOf("my-string" to "hello"),
+        variables = mapOf("my-var" to "hello"),
       )
     }
   }
 
   @Test
-  fun `should resolve kebab-case in single quotes`() {
-    val result =
+  fun `13 - invalid - number prefix without quotes`() {
+    assertFailsWith<Exception> {
       evaluateFhirPath(
-        expression = "%'my-string'",
+        expression = "%123var",
         resource = null,
-        variables = mapOf("my-string" to "hello"),
+        variables = mapOf("123var" to "hello"),
       )
-    assertEquals(listOf("hello"), result.toList())
+    }
   }
 
-  @Test
-  fun `should resolve kebab-case in backticks`() {
-    val result =
-      evaluateFhirPath(
-        expression = "%`my-string`",
-        resource = null,
-        variables = mapOf("my-string" to "hello"),
-      )
-    assertEquals(listOf("hello"), result.toList())
-  }
+  // Other tests
 
   @Test
-  fun `should resolve null variable as empty`() {
+  fun `14 - null variable returns empty`() {
     val result =
       evaluateFhirPath(
         expression = "%nullVar",
@@ -100,7 +185,7 @@ class CustomVariablesTest {
   }
 
   @Test
-  fun `should throw for unknown variable`() {
+  fun `15 - unknown variable throws error`() {
     assertFailsWith<Exception> { evaluateFhirPath(expression = "%unknownVar", resource = null) }
   }
 }
