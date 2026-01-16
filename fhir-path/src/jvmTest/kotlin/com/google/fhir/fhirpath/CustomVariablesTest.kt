@@ -23,12 +23,67 @@ import org.junit.jupiter.api.Test
 class CustomVariablesTest {
 
   @Test
-  fun `should resolve custom variable`() {
+  fun `should resolve camelCase variable`() {
     val result =
       evaluateFhirPath(
         expression = "%myString",
         resource = null,
         variables = mapOf("myString" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `should resolve snake_case variable`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%my_string",
+        resource = null,
+        variables = mapOf("my_string" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `should resolve lowercase variable`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%mystring",
+        resource = null,
+        variables = mapOf("mystring" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `should fail for kebab-case without quotes`() {
+    assertFailsWith<Exception> {
+      evaluateFhirPath(
+        expression = "%my-string",
+        resource = null,
+        variables = mapOf("my-string" to "hello"),
+      )
+    }
+  }
+
+  @Test
+  fun `should resolve kebab-case in single quotes`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%'my-string'",
+        resource = null,
+        variables = mapOf("my-string" to "hello"),
+      )
+    assertEquals(listOf("hello"), result.toList())
+  }
+
+  @Test
+  fun `should resolve kebab-case in backticks`() {
+    val result =
+      evaluateFhirPath(
+        expression = "%`my-string`",
+        resource = null,
+        variables = mapOf("my-string" to "hello"),
       )
     assertEquals(listOf("hello"), result.toList())
   }
