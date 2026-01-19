@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package com.google.fhir.fhirpath.functions
 
-import com.google.fhir.fhirpath.ext.getAllChildren
 import com.google.fhir.model.r4.BackboneElement
 import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.Resource
+import com.google.fhir.model.r4.ext.getAllChildren
 
 /**
  * Returns all immediate child nodes from each item in the input collection.

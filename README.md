@@ -289,10 +289,12 @@ To run the model extension codegen in `buildSrc` locally:
 
 ```shell
 ./gradlew generateR4Helpers
+./gradlew generateR4BHelpers
+./gradlew generateR5Helpers
 ```
 
 The generated code will be located in `fhir-path/build/generated` under packages
-`com.google.fhir.fhirpath` and `com.google.fhir.fhirpath.ext`.
+`com.google.fhir.model.<FHIR_VERSION>.ext` and `com.google.fhir.fhirpath`.
 
 ### UCUM helpers
 

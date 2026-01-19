@@ -16,11 +16,6 @@
 
 package com.google.fhir.fhirpath
 
-import com.google.fhir.fhirpath.ext.getProperty
-import com.google.fhir.fhirpath.ext.getPropertyInChoiceValue
-import com.google.fhir.fhirpath.ext.hasProperty
-import com.google.fhir.fhirpath.ext.hasPropertyInChoiceValue
-import com.google.fhir.fhirpath.ext.unwrapChoiceValue
 import com.google.fhir.fhirpath.functions.DEFAULT_UNIT
 import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
@@ -29,6 +24,11 @@ import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.BackboneElement
 import com.google.fhir.model.r4.Element
 import com.google.fhir.model.r4.Resource
+import com.google.fhir.model.r4.ext.getProperty
+import com.google.fhir.model.r4.ext.getPropertyInChoiceValue
+import com.google.fhir.model.r4.ext.hasProperty
+import com.google.fhir.model.r4.ext.hasPropertyInChoiceValue
+import com.google.fhir.model.r4.ext.unwrapChoiceValue
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 
@@ -47,13 +47,13 @@ private const val STRICT_MODE = false
 val fhirTypeToFhirPathType =
   mapOf<FhirType, Pair<SystemType, (element: Element) -> Any>>(
     // FHIR primitive types
-    FhirPrimitiveType.Boolean to
+    FhirR4PrimitiveType.Boolean to
       (SystemType.BOOLEAN to { it -> (it as com.google.fhir.model.r4.Boolean).value!! }),
-    FhirPrimitiveType.String to
+    FhirR4PrimitiveType.String to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.String).value!! }),
-    FhirPrimitiveType.Uri to
+    FhirR4PrimitiveType.Uri to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Uri).value!! }),
-    FhirPrimitiveType.Code to
+    FhirR4PrimitiveType.Code to
       (SystemType.STRING to
         { it ->
           // A code in the Kotlin FHIR library is represented either as an Enumeration if it is
@@ -64,42 +64,42 @@ val fhirTypeToFhirPathType =
             else -> error("Unknown code type")
           }
         }),
-    FhirPrimitiveType.Oid to
+    FhirR4PrimitiveType.Oid to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Oid).value!! }),
-    FhirPrimitiveType.Id to
+    FhirR4PrimitiveType.Id to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Id).value!! }),
-    FhirPrimitiveType.Uuid to
+    FhirR4PrimitiveType.Uuid to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Uuid).value!! }),
-    FhirPrimitiveType.Markdown to
+    FhirR4PrimitiveType.Markdown to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Markdown).value!! }),
-    FhirPrimitiveType.Base64Binary to
+    FhirR4PrimitiveType.Base64Binary to
       (SystemType.STRING to { it -> (it as com.google.fhir.model.r4.Base64Binary).value!! }),
-    FhirPrimitiveType.Integer to
+    FhirR4PrimitiveType.Integer to
       (SystemType.INTEGER to { it -> (it as com.google.fhir.model.r4.Integer).value!! }),
-    FhirPrimitiveType.UnsignedInt to
+    FhirR4PrimitiveType.UnsignedInt to
       (SystemType.INTEGER to { it -> (it as com.google.fhir.model.r4.UnsignedInt).value!! }),
-    FhirPrimitiveType.PositiveInt to
+    FhirR4PrimitiveType.PositiveInt to
       (SystemType.INTEGER to { it -> (it as com.google.fhir.model.r4.PositiveInt).value!! }),
-    FhirPrimitiveType.Decimal to
+    FhirR4PrimitiveType.Decimal to
       (SystemType.DECIMAL to { it -> (it as com.google.fhir.model.r4.Decimal).value!! }),
-    FhirPrimitiveType.Date to
+    FhirR4PrimitiveType.Date to
       (SystemType.DATE to
         { it ->
           FhirPathDate.fromFhirDate((it as com.google.fhir.model.r4.Date).value!!)
         }),
-    FhirPrimitiveType.DateTime to
+    FhirR4PrimitiveType.DateTime to
       (SystemType.DATETIME to
         { it ->
           FhirPathDateTime.fromFhirDateTime((it as com.google.fhir.model.r4.DateTime).value!!)
         }),
-    FhirPrimitiveType.Time to
+    FhirR4PrimitiveType.Time to
       (SystemType.TIME to
         { it ->
           FhirPathTime.fromLocalTime((it as com.google.fhir.model.r4.Time).value!!)
         }),
 
     // FHIR complex types
-    FhirComplexType.Quantity to
+    FhirR4ComplexType.Quantity to
       (SystemType.QUANTITY to
         {
           (it as com.google.fhir.model.r4.Quantity).let {

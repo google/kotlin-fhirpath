@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import com.squareup.kotlinpoet.asTypeName
 object ComplexTypeExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtensionPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    return FileSpec.builder(fhirPathExtPackageName, "MoreComplexTypes")
+    return FileSpec.builder(modelExtensionPackageName, "MoreComplexTypes")
       .addFunction(
         FunSpec.builder("getProperty")
           .addModifiers(KModifier.INTERNAL)

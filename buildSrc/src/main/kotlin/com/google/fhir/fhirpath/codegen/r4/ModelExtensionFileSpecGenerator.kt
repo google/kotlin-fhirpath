@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import kotlin.collections.iterator
 object ModelExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtensionPackageName: String,
     structureDefinition: StructureDefinition,
   ): FileSpec {
     val modelClassName = ClassName(modelPackageName, structureDefinition.name.capitalized())
 
     return FileSpec.builder(
-        fhirPathExtPackageName,
+        modelExtensionPackageName,
         "More${structureDefinition.name.capitalized()}s",
       )
       .addFunction(

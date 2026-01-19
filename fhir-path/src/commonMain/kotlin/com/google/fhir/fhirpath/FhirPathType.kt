@@ -16,12 +16,12 @@
 
 package com.google.fhir.fhirpath
 
-import com.google.fhir.fhirpath.ext.getFhirType
 import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.model.r4.Resource
+import com.google.fhir.model.r4.ext.getFhirType
 import com.google.fhir.model.r4.terminologies.ResourceType
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
@@ -43,10 +43,10 @@ sealed interface FhirPathType {
         val (namespace, name) = string.split('.')
         when (namespace) {
           "FHIR" -> {
-            FhirPrimitiveType.fromString(name)?.let {
+            FhirR4PrimitiveType.fromString(name)?.let {
               return it
             }
-            FhirComplexType.fromString(name)?.let {
+            FhirR4ComplexType.fromString(name)?.let {
               return it
             }
             return FhirResourceType(ResourceType.fromCode(name))
@@ -60,10 +60,10 @@ sealed interface FhirPathType {
 
       // Unqualified type names are resolved as FHIR types first and then FHIRPath system types, as
       // specified in https://hl7.org/fhirpath/#models.
-      FhirPrimitiveType.fromString(name)?.let {
+      FhirR4PrimitiveType.fromString(name)?.let {
         return it
       }
-      FhirComplexType.fromString(name)?.let {
+      FhirR4ComplexType.fromString(name)?.let {
         return it
       }
       try {
@@ -95,10 +95,10 @@ sealed interface FhirType : FhirPathType {
 
   companion object {
     fun fromObject(value: Any): FhirType? {
-      FhirPrimitiveType.fromObject(value)?.let {
+      FhirR4PrimitiveType.fromObject(value)?.let {
         return it
       }
-      FhirComplexType.fromObject(value)?.let {
+      FhirR4ComplexType.fromObject(value)?.let {
         return it
       }
       (value as? Resource)?.getFhirType()?.let {
@@ -109,9 +109,15 @@ sealed interface FhirType : FhirPathType {
   }
 }
 
-data class FhirResourceType(val resourceType: ResourceType) : FhirType {
+data class FhirResourceType(val resourceType: Any) : FhirType {
   override val typeName: String
-    get() = resourceType.getCode()
+    get() =
+      when (resourceType) {
+        is ResourceType -> resourceType.getCode()
+        is com.google.fhir.model.r4b.terminologies.ResourceType -> resourceType.getCode()
+        is com.google.fhir.model.r5.terminologies.ResourceType -> resourceType.getCode()
+        else -> error("Invalid resource type: $resourceType")
+      }
 }
 
 enum class SystemType(override val typeName: String) : FhirPathType {

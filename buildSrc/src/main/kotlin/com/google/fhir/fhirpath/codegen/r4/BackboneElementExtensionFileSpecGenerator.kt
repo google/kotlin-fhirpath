@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import kotlin.collections.iterator
 object BackboneElementExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    return FileSpec.builder(fhirPathExtPackageName, "MoreBackboneElements")
+    return FileSpec.builder(modelExtPackageName, "MoreBackboneElements")
       .addFunction(
         FunSpec.builder("getProperty")
           .addModifiers(KModifier.INTERNAL)

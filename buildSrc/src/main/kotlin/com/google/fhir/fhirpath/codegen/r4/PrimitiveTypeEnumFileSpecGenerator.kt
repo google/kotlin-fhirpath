@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ object PrimitiveTypeEnumFileSpecGenerator {
   fun generate(
     modelPackageName: String,
     fhirPathPackageName: String,
+    fhirVersion: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    val className = ClassName(fhirPathPackageName, "FhirPrimitiveType")
+    val className = ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}PrimitiveType")
     return FileSpec.builder(className)
       .addType(
-        TypeSpec.enumBuilder("FhirPrimitiveType")
+        TypeSpec.enumBuilder(className)
           .addSuperinterface(ClassName(fhirPathPackageName, "FhirType"))
           .primaryConstructor(
             FunSpec.constructorBuilder().addParameter("typeName", String::class).build()

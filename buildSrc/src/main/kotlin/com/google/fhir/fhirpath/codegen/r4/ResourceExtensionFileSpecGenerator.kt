@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package com.google.fhir.fhirpath.codegen.r4
 import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
 import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition.Kind
 import com.google.fhir.fhirpath.codegen.r4.schema.capitalized
-import com.google.fhir.model.r4.terminologies.ResourceType
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -31,17 +30,17 @@ import com.squareup.kotlinpoet.asTypeName
 object ResourceExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhriPathPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtensionPackageName: String,
+    fhirPathPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
     val resourceType = ClassName(modelPackageName, "Resource")
-    return FileSpec.builder(fhirPathExtPackageName, "MoreResources")
+    return FileSpec.builder(modelExtensionPackageName, "MoreResources")
       .addFunction(
         FunSpec.builder("getFhirType")
           .addModifiers(KModifier.INTERNAL)
           .receiver(resourceType)
-          .returns(ClassName(fhriPathPackageName, "FhirType").copy(nullable = true))
+          .returns(ClassName(fhirPathPackageName, "FhirType").copy(nullable = true))
           .beginControlFlow("return when(this)")
           .apply {
             for (structureDefinition in structureDefinitions) {
@@ -52,7 +51,7 @@ object ResourceExtensionFileSpecGenerator {
                     "is %T -> %T(%T.%N)",
                     ClassName(modelPackageName, typeName),
                     ClassName("com.google.fhir.fhirpath", "FhirResourceType"),
-                    ResourceType::class,
+                    ClassName("$modelPackageName.terminologies", "ResourceType"),
                     typeName,
                   )
                 }
