@@ -1,6 +1,6 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.google.fhir.fhirpath.codegen.r4.R4HelperGenerationTask
+import com.google.fhir.fhirpath.codegen.r4.FhirModelHelperGenerationTask
 import com.google.fhir.fhirpath.codegen.ucum.UcumHelperGenerationTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -26,7 +26,7 @@ val fhirVersions = mapOf(
 // Run `./gradlew generate{R4,R4B,R5}Helpers` to generate helper functions in `fhirpath/build/generated`
 fhirVersions.forEach { (version, path) ->
     val taskName = "generate${version.uppercase()}Helpers"
-    tasks.register<R4HelperGenerationTask>(taskName) {
+    tasks.register<FhirModelHelperGenerationTask>(taskName) {
         description = "Generate FHIR model extensions for ${version.uppercase()}"
         this.corePackageFiles.from(
             File(project.rootDir, path).listFiles()
@@ -161,7 +161,7 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    dependsOn(tasks.withType<R4HelperGenerationTask>())
+    dependsOn(tasks.withType<FhirModelHelperGenerationTask>())
     dependsOn(generateUcumHelpers)
     dependsOn(generateKotlinGrammarSource)
 }

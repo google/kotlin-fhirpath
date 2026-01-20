@@ -32,7 +32,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
 @CacheableTask
-abstract class R4HelperGenerationTask : DefaultTask() {
+abstract class FhirModelHelperGenerationTask : DefaultTask() {
   @get:InputFiles
   @get:PathSensitive(PathSensitivity.NONE)
   // These are files retrieved from third_party/hl7.fhir.<R4|R4B|R5>.core directory
@@ -102,7 +102,8 @@ abstract class R4HelperGenerationTask : DefaultTask() {
         .writeTo(outputDir)
     }
 
-    // Generate "routers" for accessing elements by name (e.g. `MoreResources.kt`)
+    // Generate "routers" for accessing elements by name (e.g. `MoreResources.kt`). These helpers
+    // will be in `com.google.fhir.model.<FHIR_VERSION>.ext` package.
 
     ResourceExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
@@ -144,7 +145,9 @@ abstract class R4HelperGenerationTask : DefaultTask() {
       )
       .writeTo(outputDir)
 
-    // Generate primitive and complex type enums
+    // Generate primitive and complex type enums. These enum classes will be in
+    // `com.google.fhir.model.r4.ext package` since they need to subclass the sealed interface
+    // `FhirType`.
 
     PrimitiveTypeEnumFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
