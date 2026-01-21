@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
-/** Converts the firs character of a string to uppercase */
-fun String.capitalized() = this.replaceFirstChar(Char::uppercaseChar)
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Concept(val code: String, val display: String? = null, val definition: String? = null)

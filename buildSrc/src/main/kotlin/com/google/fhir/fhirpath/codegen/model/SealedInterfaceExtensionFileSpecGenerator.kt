@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
 import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
 import com.google.fhir.fhirpath.codegen.r4.schema.capitalized

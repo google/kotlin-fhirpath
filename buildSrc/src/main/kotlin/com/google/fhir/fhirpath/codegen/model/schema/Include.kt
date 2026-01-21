@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class Concept(val code: String, val display: String? = null, val definition: String? = null)
+@Serializable data class Include(val system: String? = null, val concept: List<Concept>? = null)

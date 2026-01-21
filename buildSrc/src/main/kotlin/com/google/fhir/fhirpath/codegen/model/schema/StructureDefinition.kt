@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

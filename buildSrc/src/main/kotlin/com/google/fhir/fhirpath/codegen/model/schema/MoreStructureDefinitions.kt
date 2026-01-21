@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
-import kotlinx.serialization.Serializable
+val StructureDefinition.rootElements
+  get() =
+    snapshot?.element?.filter { it.id.matches("$name\\.[A-Za-z0-9]+(\\[x])?".toRegex()) }
+      ?: emptyList()
 
-@Serializable data class Include(val system: String? = null, val concept: List<Concept>? = null)
+val StructureDefinition.backboneElements
+  get() =
+    snapshot?.element?.let { elements ->
+      elements
+        .filter { it.isBackboneElement() }
+        .associateWith { backboneElement ->
+          elements.filter {
+            it.path.matches("${backboneElement.path}\\.[A-Za-z0-9]+(\\[x])?".toRegex())
+          }
+        }
+    } ?: emptyMap()

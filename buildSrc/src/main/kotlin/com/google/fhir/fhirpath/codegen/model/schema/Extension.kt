@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class Compose(val include: List<Include> = emptyList())
+@Serializable
+data class Extension(
+  val url: String,
+  val valueCode: String? = null,
+  val valueString: String? = null,
+  val valueBoolean: Boolean? = null,
+  val valueUrl: String? = null,
+)

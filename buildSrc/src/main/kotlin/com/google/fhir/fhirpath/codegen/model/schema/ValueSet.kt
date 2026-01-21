@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
-val StructureDefinition.rootElements
-  get() =
-    snapshot?.element?.filter { it.id.matches("$name\\.[A-Za-z0-9]+(\\[x])?".toRegex()) }
-      ?: emptyList()
+import kotlinx.serialization.Serializable
 
-val StructureDefinition.backboneElements
-  get() =
-    snapshot?.element?.let { elements ->
-      elements
-        .filter { it.isBackboneElement() }
-        .associateWith { backboneElement ->
-          elements.filter {
-            it.path.matches("${backboneElement.path}\\.[A-Za-z0-9]+(\\[x])?".toRegex())
-          }
-        }
-    } ?: emptyMap()
+@Serializable
+data class ValueSet(
+  val id: String,
+  val url: String,
+  val name: String,
+  val description: String? = null,
+  val compose: Compose? = null,
+)
