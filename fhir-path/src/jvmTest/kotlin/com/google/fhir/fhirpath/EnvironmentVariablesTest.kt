@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
  * Tests for FHIRPath environment variables.
  *
  * See https://hl7.org/fhirpath/#environment-variables and
- * https://hl7.org/fhir/R4/fhirpath.html#vars
+ * https://fhir.hl7.org/fhir/fhirpath.html#vars
  */
 class EnvironmentVariablesTest {
 
