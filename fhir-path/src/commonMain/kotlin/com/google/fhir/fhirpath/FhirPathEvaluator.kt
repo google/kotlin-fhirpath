@@ -18,6 +18,7 @@ package com.google.fhir.fhirpath
 
 import com.google.fhir.fhirpath.functions.invoke
 import com.google.fhir.fhirpath.functions.union
+import com.google.fhir.fhirpath.model.FhirModelNavigator
 import com.google.fhir.fhirpath.operators.addition
 import com.google.fhir.fhirpath.operators.and
 import com.google.fhir.fhirpath.operators.`as`
@@ -40,6 +41,7 @@ import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
@@ -58,24 +60,37 @@ import kotlin.time.Instant
  *   for the expression.
  */
 internal class FhirPathEvaluator(
-  initialContext: Any?,
-  private val variables: Map<String, Any?> = emptyMap(),
+  val fhirPathTypeResolver: FhirPathTypeResolver,
+  val fhirModelNavigator: FhirModelNavigator,
 ) : fhirpathBaseVisitor<Collection<Any>>() {
-
-  private val resource: Any? = initialContext
+  private var resource: Any? = null
   private val contextStack = ArrayDeque<Collection<Any>>()
   private val thisStack = ArrayDeque<Any>()
   private val totalStack = ArrayDeque<Collection<Any>>()
+  private val variables = mutableMapOf<String, Any?>()
+  @OptIn(ExperimentalTime::class) private var now: Instant = Clock.System.now()
 
-  // Ensure determinism of current date and time functions by getting the current timestamp once.
-  // See https://hl7.org/fhirpath/N1/#current-date-and-time-functions.
-  @OptIn(ExperimentalTime::class) private val now: Instant = Clock.System.now()
+  @OptIn(ExperimentalTime::class)
+  fun initialize(context: Any?, variables: Map<String, Any?>? = emptyMap()) {
+    resource = null
+    contextStack.clear()
+    thisStack.clear()
+    totalStack.clear()
+    this.variables.clear()
 
-  init {
-    if (initialContext != null) {
-      contextStack.add(listOf(initialContext))
-      thisStack.add(initialContext)
+    if (context != null) {
+      resource = context
+      contextStack.add(listOf(context))
+      thisStack.add(context)
     }
+
+    if (variables != null) {
+      this.variables.putAll(variables)
+    }
+
+    // Ensure determinism of current date and time functions by getting the current timestamp once.
+    // See https://hl7.org/fhirpath/N1/#current-date-and-time-functions.
+    now = Clock.System.now()
   }
 
   override fun defaultResult(): Collection<Any> = emptyList()
@@ -135,8 +150,8 @@ internal class FhirPathEvaluator(
     val right = visit(ctx.expression(1)!!)
     val op = ctx.getChild(1)!!.text
     return when (op) {
-      "*" -> multiplication(left, right)
-      "/" -> division(left, right)
+      "*" -> multiplication(left, right, fhirPathTypeResolver)
+      "/" -> division(left, right, fhirPathTypeResolver)
       "div" -> div(left, right)
       "mod" -> mod(left, right)
       else -> error("Unknown multiplicative operator: $op")
@@ -151,8 +166,8 @@ internal class FhirPathEvaluator(
     val op = ctx.getChild(1)!!.text
 
     return when (op) {
-      "+" -> addition(left, right)
-      "-" -> subtraction(left, right)
+      "+" -> addition(left, right, fhirPathTypeResolver)
+      "-" -> subtraction(left, right, fhirPathTypeResolver)
       "&" -> concat(left, right)
       else -> error("Unknown additive operator: $op")
     }
@@ -163,8 +178,8 @@ internal class FhirPathEvaluator(
     val typeSpecifier = visit(ctx.typeSpecifier())
 
     return when (ctx.getChild(1)!!.text) {
-      "as" -> expression.`as`(typeSpecifier.toList())
-      "is" -> expression.`is`(typeSpecifier.toList())
+      "as" -> expression.`as`(typeSpecifier.toList(), fhirPathTypeResolver)
+      "is" -> expression.`is`(typeSpecifier.toList(), fhirPathTypeResolver)
       else -> error("Unknown type operator: ${ctx.getChild(1)!!.text}")
     }
   }
@@ -186,7 +201,7 @@ internal class FhirPathEvaluator(
 
     val leftItem = left.singleOrNull() ?: return emptyList()
     val rightItem = right.singleOrNull() ?: return emptyList()
-    val comparisonResult = compare(leftItem, rightItem) ?: return emptyList()
+    val comparisonResult = compare(leftItem, rightItem, fhirPathTypeResolver) ?: return emptyList()
 
     return when (val op = ctx.getChild(1)!!.text) {
       "<" -> listOf(comparisonResult < 0)
@@ -207,8 +222,8 @@ internal class FhirPathEvaluator(
     val negated = op.contains("!")
     val result =
       when {
-        op.contains("=") -> equal(left, right)
-        op.contains("~") -> equivalent(left, right)
+        op.contains("=") -> equal(left, right, fhirPathTypeResolver)
+        op.contains("~") -> equivalent(left, right, fhirPathTypeResolver)
         else -> error("Unknown equality operator: $op")
       }
     return when (result) {
@@ -225,9 +240,18 @@ internal class FhirPathEvaluator(
     val right = visit(ctx.expression(1)!!)
     val op = ctx.getChild(1)!!.text
     return when (op) {
-      "in" -> listOf(right.map { it.toFhirPathType() }.contains(left.single().toFhirPathType()))
+      "in" ->
+        listOf(
+          right
+            .map { it.toFhirPathType(fhirPathTypeResolver) }
+            .contains(left.single().toFhirPathType(fhirPathTypeResolver))
+        )
       "contains" ->
-        listOf(left.map { it.toFhirPathType() }.contains(right.single().toFhirPathType()))
+        listOf(
+          left
+            .map { it.toFhirPathType(fhirPathTypeResolver) }
+            .contains(right.single().toFhirPathType(fhirPathTypeResolver))
+        )
       else -> error("Unknown membership operator: $op")
     }
   }
@@ -359,7 +383,7 @@ internal class FhirPathEvaluator(
 
     ctx.getParent() ==
       return context.flatMap { item ->
-        val fieldValue = item.accessMember(memberName)
+        val fieldValue = fhirModelNavigator.accessProperty(item, memberName)
         when (fieldValue) {
           null -> emptyList()
           is List<*> -> fieldValue as Collection<Any>
@@ -469,12 +493,18 @@ internal class FhirPathEvaluator(
         context
       }
       "is" -> {
-        val type = FhirPathType.fromString(functionNode.paramList()!!.expression().single().text)
-        return context.`is`(listOf(type))
+        val type =
+          fhirPathTypeResolver.resolveFromString(
+            functionNode.paramList()!!.expression().single().text
+          )
+        return context.`is`(listOf(type), fhirPathTypeResolver)
       }
       "as" -> {
-        val type = FhirPathType.fromString(functionNode.paramList()!!.expression().single().text)
-        return context.`as`(listOf(type))
+        val type =
+          fhirPathTypeResolver.resolveFromString(
+            functionNode.paramList()!!.expression().single().text
+          )
+        return context.`as`(listOf(type), fhirPathTypeResolver)
       }
       else -> {
         // First-order functions that do not require in-context expression valuation or
@@ -486,7 +516,7 @@ internal class FhirPathEvaluator(
             listOf(thisStack.last())
           }
         val params = functionNode.paramList()?.expression()?.flatMap { visit(it) } ?: emptyList()
-        receiver.invoke(functionName, params, now)
+        receiver.invoke(functionName, params, now, fhirPathTypeResolver, fhirModelNavigator)
       }
     }
   }
@@ -502,7 +532,7 @@ internal class FhirPathEvaluator(
   // typeSpecifier
 
   override fun visitTypeSpecifier(ctx: fhirpathParser.TypeSpecifierContext): Collection<Any> {
-    return listOf(FhirPathType.fromString(ctx.text))
+    return listOf(fhirPathTypeResolver.resolveFromString(ctx.text))
   }
 
   // identifier

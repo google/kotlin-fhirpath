@@ -32,6 +32,7 @@ object ResourceExtensionFileSpecGenerator {
     modelPackageName: String,
     modelExtensionPackageName: String,
     fhirPathPackageName: String,
+    fhirVersion: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
     val resourceType = ClassName(modelPackageName, "Resource")
@@ -40,7 +41,10 @@ object ResourceExtensionFileSpecGenerator {
         FunSpec.builder("getFhirType")
           .addModifiers(KModifier.INTERNAL)
           .receiver(resourceType)
-          .returns(ClassName(fhirPathPackageName, "FhirType").copy(nullable = true))
+          .returns(
+            ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}Type")
+              .copy(nullable = true)
+          )
           .beginControlFlow("return when(this)")
           .apply {
             for (structureDefinition in structureDefinitions) {
@@ -50,7 +54,7 @@ object ResourceExtensionFileSpecGenerator {
                   addStatement(
                     "is %T -> %T(%T.%N)",
                     ClassName(modelPackageName, typeName),
-                    ClassName("com.google.fhir.fhirpath", "FhirResourceType"),
+                    ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}ResourceType"),
                     ClassName("$modelPackageName.terminologies", "ResourceType"),
                     typeName,
                   )

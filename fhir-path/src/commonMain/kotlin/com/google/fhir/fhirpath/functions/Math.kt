@@ -19,6 +19,7 @@ package com.google.fhir.fhirpath.functions
 import com.google.fhir.fhirpath.operators.DECIMAL_MODE
 import com.google.fhir.fhirpath.toFhirPathType
 import com.google.fhir.fhirpath.types.FhirPathQuantity
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.abs
@@ -28,9 +29,9 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 /** See [specification](https://hl7.org/fhirpath/N1/#abs-integer-decimal-quantity). */
-internal fun Collection<Any>.abs(): Collection<Any> {
+internal fun Collection<Any>.abs(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "abs() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int -> listOf(abs(value))
     is Long -> listOf(abs(value))
@@ -41,9 +42,9 @@ internal fun Collection<Any>.abs(): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#ceiling-integer) */
-internal fun Collection<Any>.ceiling(): Collection<Any> {
+internal fun Collection<Any>.ceiling(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "ceiling() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int,
     Long -> listOf(value)
@@ -54,9 +55,9 @@ internal fun Collection<Any>.ceiling(): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#exp-decimal) */
-internal fun Collection<Any>.exp(): Collection<Any> {
+internal fun Collection<Any>.exp(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "exp() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int -> listOf(exp(value.toDouble()).toBigDecimal())
     is Long -> listOf(exp(value.toDouble()).toBigDecimal())
@@ -66,9 +67,9 @@ internal fun Collection<Any>.exp(): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#floor-integer) */
-internal fun Collection<Any>.floor(): Collection<Any> {
+internal fun Collection<Any>.floor(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "floor() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int,
     Long -> listOf(value)
@@ -79,9 +80,9 @@ internal fun Collection<Any>.floor(): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#ln-decimal) */
-internal fun Collection<Any>.ln(): Collection<Any> {
+internal fun Collection<Any>.ln(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "ln() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int -> listOf(ln(value.toDouble()).toBigDecimal())
     is Long -> listOf(ln(value.toDouble()).toBigDecimal())
@@ -91,17 +92,24 @@ internal fun Collection<Any>.ln(): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#logbase-decimal-decimal) */
-internal fun Collection<Any>.log(params: List<Any>): Collection<Any> {
+internal fun Collection<Any>.log(
+  params: List<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
   check(size <= 1) { "log() cannot be called on a collection with more than 1 item" }
   val valueDouble =
-    when (val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()) {
+    when (
+      val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+    ) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
       is BigDecimal -> value.doubleValue()
       else -> error("log() can only be applied to numbers")
     }
   val baseDouble =
-    when (val param = params.singleOrNull()?.toFhirPathType() ?: return emptyList()) {
+    when (
+      val param = params.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+    ) {
       is Int -> param.toDouble()
       is Long -> param.toDouble()
       is BigDecimal -> param.doubleValue()
@@ -113,10 +121,13 @@ internal fun Collection<Any>.log(params: List<Any>): Collection<Any> {
 /**
  * See [specification](https://hl7.org/fhirpath/N1/#powerexponent-integer-decimal-integer-decimal)
  */
-internal fun Collection<Any>.power(params: List<Any>): Collection<Any> {
+internal fun Collection<Any>.power(
+  params: List<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
   check(size <= 1) { "power() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
-  val exponent = params.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  val exponent = params.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   val valueDouble =
     when (value) {
       is Int -> value.toDouble()
@@ -147,10 +158,14 @@ internal fun Collection<Any>.power(params: List<Any>): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#roundprecision-integer-decimal) */
-internal fun Collection<Any>.round(params: List<Any>): Collection<Any> {
+internal fun Collection<Any>.round(
+  params: List<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
   check(size <= 1) { "round() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
-  val precision = params.singleOrNull()?.toFhirPathType()?.let { it as Int } ?: 0
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  val precision =
+    params.singleOrNull()?.toFhirPathType(fhirPathTypeResolver)?.let { it as Int } ?: 0
   check(precision >= 0) { "round() precision must be non-negative" }
   return when (value) {
     is Int -> listOf(value.toBigDecimal())
@@ -164,10 +179,12 @@ internal fun Collection<Any>.round(params: List<Any>): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#sqrt-decimal) */
-internal fun Collection<Any>.sqrt(): Collection<Any> {
+internal fun Collection<Any>.sqrt(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "sqrt() cannot be called on a collection with more than 1 item" }
   val valueDouble =
-    when (val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()) {
+    when (
+      val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+    ) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
       is BigDecimal -> value.doubleValue()
@@ -179,9 +196,9 @@ internal fun Collection<Any>.sqrt(): Collection<Any> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#truncate-integer) */
-internal fun Collection<Any>.truncate(): Collection<Any> {
+internal fun Collection<Any>.truncate(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "truncate() cannot be called on a collection with more than 1 item" }
-  val value = this.singleOrNull()?.toFhirPathType() ?: return emptyList()
+  val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int,
     Long -> listOf(value)

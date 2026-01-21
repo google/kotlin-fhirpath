@@ -40,7 +40,7 @@ object PrimitiveTypeEnumFileSpecGenerator {
     return FileSpec.builder(className)
       .addType(
         TypeSpec.enumBuilder(className)
-          .addSuperinterface(ClassName(fhirPathPackageName, "FhirType"))
+          .addSuperinterface(ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}Type"))
           .primaryConstructor(
             FunSpec.constructorBuilder().addParameter("typeName", String::class).build()
           )

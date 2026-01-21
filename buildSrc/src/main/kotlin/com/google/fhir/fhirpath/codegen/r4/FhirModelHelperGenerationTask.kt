@@ -89,7 +89,7 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
     val fhirVersion = this.fhirVersion.get()
     val modelPackageName = "com.google.fhir.model.$fhirVersion"
     val modelExtPackageName = "com.google.fhir.model.$fhirVersion.ext"
-    val fhirPathPackageName = "com.google.fhir.fhirpath"
+    val fhirPathPackageName = "com.google.fhir.fhirpath.types"
 
     // Generate resource extensions for accessing elements by name (e.g. `MorePatients.kt`)
 
@@ -109,6 +109,7 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
         modelPackageName = modelPackageName,
         modelExtensionPackageName = modelExtPackageName,
         fhirPathPackageName = fhirPathPackageName,
+        fhirVersion = fhirVersion,
         structureDefinitions =
           structureDefinitions
             .filter { it.kind == Kind.RESOURCE }

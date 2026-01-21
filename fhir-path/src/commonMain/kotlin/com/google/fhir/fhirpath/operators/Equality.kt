@@ -20,10 +20,11 @@ import com.google.fhir.fhirpath.asComparableOperands
 import com.google.fhir.fhirpath.toEqualCanonicalized
 import com.google.fhir.fhirpath.toEquivalentCanonicalized
 import com.google.fhir.fhirpath.toFhirPathType
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
-import com.google.fhir.model.r4.FhirDate
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 /**
@@ -45,7 +46,11 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
  * [discussion](https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Collection.20equality/with/540473873).
  * Also see: https://jira.hl7.org/browse/FHIR-53076
  */
-internal fun equal(left: Collection<Any>, right: Collection<Any>): Boolean? {
+internal fun equal(
+  left: Collection<Any>,
+  right: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Boolean? {
   if (left.isEmpty() || right.isEmpty()) {
     return null
   }
@@ -53,7 +58,7 @@ internal fun equal(left: Collection<Any>, right: Collection<Any>): Boolean? {
     return false
   }
 
-  val pairwiseComparisons = left.zip(right).map { (l, r) -> itemsEqual(l, r) }
+  val pairwiseComparisons = left.zip(right).map { (l, r) -> itemsEqual(l, r, fhirPathTypeResolver) }
   return when {
     pairwiseComparisons.any { it == false } -> false
     pairwiseComparisons.all { it == true } -> true
@@ -62,7 +67,11 @@ internal fun equal(left: Collection<Any>, right: Collection<Any>): Boolean? {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#equivalent). */
-internal fun equivalent(left: Collection<Any>, right: Collection<Any>): Boolean {
+internal fun equivalent(
+  left: Collection<Any>,
+  right: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Boolean {
   if (left.isEmpty() && right.isEmpty()) {
     return true
   }
@@ -75,16 +84,22 @@ internal fun equivalent(left: Collection<Any>, right: Collection<Any>): Boolean 
 
   var toBeMatched = right.toMutableList()
   for (item in left) {
-    val match = toBeMatched.firstOrNull { itemsEquivalent(item, it) } ?: return false
+    val match =
+      toBeMatched.firstOrNull { itemsEquivalent(item, it, fhirPathTypeResolver) } ?: return false
     toBeMatched.remove(match)
   }
   return true
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#equals). */
-private fun itemsEqual(left: Any, right: Any): Boolean? {
+private fun itemsEqual(
+  left: Any,
+  right: Any,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Boolean? {
   val (leftFhirPath, rightFhirPath) =
-    (left.toFhirPathType() to right.toFhirPathType()).asComparableOperands()
+    (left.toFhirPathType(fhirPathTypeResolver) to right.toFhirPathType(fhirPathTypeResolver))
+      .asComparableOperands(fhirPathTypeResolver)
 
   return when {
     leftFhirPath is String && rightFhirPath is String -> {
@@ -102,7 +117,7 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
     leftFhirPath is Boolean && rightFhirPath is Boolean -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is FhirDate && rightFhirPath is FhirDate -> {
+    leftFhirPath is FhirPathDate && rightFhirPath is FhirPathDate -> {
       leftFhirPath == rightFhirPath
     }
     leftFhirPath is FhirPathDateTime && rightFhirPath is FhirPathDateTime -> {
@@ -127,9 +142,14 @@ private fun itemsEqual(left: Any, right: Any): Boolean? {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#equivalent). */
-private fun itemsEquivalent(left: Any, right: Any): Boolean {
+private fun itemsEquivalent(
+  left: Any,
+  right: Any,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Boolean {
   val (leftFhirPath, rightFhirPath) =
-    (left.toFhirPathType() to right.toFhirPathType()).asComparableOperands()
+    (left.toFhirPathType(fhirPathTypeResolver) to right.toFhirPathType(fhirPathTypeResolver))
+      .asComparableOperands(fhirPathTypeResolver)
 
   return when {
     leftFhirPath is String && rightFhirPath is String -> {
@@ -151,7 +171,7 @@ private fun itemsEquivalent(left: Any, right: Any): Boolean {
     leftFhirPath is Boolean && rightFhirPath is Boolean -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is FhirDate && rightFhirPath is FhirDate -> {
+    leftFhirPath is FhirPathDate && rightFhirPath is FhirPathDate -> {
       leftFhirPath == rightFhirPath
     }
     leftFhirPath is FhirPathDateTime && rightFhirPath is FhirPathDateTime -> {

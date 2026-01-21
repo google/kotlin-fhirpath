@@ -21,6 +21,7 @@ import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.google.fhir.fhirpath.ucum.Unit
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
@@ -45,12 +46,14 @@ private val PLURAL_CALENDAR_DURATION_LIST =
 private val CALENDAR_DURATION_LIST = SINGULAR_CALENDAR_DURATION_LIST + PLURAL_CALENDAR_DURATION_LIST
 
 /** See [specification](https://hl7.org/fhirpath/N1/#toboolean-boolean). */
-internal fun Collection<Any>.toBoolean(): Collection<Boolean> {
+internal fun Collection<Any>.toBoolean(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "toBoolean() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is Boolean -> listOf(value)
     is Int ->
       when (value) {
@@ -85,21 +88,25 @@ internal fun Collection<Any>.toBoolean(): Collection<Boolean> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstoboolean-boolean). */
-internal fun Collection<Any>.convertsToBoolean(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToBoolean(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToBoolean() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return listOf(toBoolean().isNotEmpty())
+  return listOf(toBoolean(fhirPathTypeResolver).isNotEmpty())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#tointeger-integer). */
-internal fun Collection<Any>.toInteger(): Collection<Int> {
+internal fun Collection<Any>.toInteger(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Int> {
   check(size <= 1) { "toInteger() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is Int -> listOf(value)
     is String -> {
       value.toIntOrNull()?.let { listOf(it) } ?: emptyList()
@@ -110,21 +117,25 @@ internal fun Collection<Any>.toInteger(): Collection<Int> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstointeger-boolean). */
-internal fun Collection<Any>.convertsToInteger(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToInteger(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToInteger() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return listOf(toInteger().isNotEmpty())
+  return listOf(toInteger(fhirPathTypeResolver).isNotEmpty())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#todate-date). */
-internal fun Collection<Any>.toDate(): Collection<FhirPathDate> {
+internal fun Collection<Any>.toDate(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<FhirPathDate> {
   check(size <= 1) { "toDate() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is FhirPathDate -> listOf(value)
     is FhirPathDateTime -> TODO("Clarify the requirement in the specification")
     is String ->
@@ -138,12 +149,14 @@ internal fun Collection<Any>.toDate(): Collection<FhirPathDate> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstodate-boolean). */
-internal fun Collection<Any>.convertsToDate(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToDate(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToDate() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is FhirPathDate -> listOf(true)
     is FhirPathDateTime -> listOf(true)
     is String ->
@@ -158,12 +171,14 @@ internal fun Collection<Any>.convertsToDate(): Collection<Boolean> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#todatetime-datetime). */
-internal fun Collection<Any>.toDateTime(): Collection<FhirPathDateTime> {
+internal fun Collection<Any>.toDateTime(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<FhirPathDateTime> {
   check(size <= 1) { "toDateTime() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is FhirPathDateTime -> listOf(value)
     is FhirPathDate -> listOf(FhirPathDateTime.fromString(value.toString()))
     is String ->
@@ -177,12 +192,14 @@ internal fun Collection<Any>.toDateTime(): Collection<FhirPathDateTime> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstodatetime-boolean). */
-internal fun Collection<Any>.convertsToDateTime(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToDateTime(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToDateTime() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is FhirPathDateTime -> listOf(true)
     is FhirPathDate -> listOf(true)
     is String ->
@@ -197,12 +214,14 @@ internal fun Collection<Any>.convertsToDateTime(): Collection<Boolean> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#todecimal-decimal). */
-internal fun Collection<Any>.toDecimal(): Collection<BigDecimal> {
+internal fun Collection<Any>.toDecimal(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<BigDecimal> {
   check(size <= 1) { "toDecimal() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val value = single().toFhirPathType()) {
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is BigDecimal -> listOf(value)
     is Int -> listOf(value.toBigDecimal())
     is Boolean -> listOf(if (value) BigDecimal.ONE else BigDecimal.ZERO)
@@ -214,21 +233,26 @@ internal fun Collection<Any>.toDecimal(): Collection<BigDecimal> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstodecimal-boolean). */
-internal fun Collection<Any>.convertsToDecimal(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToDecimal(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToDecimal() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return listOf(toDecimal().isNotEmpty())
+  return listOf(toDecimal(fhirPathTypeResolver).isNotEmpty())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#toquantityunit-string-quantity). */
-internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<FhirPathQuantity> {
+internal fun Collection<Any>.toQuantity(
+  targetUnit: String?,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<FhirPathQuantity> {
   check(size <= 1) { "toQuantity() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single().toFhirPathType()) {
+  return when (val item = single().toFhirPathType(fhirPathTypeResolver)) {
     is Int -> {
       val pair = (item.toBigDecimal() to DEFAULT_UNIT)
       listOf(FhirPathQuantity(value = pair.first, unit = pair.second))
@@ -277,21 +301,25 @@ internal fun Collection<Any>.toQuantity(targetUnit: String?): Collection<FhirPat
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstoquantityunit-string-boolean). */
-internal fun Collection<Any>.convertsToQuantity(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToQuantity(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToQuantity() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return listOf(toQuantity(targetUnit = null).isNotEmpty())
+  return listOf(toQuantity(targetUnit = null, fhirPathTypeResolver).isNotEmpty())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#tostring-string). */
-internal fun Collection<Any>.toStringFun(): Collection<String> {
+internal fun Collection<Any>.toStringFun(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<String> {
   check(size <= 1) { "toString() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single().toFhirPathType()) {
+  return when (val item = single().toFhirPathType(fhirPathTypeResolver)) {
     is String -> listOf(item)
     is Int -> listOf(item.toString())
     is Long -> listOf(item.toString())
@@ -313,13 +341,15 @@ internal fun Collection<Any>.toStringFun(): Collection<String> {
  *
  * TODO: Correct URL once https://jira.hl7.org/browse/FHIR-52051 is addressed.
  */
-internal fun Collection<Any>.convertsToString(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToString(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToString() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
   val isConvertible =
-    when (single().toFhirPathType()) {
+    when (single().toFhirPathType(fhirPathTypeResolver)) {
       is String,
       is Int,
       is Long,
@@ -336,12 +366,14 @@ internal fun Collection<Any>.convertsToString(): Collection<Boolean> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#totime-time). */
-internal fun Collection<Any>.toTime(): Collection<FhirPathTime> {
+internal fun Collection<Any>.toTime(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<FhirPathTime> {
   check(size <= 1) { "toTime() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single().toFhirPathType()) {
+  return when (val item = single().toFhirPathType(fhirPathTypeResolver)) {
     is LocalTime -> listOf(FhirPathTime.fromLocalTime(item))
     is FhirPathTime -> listOf(item)
     is String ->
@@ -355,12 +387,14 @@ internal fun Collection<Any>.toTime(): Collection<FhirPathTime> {
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#convertstotime-boolean). */
-internal fun Collection<Any>.convertsToTime(): Collection<Boolean> {
+internal fun Collection<Any>.convertsToTime(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
   check(size <= 1) { "convertsToTime() cannot be called on a collection with more than 1 item" }
 
   if (isEmpty()) return emptyList()
 
-  return when (val item = single().toFhirPathType()) {
+  return when (val item = single().toFhirPathType(fhirPathTypeResolver)) {
     is LocalTime -> listOf(true)
     is FhirPathTime -> listOf(true)
     is String ->

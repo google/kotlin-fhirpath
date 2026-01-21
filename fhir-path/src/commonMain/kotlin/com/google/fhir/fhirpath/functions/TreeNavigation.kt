@@ -16,25 +16,15 @@
 
 package com.google.fhir.fhirpath.functions
 
-import com.google.fhir.model.r4.BackboneElement
-import com.google.fhir.model.r4.Element
-import com.google.fhir.model.r4.Resource
-import com.google.fhir.model.r4.ext.getAllChildren
+import com.google.fhir.fhirpath.model.FhirModelNavigator
 
 /**
  * Returns all immediate child nodes from each item in the input collection.
  *
  * See [specification](https://hl7.org/fhirpath/N1/#tree-navigation).
  */
-internal fun Collection<Any>.children(): Collection<Any> {
-  return flatMap { item ->
-    when (item) {
-      is Resource -> item.getAllChildren()
-      is BackboneElement -> item.getAllChildren()
-      is Element -> item.getAllChildren()
-      else -> emptyList()
-    }
-  }
+internal fun Collection<Any>.children(fhirModelNavigator: FhirModelNavigator): Collection<Any> {
+  return flatMap { item -> fhirModelNavigator.getAllChildren(item) }
 }
 
 /**
@@ -45,7 +35,7 @@ internal fun Collection<Any>.children(): Collection<Any> {
  *
  * See [specification](https://hl7.org/fhirpath/N1/#tree-navigation).
  */
-internal fun Collection<Any>.descendants(): Collection<Any> =
-  children().let { children ->
-    if (children.isEmpty()) emptyList() else children + children.descendants()
+internal fun Collection<Any>.descendants(fhirModelNavigator: FhirModelNavigator): Collection<Any> =
+  children(fhirModelNavigator).let { children ->
+    if (children.isEmpty()) emptyList() else children + children.descendants(fhirModelNavigator)
   }

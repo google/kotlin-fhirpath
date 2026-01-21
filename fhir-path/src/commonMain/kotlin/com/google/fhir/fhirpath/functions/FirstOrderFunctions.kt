@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package com.google.fhir.fhirpath.functions
 
+import com.google.fhir.fhirpath.model.FhirModelNavigator
 import com.google.fhir.fhirpath.operators.not
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -29,6 +31,8 @@ internal fun Collection<Any>.invoke(
   functionName: String,
   params: List<Any>,
   now: Instant,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+  fhirModelNavigator: FhirModelNavigator,
 ): Collection<Any> =
   when (functionName) {
     // Existence
@@ -67,22 +71,22 @@ internal fun Collection<Any>.invoke(
 
     // Conversion
     // https://hl7.org/fhirpath/N1/#conversion
-    "toBoolean" -> this.toBoolean()
-    "convertsToBoolean" -> this.convertsToBoolean()
-    "toInteger" -> this.toInteger()
-    "convertsToInteger" -> this.convertsToInteger()
-    "toDate" -> this.toDate()
-    "convertsToDate" -> this.convertsToDate()
-    "toDateTime" -> this.toDateTime()
-    "convertsToDateTime" -> this.convertsToDateTime()
-    "toDecimal" -> this.toDecimal()
-    "convertsToDecimal" -> this.convertsToDecimal()
-    "toQuantity" -> this.toQuantity(params.firstOrNull()?.toString())
-    "convertsToQuantity" -> this.convertsToQuantity()
-    "toString" -> this.toStringFun()
-    "convertsToString" -> this.convertsToString()
-    "toTime" -> this.toTime()
-    "convertsToTime" -> this.convertsToTime()
+    "toBoolean" -> this.toBoolean(fhirPathTypeResolver)
+    "convertsToBoolean" -> this.convertsToBoolean(fhirPathTypeResolver)
+    "toInteger" -> this.toInteger(fhirPathTypeResolver)
+    "convertsToInteger" -> this.convertsToInteger(fhirPathTypeResolver)
+    "toDate" -> this.toDate(fhirPathTypeResolver)
+    "convertsToDate" -> this.convertsToDate(fhirPathTypeResolver)
+    "toDateTime" -> this.toDateTime(fhirPathTypeResolver)
+    "convertsToDateTime" -> this.convertsToDateTime(fhirPathTypeResolver)
+    "toDecimal" -> this.toDecimal(fhirPathTypeResolver)
+    "convertsToDecimal" -> this.convertsToDecimal(fhirPathTypeResolver)
+    "toQuantity" -> this.toQuantity(params.firstOrNull()?.toString(), fhirPathTypeResolver)
+    "convertsToQuantity" -> this.convertsToQuantity(fhirPathTypeResolver)
+    "toString" -> this.toStringFun(fhirPathTypeResolver)
+    "convertsToString" -> this.convertsToString(fhirPathTypeResolver)
+    "toTime" -> this.toTime(fhirPathTypeResolver)
+    "convertsToTime" -> this.convertsToTime(fhirPathTypeResolver)
 
     // String manipulation
     // https://hl7.org/fhirpath/N1/#string-manipulation
@@ -108,21 +112,21 @@ internal fun Collection<Any>.invoke(
 
     // Math
     // https://hl7.org/fhirpath/N1/#math
-    "abs" -> this.abs()
-    "ceiling" -> this.ceiling()
-    "exp" -> this.exp()
-    "floor" -> this.floor()
-    "ln" -> this.ln()
-    "log" -> this.log(params)
-    "power" -> this.power(params)
-    "round" -> this.round(params)
-    "sqrt" -> this.sqrt()
-    "truncate" -> this.truncate()
+    "abs" -> this.abs(fhirPathTypeResolver)
+    "ceiling" -> this.ceiling(fhirPathTypeResolver)
+    "exp" -> this.exp(fhirPathTypeResolver)
+    "floor" -> this.floor(fhirPathTypeResolver)
+    "ln" -> this.ln(fhirPathTypeResolver)
+    "log" -> this.log(params, fhirPathTypeResolver)
+    "power" -> this.power(params, fhirPathTypeResolver)
+    "round" -> this.round(params, fhirPathTypeResolver)
+    "sqrt" -> this.sqrt(fhirPathTypeResolver)
+    "truncate" -> this.truncate(fhirPathTypeResolver)
 
     // Tree navigation
     // https://hl7.org/fhirpath/N1/#tree-navigation
-    "children" -> this.children()
-    "descendants" -> this.descendants()
+    "children" -> this.children(fhirModelNavigator)
+    "descendants" -> this.descendants(fhirModelNavigator)
 
     // Utility functions
     // https://hl7.org/fhirpath/N1/#utility-functions
