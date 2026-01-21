@@ -25,7 +25,7 @@ class AggregateTest :
   FunSpec({
     test("nested aggregate inner total is independent from outer total") {
       val result =
-        fhirPathEngine.evaluateFhirPath(
+        fhirPathEngine.evaluateExpression(
           "(1 | 2).aggregate((10 | 20 | 30).aggregate(\$total + \$this, 0) + \$total + \$this, 0)",
           null,
         )

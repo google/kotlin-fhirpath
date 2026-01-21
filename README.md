@@ -260,7 +260,7 @@ dependencies {
 ### Evaluating FHIRPath expressions
 
 To evaluate a FHIRPath expression, create a `FhirPathEngine` for the correct FHIR version and use
-`evaluateFhirPath` function:
+`evaluateExpression` function:
 
 ```
 import com.google.fhir.fhirpath.FhirPathEngine
@@ -269,7 +269,7 @@ import com.google.fhir.model.r4.FhirR4Json
 val patientExampleJson = ... // Load "patient-example.json"
 val patient = FhirR4Json().decodeFromString(patientExampleJson)
 val fhirPathEngine = FhirPathEngine.forR4()
-val results = fhirPathEngine.evaluateFhirPath("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
+val results = fhirPathEngine.evaluateExpression("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
 ```
 
 ## Developer Guide

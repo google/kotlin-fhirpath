@@ -141,14 +141,14 @@ class FhirPathEngineTest :
           ) {
             if (testCase.expression.invalid != null) {
               assertFailsWith<Exception> {
-                fhirPathEngine.evaluateFhirPath(
+                fhirPathEngine.evaluateExpression(
                   testCase.expression.value,
                   testCase.inputfile?.let { inputMap[it] },
                 )
               }
             } else {
               val results =
-                fhirPathEngine.evaluateFhirPath(
+                fhirPathEngine.evaluateExpression(
                   testCase.expression.value,
                   testCase.inputfile?.let { inputMap[it] },
                 )
