@@ -47,7 +47,11 @@ internal constructor(
    * @param variables Environment variables accessible via %name syntax in the expression.
    * @return @return A collection of elements as the result of the evaluation.
    */
-  fun evaluateExpression(expression: String, resource: Resource?, variables: Map<String, Any?> = emptyMap(),): Collection<Any> {
+  fun evaluateExpression(
+    expression: String,
+    resource: Resource?,
+    variables: Map<String, Any?> = emptyMap(),
+  ): Collection<Any> {
     val lexer = fhirpathLexer(CharStreams.fromString(expression))
     val tokenStream = CommonTokenStream(lexer)
     val parser =

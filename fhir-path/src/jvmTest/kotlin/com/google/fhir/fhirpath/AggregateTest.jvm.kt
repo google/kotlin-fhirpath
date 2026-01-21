@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package com.google.fhir.fhirpath
 
-import io.kotest.core.spec.style.FunSpec
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 private val fhirPathEngine = FhirPathEngine.forR4()
 
-class AggregateTest :
-  FunSpec({
-    test("nested aggregate inner total is independent from outer total") {
-      val result =
-        fhirPathEngine.evaluateExpression(
-          "(1 | 2).aggregate((10 | 20 | 30).aggregate(\$total + \$this, 0) + \$total + \$this, 0)",
-          null,
-        )
-      assertEquals(listOf(123), result.toList())
-    }
-  })
+class AggregateTest {
+
+  @Test
+  fun `nested aggregate inner total is independent from outer total`() {
+    val result =
+      fhirPathEngine.evaluateExpression(
+        "(1 | 2).aggregate((10 | 20 | 30).aggregate(\$total + \$this, 0) + \$total + \$this, 0)",
+        null,
+      )
+    assertEquals(listOf(123), result.toList())
+  }
+}

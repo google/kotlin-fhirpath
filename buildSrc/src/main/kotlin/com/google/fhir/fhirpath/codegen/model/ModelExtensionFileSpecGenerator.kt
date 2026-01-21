@@ -16,12 +16,12 @@
 
 package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.backboneElements
-import com.google.fhir.fhirpath.codegen.r4.schema.capitalized
-import com.google.fhir.fhirpath.codegen.r4.schema.getElementName
-import com.google.fhir.fhirpath.codegen.r4.schema.getNestedClassName
-import com.google.fhir.fhirpath.codegen.r4.schema.rootElements
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.backboneElements
+import com.google.fhir.fhirpath.codegen.model.schema.capitalized
+import com.google.fhir.fhirpath.codegen.model.schema.getElementName
+import com.google.fhir.fhirpath.codegen.model.schema.getNestedClassName
+import com.google.fhir.fhirpath.codegen.model.schema.rootElements
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec

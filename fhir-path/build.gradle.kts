@@ -1,6 +1,6 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.google.fhir.fhirpath.codegen.r4.FhirModelHelperGenerationTask
+import com.google.fhir.fhirpath.codegen.model.FhirModelHelperGenerationTask
 import com.google.fhir.fhirpath.codegen.ucum.UcumHelperGenerationTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
