@@ -318,8 +318,7 @@ internal class FhirPathEvaluator(
 
     return when {
       variables.containsKey(name) -> {
-        val value = variables[name]
-        if (value == null) emptyList() else listOf(value)
+        variables[name]?.let { listOf(it) } ?: emptyList()
       }
       else -> error("Unknown variable: %$name")
     }
