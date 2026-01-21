@@ -317,6 +317,17 @@ internal class FhirPathEvaluator(
         ?: error("Invalid external constant")
 
     return when {
+      name == "sct" -> listOf("http://snomed.info/sct")
+      name == "loinc" -> listOf("http://loinc.org")
+      name == "ucum" -> listOf("http://unitsofmeasure.org")
+      name.startsWith("vs-") -> {
+        val valueSetId = name.removePrefix("vs-")
+        listOf("http://hl7.org/fhir/ValueSet/$valueSetId")
+      }
+      name.startsWith("ext-") -> {
+        val extensionId = name.removePrefix("ext-")
+        listOf("http://hl7.org/fhir/StructureDefinition/$extensionId")
+      }
       variables.containsKey(name) -> {
         variables[name]?.let { listOf(it) } ?: emptyList()
       }
