@@ -29,7 +29,7 @@ import org.antlr.v4.kotlinruntime.Token
  *
  * @param expression The FHIRPath string to evaluate (e.g., "Patient.name.given").
  * @param resource The initial FHIR resource to run the expression against.
- * @param variables Custom variables accessible via %name syntax in the expression.
+ * @param variables Environment variables accessible via %name syntax in the expression.
  * @return A collection of elements that result from the evaluation.
  */
 fun evaluateFhirPath(
