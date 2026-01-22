@@ -58,4 +58,7 @@ internal sealed class FhirPathTypeResolver {
   protected abstract fun resolveFhirTypeFromString(name: String): FhirType
 
   protected abstract fun resolveFhirTypeFromObject(value: Any): FhirType?
+
+  /** Converts the value to a string if possible, otherwise returns null. */
+  abstract fun convertToString(value: Any): String?
 }

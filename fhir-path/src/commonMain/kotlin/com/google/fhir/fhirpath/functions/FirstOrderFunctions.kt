@@ -90,25 +90,25 @@ internal fun Collection<Any>.invoke(
 
     // String manipulation
     // https://hl7.org/fhirpath/N1/#string-manipulation
-    "indexOf" -> this.indexOf(params)
-    "substring" -> this.substring(params)
-    "startsWith" -> this.startsWith(params)
-    "endsWith" -> this.endsWith(params)
-    "contains" -> this.strContains(params)
-    "upper" -> this.upper()
-    "lower" -> this.lower()
-    "replace" -> this.replace(params)
-    "matches" -> this.matches(params)
-    "matchesFull" -> this.matchesFull(params) // STU
-    "replaceMatches" -> this.replaceMatches(params)
-    "length" -> this.length()
-    "toChars" -> this.toChars()
+    "indexOf" -> this.indexOf(params, fhirPathTypeResolver)
+    "substring" -> this.substring(params, fhirPathTypeResolver)
+    "startsWith" -> this.startsWith(params, fhirPathTypeResolver)
+    "endsWith" -> this.endsWith(params, fhirPathTypeResolver)
+    "contains" -> this.strContains(params, fhirPathTypeResolver)
+    "upper" -> this.upper(fhirPathTypeResolver)
+    "lower" -> this.lower(fhirPathTypeResolver)
+    "replace" -> this.replace(params, fhirPathTypeResolver)
+    "matches" -> this.matches(params, fhirPathTypeResolver)
+    "matchesFull" -> this.matchesFull(params, fhirPathTypeResolver) // STU
+    "replaceMatches" -> this.replaceMatches(params, fhirPathTypeResolver)
+    "length" -> this.length(fhirPathTypeResolver)
+    "toChars" -> this.toChars(fhirPathTypeResolver)
 
     // Additional string functions (STU)
     // https://build.fhir.org/ig/HL7/FHIRPath/#additional-string-functions
-    "trim" -> this.trim()
-    "split" -> this.split(params)
-    "join" -> this.join(params)
+    "trim" -> this.trim(fhirPathTypeResolver)
+    "split" -> this.split(params, fhirPathTypeResolver)
+    "join" -> this.join(params, fhirPathTypeResolver)
 
     // Math
     // https://hl7.org/fhirpath/N1/#math

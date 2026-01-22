@@ -16,6 +16,7 @@
 
 package com.google.fhir.fhirpath.types
 
+import com.google.fhir.model.r5.Enumeration
 import com.google.fhir.model.r5.Resource
 import com.google.fhir.model.r5.ext.getFhirType
 import com.google.fhir.model.r5.terminologies.ResourceType
@@ -43,4 +44,11 @@ internal object FhirR5TypeResolver : FhirPathTypeResolver() {
     }
     return null
   }
+
+  override fun convertToString(value: Any): String? =
+    when (value) {
+      is com.google.fhir.model.r5.String -> value.value
+      is Enumeration<*> -> value.toString()
+      else -> null
+    }
 }
