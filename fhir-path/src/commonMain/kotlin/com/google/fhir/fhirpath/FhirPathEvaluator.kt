@@ -483,7 +483,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     (this as fhirpathParser.PolarityExpressionContext).expression()
 
   /** Evaluates a block with the given item pushed onto thisStack. */
-  private fun <T> evaluateWithThis(item: Any, block: () -> T): T {
+  private fun evaluateWithThis(item: Any, block: () -> Any?): Any? {
     thisStack.addLast(item)
     return block().also { thisStack.removeLast() }
   }
