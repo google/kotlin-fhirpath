@@ -42,6 +42,8 @@ internal sealed class FhirModelNavigator {
 
   abstract fun getAllChildren(any: Any): Collection<Any>
 
+  abstract fun canHaveChildren(obj: Any): Boolean
+
   protected abstract fun hasProperty(obj: Any, fieldName: String): Boolean
 
   protected abstract fun getProperty(obj: Any, fieldName: String): Any?

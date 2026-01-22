@@ -42,9 +42,6 @@ import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
 import com.google.fhir.fhirpath.types.FhirPathTypeResolver
-import com.google.fhir.model.r4.BackboneElement
-import com.google.fhir.model.r4.Element
-import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
@@ -502,11 +499,11 @@ internal class FhirPathEvaluator(
           thisStack.removeLast()
 
           for (result in results) {
-            if (result.hasChildren()) {
+            if (fhirModelNavigator.canHaveChildren(result)) {
               finalResults.add(result)
               queue.addLast(result)
             } else {
-              if (finalResults.none { it.toFhirPathType() == result.toFhirPathType() }) {
+              if (finalResults.none { it.toFhirPathType(fhirPathTypeResolver) == result.toFhirPathType(fhirPathTypeResolver) }) {
                 finalResults.add(result)
               }
             }
@@ -574,10 +571,6 @@ internal class FhirPathEvaluator(
     return listOf(identifierText.removeSurrounding("`"))
   }
 }
-
-/** Returns true if the object can have children. */
-private fun Any.hasChildren(): Boolean =
-  this is Resource || this is BackboneElement || this is Element
 
 /** Returns a new [FhirPathQuantity] object with the numeric value negated. */
 private fun FhirPathQuantity.negate(): FhirPathQuantity =

@@ -65,4 +65,7 @@ internal object FhirR5ModelNavigator : FhirModelNavigator() {
       is Element -> item.getAllChildren()
       else -> emptyList()
     }
+
+  override fun canHaveChildren(obj: Any): Boolean =
+    obj is Resource || obj is BackboneElement || obj is Element
 }
