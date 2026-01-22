@@ -22,10 +22,11 @@ import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
-internal fun compare(left: Any, right: Any): Int? {
-  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands()
+internal fun compare(left: Any, right: Any, fhirPathTypeResolver: FhirPathTypeResolver): Int? {
+  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands(fhirPathTypeResolver)
 
   return when {
     leftFhirPath is String && rightFhirPath is String -> {

@@ -1,6 +1,6 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.google.fhir.fhirpath.codegen.r4.R4HelperGenerationTask
+import com.google.fhir.fhirpath.codegen.model.FhirModelHelperGenerationTask
 import com.google.fhir.fhirpath.codegen.ucum.UcumHelperGenerationTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -17,15 +17,23 @@ plugins {
 group = "com.google.fhir"
 version = "1.0.0-alpha02"
 
-// Run `./gradlew generateR4Helpers` to generate helper functions for R4 in `fhirpath/build/generated`
-val generateR4Helpers = tasks.register<R4HelperGenerationTask>("generateR4Helpers") {
-    description = "Generate FHIR model extensions for R4"
-    this.corePackageFiles.from(
-        File(project.rootDir, "third_party/hl7.fhir.r4.core/package").listFiles()
-    )
-    this.modelPackageName.set("com.google.fhir.model.r4")
-    this.fhirPathPackageName.set("com.google.fhir.fhirpath")
-    outputDirectory.set(layout.buildDirectory.dir("generated/kotlin"))
+val fhirVersions = mapOf(
+    "r4" to "third_party/hl7.fhir.r4.core/package",
+    "r4b" to "third_party/hl7.fhir.r4b.core/package",
+    "r5" to "third_party/hl7.fhir.r5.core/package"
+)
+
+// Run `./gradlew generate{R4,R4B,R5}Helpers` to generate helper functions in `fhirpath/build/generated`
+fhirVersions.forEach { (version, path) ->
+    val taskName = "generate${version.uppercase()}Helpers"
+    tasks.register<FhirModelHelperGenerationTask>(taskName) {
+        description = "Generate FHIR model extensions for ${version.uppercase()}"
+        this.corePackageFiles.from(
+            File(project.rootDir, path).listFiles()
+        )
+        this.fhirVersion.set(version)
+        outputDirectory.set(layout.buildDirectory.dir("generated/kotlin"))
+    }
 }
 
 // Run `./gradlew generateUcumHelpers` to generate helper functions for UCUM in `fhirpath/build/generated`
@@ -108,7 +116,9 @@ kotlin {
     sourceSets {
         commonMain {
             kotlin {
-                srcDir(generateR4Helpers)
+                fhirVersions.keys.forEach { version ->
+                    srcDir(tasks.named("generate${version.uppercase()}Helpers"))
+                }
                 srcDir(generateUcumHelpers)
                 srcDir(generateKotlinGrammarSource)
             }
@@ -151,7 +161,7 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    dependsOn(generateR4Helpers)
+    dependsOn(tasks.withType<FhirModelHelperGenerationTask>())
     dependsOn(generateUcumHelpers)
     dependsOn(generateKotlinGrammarSource)
 }

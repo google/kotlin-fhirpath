@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition.Kind
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition.Kind
+import com.google.fhir.fhirpath.codegen.model.schema.capitalized
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
 
-object ComplexTypeEnumFileSpecGenerator {
+object PrimitiveTypeEnumFileSpecGenerator {
   fun generate(
     modelPackageName: String,
     fhirPathPackageName: String,
+    fhirVersion: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    val className = ClassName(fhirPathPackageName, "FhirComplexType")
+    val className = ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}PrimitiveType")
     return FileSpec.builder(className)
       .addType(
-        TypeSpec.enumBuilder("FhirComplexType")
-          .addSuperinterface(ClassName(fhirPathPackageName, "FhirType"))
+        TypeSpec.enumBuilder(className)
+          .addSuperinterface(ClassName(fhirPathPackageName, "Fhir${fhirVersion.uppercase()}Type"))
           .primaryConstructor(
             FunSpec.constructorBuilder().addParameter("typeName", String::class).build()
           )
@@ -48,10 +52,10 @@ object ComplexTypeEnumFileSpecGenerator {
           .apply {
             for (structureDefinition in structureDefinitions) {
               when (structureDefinition.kind) {
-                Kind.COMPLEX_TYPE -> {
+                Kind.PRIMITIVE_TYPE -> {
                   val typeName = structureDefinition.name
                   addEnumConstant(
-                    typeName,
+                    typeName.capitalized(),
                     TypeSpec.anonymousClassBuilder()
                       .addSuperclassConstructorParameter("%S", typeName)
                       .build(),
@@ -84,12 +88,12 @@ object ComplexTypeEnumFileSpecGenerator {
                       .apply {
                         for (structureDefinition in structureDefinitions) {
                           when (structureDefinition.kind) {
-                            Kind.COMPLEX_TYPE -> {
+                            Kind.PRIMITIVE_TYPE -> {
                               val typeName = structureDefinition.name
                               addStatement(
                                 "is %T -> %N",
-                                ClassName(modelPackageName, typeName),
-                                typeName,
+                                ClassName(modelPackageName, typeName.capitalized()),
+                                typeName.capitalized(),
                               )
                             }
                             else ->
@@ -98,6 +102,13 @@ object ComplexTypeEnumFileSpecGenerator {
                               )
                           }
                         }
+
+                        // Enumerations are a special case that should be mapped to Code
+                        addStatement(
+                          "is %T -> %N",
+                          ClassName(modelPackageName, "Enumeration").parameterizedBy(STAR),
+                          "Code",
+                        )
                       }
                       .addStatement("else -> null")
                       .endControlFlow()

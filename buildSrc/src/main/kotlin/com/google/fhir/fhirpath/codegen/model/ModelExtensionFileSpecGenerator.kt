@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.backboneElements
-import com.google.fhir.fhirpath.codegen.r4.schema.capitalized
-import com.google.fhir.fhirpath.codegen.r4.schema.getElementName
-import com.google.fhir.fhirpath.codegen.r4.schema.getNestedClassName
-import com.google.fhir.fhirpath.codegen.r4.schema.rootElements
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.backboneElements
+import com.google.fhir.fhirpath.codegen.model.schema.capitalized
+import com.google.fhir.fhirpath.codegen.model.schema.getElementName
+import com.google.fhir.fhirpath.codegen.model.schema.getNestedClassName
+import com.google.fhir.fhirpath.codegen.model.schema.rootElements
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -34,13 +34,13 @@ import kotlin.collections.iterator
 object ModelExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtensionPackageName: String,
     structureDefinition: StructureDefinition,
   ): FileSpec {
     val modelClassName = ClassName(modelPackageName, structureDefinition.name.capitalized())
 
     return FileSpec.builder(
-        fhirPathExtPackageName,
+        modelExtensionPackageName,
         "More${structureDefinition.name.capitalized()}s",
       )
       .addFunction(

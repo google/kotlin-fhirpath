@@ -22,9 +22,7 @@ import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
-import com.google.fhir.model.r4.Code
-import com.google.fhir.model.r4.Decimal
-import com.google.fhir.model.r4.Quantity
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
@@ -55,9 +53,13 @@ val TIME_ARITHMETIC_UNITS =
 val DATETIME_ARITHMETIC_UNITS = DATE_ARITHMETIC_UNITS + TIME_ARITHMETIC_UNITS
 
 /** See [specification](https://hl7.org/fhirpath/N1/#multiplication). */
-internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
-  val leftItem = left.singleOrNull()?.toFhirPathType() ?: return emptyList()
-  val rightItem = right.singleOrNull()?.toFhirPathType() ?: return emptyList()
+internal fun multiplication(
+  left: Collection<Any>,
+  right: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val leftItem = left.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  val rightItem = right.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
 
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem * rightItem)
@@ -92,16 +94,20 @@ internal fun multiplication(left: Collection<Any>, right: Collection<Any>): Coll
       val combinedUnits = leftUnits * rightUnits
       val resultUnitString = formatUcumUnit(combinedUnits)
 
-      listOf(Quantity(value = Decimal(value = resultValue), code = Code(value = resultUnitString)))
+      listOf(FhirPathQuantity(value = resultValue, unit = resultUnitString))
     }
     else -> error("Cannot multiply $leftItem and $rightItem")
   }
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#division). */
-internal fun division(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
-  val leftItem = left.singleOrNull()?.toFhirPathType() ?: return emptyList()
-  val rightItem = right.singleOrNull()?.toFhirPathType() ?: return emptyList()
+internal fun division(
+  left: Collection<Any>,
+  right: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val leftItem = left.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  val rightItem = right.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
 
   if (leftItem is FhirPathQuantity && rightItem is FhirPathQuantity) {
     val leftCanonical = leftItem.toEqualCanonicalized()
@@ -116,9 +122,7 @@ internal fun division(left: Collection<Any>, right: Collection<Any>): Collection
     val combinedUnits = leftUnits / rightUnits
     val resultUnitString = formatUcumUnit(combinedUnits)
 
-    return listOf(
-      Quantity(value = Decimal(value = resultValue), code = Code(value = resultUnitString))
-    )
+    return listOf(FhirPathQuantity(value = resultValue, unit = resultUnitString))
   }
 
   val leftBigDecimal =
@@ -142,9 +146,13 @@ internal fun division(left: Collection<Any>, right: Collection<Any>): Collection
 
 /** See [specification](https://hl7.org/fhirpath/N1/#addition). */
 @OptIn(ExperimentalTime::class)
-internal fun addition(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
-  val leftItem = left.singleOrNull()?.toFhirPathType() ?: return emptyList()
-  val rightItem = right.singleOrNull()?.toFhirPathType() ?: return emptyList()
+internal fun addition(
+  left: Collection<Any>,
+  right: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val leftItem = left.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  val rightItem = right.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
 
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem + rightItem)
@@ -157,7 +165,8 @@ internal fun addition(left: Collection<Any>, right: Collection<Any>): Collection
     leftItem is BigDecimal && rightItem is Long -> listOf(leftItem + rightItem)
     leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem + rightItem)
     leftItem is String && rightItem is String -> listOf(leftItem + rightItem)
-    leftItem is Quantity && rightItem is FhirPathQuantity -> TODO("Implement adding two quantities")
+    leftItem is FhirPathQuantity && rightItem is FhirPathQuantity ->
+      TODO("Implement adding two quantities")
     leftItem is FhirPathDate && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
     leftItem is FhirPathDateTime && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
     leftItem is FhirPathTime && rightItem is FhirPathQuantity -> listOf(leftItem + rightItem)
@@ -166,9 +175,13 @@ internal fun addition(left: Collection<Any>, right: Collection<Any>): Collection
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#subtraction). */
-internal fun subtraction(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
-  val leftItem = left.singleOrNull()?.toFhirPathType() ?: return emptyList()
-  val rightItem = right.singleOrNull()?.toFhirPathType() ?: return emptyList()
+internal fun subtraction(
+  left: Collection<Any>,
+  right: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val leftItem = left.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  val rightItem = right.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem - rightItem)
     leftItem is Int && rightItem is Long -> listOf(leftItem - rightItem)
@@ -179,7 +192,7 @@ internal fun subtraction(left: Collection<Any>, right: Collection<Any>): Collect
     leftItem is BigDecimal && rightItem is Int -> listOf(leftItem - rightItem)
     leftItem is BigDecimal && rightItem is Long -> listOf(leftItem - rightItem)
     leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem - rightItem)
-    leftItem is Quantity && rightItem is FhirPathQuantity ->
+    leftItem is FhirPathQuantity && rightItem is FhirPathQuantity ->
       TODO("Implement subtracting two quantities")
     leftItem is FhirPathDate && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)
     leftItem is FhirPathDateTime && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)

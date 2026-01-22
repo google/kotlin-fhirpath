@@ -19,16 +19,12 @@ package com.google.fhir.fhirpath.functions
 import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.fhirpath.types.FhirPathTime
-import com.google.fhir.model.r4.FhirDate
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.YearMonth
 import kotlinx.datetime.minus
-import kotlinx.datetime.number
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -89,33 +85,11 @@ internal fun Collection<Any>.lowBoundary(params: List<Any>): Collection<Any> {
       // TODO: Implement lowBoundary for Decimal
       listOf(value)
     }
-    is FhirDate -> {
+    is FhirPathDate -> {
       when (precision) {
-        4 ->
-          listOf(
-            FhirDate.Year(
-              when (value) {
-                is FhirDate.Year -> value.value
-                is FhirDate.YearMonth -> value.value.year
-                is FhirDate.Date -> value.date.year
-              }
-            )
-          )
-        6 ->
-          when (value) {
-            is FhirDate.Year ->
-              listOf(FhirDate.YearMonth(YearMonth(value.value, month = Month.JANUARY)))
-            is FhirDate.YearMonth -> listOf(value)
-            is FhirDate.Date ->
-              listOf(FhirDate.YearMonth(YearMonth(value.date.year, value.date.month.number)))
-          }
-        8 ->
-          when (value) {
-            is FhirDate.Year -> listOf(FhirDate.Date(LocalDate(value.value, 1, 1)))
-            is FhirDate.YearMonth ->
-              listOf(FhirDate.Date(LocalDate(value.value.year, value.value.month, 1)))
-            is FhirDate.Date -> listOf(value)
-          }
+        4 -> listOf(FhirPathDate(year = value.year))
+        6 -> listOf(FhirPathDate(year = value.year, month = value.month ?: 1))
+        8 -> listOf(FhirPathDate(year = value.year, month = value.month ?: 1, day = value.day ?: 1))
         else -> error("Invalid precision value: $precision")
       }
     }
@@ -167,7 +141,7 @@ internal fun Collection<Any>.highBoundary(params: List<Any>): Collection<Any> {
       // TODO: Implement highBoundary for Decimal
       listOf(value)
     }
-    is FhirDate -> {
+    is FhirPathDate -> {
       TODO("Implement highBoundary for Date")
     }
     is FhirPathDateTime -> {

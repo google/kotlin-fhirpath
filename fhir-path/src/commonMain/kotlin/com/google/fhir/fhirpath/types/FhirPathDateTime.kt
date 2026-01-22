@@ -16,7 +16,6 @@
 
 package com.google.fhir.fhirpath.types
 
-import com.google.fhir.model.r4.FhirDateTime
 import kotlin.text.get
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -154,7 +153,17 @@ data class FhirPathDateTime(
       return FhirPathDateTime(year, month, day, hour, minute, second, offset)
     }
 
-    fun fromFhirDateTime(fhirDateTime: FhirDateTime): FhirPathDateTime {
+    fun fromFhirR4DateTime(fhirDateTime: com.google.fhir.model.r4.FhirDateTime): FhirPathDateTime {
+      return fromString(fhirDateTime.toString())
+    }
+
+    fun fromFhirR4BDateTime(
+      fhirDateTime: com.google.fhir.model.r4b.FhirDateTime
+    ): FhirPathDateTime {
+      return fromString(fhirDateTime.toString())
+    }
+
+    fun fromFhirR5DateTime(fhirDateTime: com.google.fhir.model.r5.FhirDateTime): FhirPathDateTime {
       return fromString(fhirDateTime.toString())
     }
   }

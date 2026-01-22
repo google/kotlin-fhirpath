@@ -34,6 +34,8 @@ private const val TEST_INPUT_DIR = "${TEST_RESOURCE_DIR}/resources"
 
 private val jsonR4 = FhirR4Json()
 
+private val fhirPathEngine = FhirPathEngine.forR4()
+
 /**
  * A map from the test group name to the reason why the test group is skipped.
  *
@@ -138,14 +140,14 @@ class FhirPathEngineTest :
           ) {
             if (testCase.expression.invalid != null) {
               assertFailsWith<Exception> {
-                evaluateFhirPath(
+                fhirPathEngine.evaluateExpression(
                   testCase.expression.value,
                   testCase.inputfile?.let { inputMap[it] },
                 )
               }
             } else {
               val results =
-                evaluateFhirPath(
+                fhirPathEngine.evaluateExpression(
                   testCase.expression.value,
                   testCase.inputfile?.let { inputMap[it] },
                 )

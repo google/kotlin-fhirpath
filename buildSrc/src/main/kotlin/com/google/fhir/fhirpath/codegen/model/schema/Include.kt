@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath
+package com.google.fhir.fhirpath.codegen.model.schema
 
-import kotlin.test.assertEquals
-import org.junit.jupiter.api.Test
+import kotlinx.serialization.Serializable
 
-class AggregateTest {
-
-  @Test
-  fun `nested aggregate inner total is independent from outer total`() {
-    val result =
-      evaluateFhirPath(
-        "(1 | 2).aggregate((10 | 20 | 30).aggregate(\$total + \$this, 0) + \$total + \$this, 0)",
-        null,
-      )
-    assertEquals(listOf(123), result.toList())
-  }
-}
+@Serializable data class Include(val system: String? = null, val concept: List<Concept>? = null)

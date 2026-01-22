@@ -16,7 +16,6 @@
 
 package com.google.fhir.fhirpath.types
 
-import com.google.fhir.model.r4.FhirDate
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.YearMonth
@@ -86,7 +85,15 @@ internal data class FhirPathDate(val year: Int, val month: Int? = null, val day:
       return FhirPathDate(year, month, day)
     }
 
-    fun fromFhirDate(fhirDate: FhirDate): FhirPathDate {
+    fun fromFhirR4Date(fhirDate: com.google.fhir.model.r4.FhirDate): FhirPathDate {
+      return fromString(fhirDate.toString())
+    }
+
+    fun fromFhirR4BDate(fhirDate: com.google.fhir.model.r4b.FhirDate): FhirPathDate {
+      return fromString(fhirDate.toString())
+    }
+
+    fun fromFhirR5Date(fhirDate: com.google.fhir.model.r5.FhirDate): FhirPathDate {
       return fromString(fhirDate.toString())
     }
   }
