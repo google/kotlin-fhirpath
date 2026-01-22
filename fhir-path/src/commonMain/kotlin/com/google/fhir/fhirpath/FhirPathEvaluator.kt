@@ -430,32 +430,31 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
       "repeat" -> {
         // See [specification](https://hl7.org/fhirpath/N1/#repeatexpression-collection).
         val expression = functionNode.paramList()!!.expression().single()
-        val seen = mutableSetOf<Any>()
         val queue = ArrayDeque(context)
-        val results = mutableListOf<Any>()
+        val finalResults = mutableListOf<Any>()
 
         while (queue.isNotEmpty()) {
           val item = queue.removeFirst()
 
           thisStack.addLast(item)
           contextStack.addLast(listOf(item))
-          val children = visit(expression)
+          val results = visit(expression)
           contextStack.removeLast()
           thisStack.removeLast()
 
-          for (child in children) {
-            if (child.hasChildren()) {
-              results.add(child)
-              queue.addLast(child)
+          for (result in results) {
+            if (result.hasChildren()) {
+              finalResults.add(result)
+              queue.addLast(result)
             } else {
-              if (seen.add(child)) {
-                results.add(child)
+              if (finalResults.none { it.toFhirPathType() == result.toFhirPathType() }) {
+                finalResults.add(result)
               }
             }
           }
         }
 
-        results
+        finalResults
       }
       "trace" -> {
         // See
