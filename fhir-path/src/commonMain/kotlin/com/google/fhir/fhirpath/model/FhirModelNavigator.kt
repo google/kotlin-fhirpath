@@ -23,13 +23,13 @@ package com.google.fhir.fhirpath.model
 internal const val STRICT_MODE = false
 
 internal sealed class FhirModelNavigator {
-  fun accessProperty(obj: Any, fieldName: String): Any? {
+  fun accessProperty(obj: Any, propertyName: String): Any? {
     if (!STRICT_MODE) {
       // Allow graceful handling of invalid property access (returns null instead of throwing)
-      if (!hasProperty(obj, fieldName)) return null
+      if (!hasProperty(obj, propertyName)) return null
     }
 
-    val element = getProperty(obj, fieldName)
+    val element = getProperty(obj, propertyName)
 
     // Always unwrap choice type values. For example, the expression `Patient.multipleBirth` will
     // be of type `Boolean` or `Integer` rather than `Patient.MultipleBirth.Boolean` or
@@ -44,9 +44,9 @@ internal sealed class FhirModelNavigator {
 
   abstract fun canHaveChildren(obj: Any): Boolean
 
-  protected abstract fun hasProperty(obj: Any, fieldName: String): Boolean
+  protected abstract fun hasProperty(obj: Any, propertyName: String): Boolean
 
-  protected abstract fun getProperty(obj: Any, fieldName: String): Any?
+  protected abstract fun getProperty(obj: Any, propertyName: String): Any?
 
   protected abstract fun unwrapProperty(any: Any): Any?
 }
