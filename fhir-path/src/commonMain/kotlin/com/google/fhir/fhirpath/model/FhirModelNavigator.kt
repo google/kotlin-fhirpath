@@ -40,7 +40,7 @@ internal sealed class FhirModelNavigator {
     return element?.let { unwrapProperty(element) }
   }
 
-  abstract fun getAllChildren(any: Any): Collection<Any>
+  abstract fun getAllChildren(obj: Any): Collection<Any>
 
   abstract fun canHaveChildren(obj: Any): Boolean
 
