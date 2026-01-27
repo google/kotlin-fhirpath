@@ -42,7 +42,8 @@ internal fun Collection<Any>.subsetOf(
   fhirPathTypeResolver: FhirPathTypeResolver,
 ): Collection<Boolean> {
   val paramsConverted = params.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
-  return listOf(all { paramsConverted.contains(it.toFhirPathType(fhirPathTypeResolver)) })
+  val thisConverted = this.map { it.toFhirPathType(fhirPathTypeResolver) }
+  return listOf(paramsConverted.containsAll(thisConverted))
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#supersetofother-collection-boolean). */
@@ -51,7 +52,8 @@ internal fun Collection<Any>.supersetOf(
   fhirPathTypeResolver: FhirPathTypeResolver,
 ): Collection<Boolean> {
   val thisConverted = this.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
-  return listOf(params.all { thisConverted.contains(it.toFhirPathType(fhirPathTypeResolver)) })
+  val paramsConverted = params.map { it.toFhirPathType(fhirPathTypeResolver) }
+  return listOf(thisConverted.containsAll(paramsConverted))
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#count-integer). */
