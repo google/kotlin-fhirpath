@@ -46,7 +46,7 @@ internal fun Collection<Any>.invoke(
     "subsetOf" -> this.subsetOf(params)
     "supersetOf" -> this.supersetOf(params)
     "count" -> this.count()
-    "distinct" -> this.distinct() // Use Kotlin's distinct()
+    "distinct" -> this.distinctFun()
     "isDistinct" -> this.isDistinct()
 
     // Filtering and projection

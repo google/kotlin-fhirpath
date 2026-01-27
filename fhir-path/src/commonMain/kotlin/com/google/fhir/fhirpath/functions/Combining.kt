@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.google.fhir.fhirpath.functions
 
+import com.google.fhir.fhirpath.toFhirPathType
+
 /**
  * See [specification](https://hl7.org/fhirpath/N1/#unionother-collection).
  *
@@ -25,7 +27,8 @@ package com.google.fhir.fhirpath.functions
  * TODO: Correct URL once https://jira.hl7.org/browse/FHIR-52050 is addressed.
  */
 internal fun Collection<Any>.union(other: Collection<Any>): Collection<Any> {
-  return (this + other).distinct()
+  val seen = mutableSetOf<Any>()
+  return (this + other).filter { seen.add(it.toFhirPathType()) }
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#combineother-collection-collection). */

@@ -44,12 +44,15 @@ internal fun Collection<Any>.lastFun(): Collection<Any> =
 
 /** See [specification](https://hl7.org/fhirpath/N1/#intersectother-collection-collection). */
 internal fun Collection<Any>.intersectFun(other: Collection<Any>): Collection<Any> {
-  return this.toSet().intersect(other.toSet())
+  val thisConverted = this.map { it.toFhirPathType() }.toSet()
+  val otherConverted = other.map { it.toFhirPathType() }.toSet()
+  return thisConverted.intersect(otherConverted)
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#excludeother-collection-collection). */
 internal fun Collection<Any>.exclude(other: Collection<Any>): Collection<Any> {
+  val otherConverted = other.map { it.toFhirPathType() }
   return this.toMutableList().apply {
-    removeAll { context -> other.contains(context.toFhirPathType()) }
+    removeAll { context -> otherConverted.contains(context.toFhirPathType()) }
   }
 }

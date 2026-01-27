@@ -93,7 +93,10 @@ specification across different FHIR versions. In particular, DateTime and Time i
 include partial time (e.g. missing minutes and seconds), which is not allowed in FHIR. Therefore,
 new implementations are needed.
 
-**Note on type conversion**: FHIR primitive types (e.g., `com.google.fhir.model.r4.String`) are not immediately converted to Kotlin primitives when extracted from resources. This is because FHIR primitives can have extensions that users may need to access. Instead, conversion to Kotlin primitives happens at the last moment—when values need to be compared for equality or membership operations. The `toFhirPathType()` function in `MoreAny.kt` handles this conversion.
+**Note on type conversion:** Conversion from FHIR types to FHIRPath types does not occur
+immediately after data elements are extracted from FHIR resources in order to preserve properties
+such as `id` and `extension`. Instead, it only occurs when needed—for checking equality,
+comparison, as well as before other functions and operations.
 
 ### Timezone offset in date time values
 
