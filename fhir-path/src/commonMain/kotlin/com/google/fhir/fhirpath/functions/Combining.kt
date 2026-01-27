@@ -17,6 +17,7 @@
 package com.google.fhir.fhirpath.functions
 
 import com.google.fhir.fhirpath.toFhirPathType
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 
 /**
  * See [specification](https://hl7.org/fhirpath/N1/#unionother-collection).
@@ -26,9 +27,12 @@ import com.google.fhir.fhirpath.toFhirPathType
  *
  * TODO: Correct URL once https://jira.hl7.org/browse/FHIR-52050 is addressed.
  */
-internal fun Collection<Any>.union(other: Collection<Any>): Collection<Any> {
+internal fun Collection<Any>.union(
+  other: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
   val seen = mutableSetOf<Any>()
-  return (this + other).filter { seen.add(it.toFhirPathType()) }
+  return (this + other).filter { seen.add(it.toFhirPathType(fhirPathTypeResolver)) }
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#combineother-collection-collection). */

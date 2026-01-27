@@ -187,7 +187,7 @@ internal class FhirPathEvaluator(
   override fun visitUnionExpression(ctx: fhirpathParser.UnionExpressionContext): Collection<Any> {
     val left = visit(ctx.expression(0)!!)
     val right = visit(ctx.expression(1)!!)
-    return left.union(right)
+    return left.union(right, fhirPathTypeResolver)
   }
 
   override fun visitInequalityExpression(

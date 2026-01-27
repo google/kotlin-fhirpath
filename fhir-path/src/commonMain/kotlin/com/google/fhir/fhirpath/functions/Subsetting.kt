@@ -17,6 +17,7 @@
 package com.google.fhir.fhirpath.functions
 
 import com.google.fhir.fhirpath.toFhirPathType
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 
 /** See [specification](https://hl7.org/fhirpath/N1/#single-collection). */
 internal fun Collection<Any>.singleFun(): Collection<Any> =
@@ -43,16 +44,22 @@ internal fun Collection<Any>.lastFun(): Collection<Any> =
   }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#intersectother-collection-collection). */
-internal fun Collection<Any>.intersectFun(other: Collection<Any>): Collection<Any> {
-  val thisConverted = this.map { it.toFhirPathType() }.toSet()
-  val otherConverted = other.map { it.toFhirPathType() }.toSet()
+internal fun Collection<Any>.intersectFun(
+  other: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val thisConverted = this.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
+  val otherConverted = other.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
   return thisConverted.intersect(otherConverted)
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#excludeother-collection-collection). */
-internal fun Collection<Any>.exclude(other: Collection<Any>): Collection<Any> {
-  val otherConverted = other.map { it.toFhirPathType() }
+internal fun Collection<Any>.exclude(
+  other: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val otherConverted = other.map { it.toFhirPathType(fhirPathTypeResolver) }
   return this.toMutableList().apply {
-    removeAll { context -> otherConverted.contains(context.toFhirPathType()) }
+    removeAll { context -> otherConverted.contains(context.toFhirPathType(fhirPathTypeResolver)) }
   }
 }

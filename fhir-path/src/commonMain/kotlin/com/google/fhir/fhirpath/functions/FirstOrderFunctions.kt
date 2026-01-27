@@ -43,11 +43,11 @@ internal fun Collection<Any>.invoke(
     "anyTrue" -> (this as Collection<Boolean>).anyTrue()
     "allFalse" -> (this as Collection<Boolean>).allFalse()
     "anyFalse" -> (this as Collection<Boolean>).anyFalse()
-    "subsetOf" -> this.subsetOf(params)
-    "supersetOf" -> this.supersetOf(params)
+    "subsetOf" -> this.subsetOf(params, fhirPathTypeResolver)
+    "supersetOf" -> this.supersetOf(params, fhirPathTypeResolver)
     "count" -> this.count()
-    "distinct" -> this.distinctFun()
-    "isDistinct" -> this.isDistinct()
+    "distinct" -> this.distinctFun(fhirPathTypeResolver)
+    "isDistinct" -> this.isDistinct(fhirPathTypeResolver)
 
     // Filtering and projection
     // https://hl7.org/fhirpath/N1/#filtering-and-projection
@@ -61,12 +61,12 @@ internal fun Collection<Any>.invoke(
     "tail" -> this.drop(1) // Use Kotlin's drop()
     "skip" -> this.drop(params[0] as Int) // Use Kotlin's drop()
     "take" -> this.take(params[0] as Int) // Use Kotlin's take()
-    "intersect" -> this.intersectFun(params)
-    "exclude" -> this.exclude(params)
+    "intersect" -> this.intersectFun(params, fhirPathTypeResolver)
+    "exclude" -> this.exclude(params, fhirPathTypeResolver)
 
     // Combining
     // https://hl7.org/fhirpath/N1/#combining
-    "union" -> this.union(params)
+    "union" -> this.union(params, fhirPathTypeResolver)
     "combine" -> this.combine(params)
 
     // Conversion
