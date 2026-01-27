@@ -17,6 +17,7 @@
 package com.google.fhir.fhirpath.operators
 
 import com.google.fhir.fhirpath.asComparableOperands
+import com.google.fhir.fhirpath.parseUcumUnit
 import com.google.fhir.fhirpath.toEqualCanonicalized
 import com.google.fhir.fhirpath.toEquivalentCanonicalized
 import com.google.fhir.fhirpath.toFhirPathType
