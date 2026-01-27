@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4.schema
+package com.google.fhir.fhirpath.codegen.model.schema
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class Concept(val code: String, val display: String? = null, val definition: String? = null)
+@Serializable data class Compose(val include: List<Include> = emptyList())

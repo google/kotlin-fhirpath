@@ -16,13 +16,13 @@
 
 package com.google.fhir.fhirpath.types
 
-import com.google.fhir.model.r4.FhirDateTime
 import kotlin.text.get
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.UtcOffset
+import kotlinx.datetime.YearMonth
 import kotlinx.datetime.toInstant
 
 data class FhirPathDateTime(
@@ -143,8 +143,9 @@ data class FhirPathDateTime(
           LocalDateTime(year, month!!, day!!, hour, minute ?: 0, second?.toInt() ?: 0)
         } else if (day != null) {
           LocalDate(year, month!!, day)
+        } else if (month != null) {
+          YearMonth(year, month)
         }
-        // TODO: Validate YearMonth using the new kotlinx.datetime.YearMonth class
       } catch (e: Exception) {
         throw IllegalArgumentException("Invalid date or time component in literal: $string", e)
       }
@@ -152,7 +153,17 @@ data class FhirPathDateTime(
       return FhirPathDateTime(year, month, day, hour, minute, second, offset)
     }
 
-    fun fromFhirDateTime(fhirDateTime: FhirDateTime): FhirPathDateTime {
+    fun fromFhirR4DateTime(fhirDateTime: com.google.fhir.model.r4.FhirDateTime): FhirPathDateTime {
+      return fromString(fhirDateTime.toString())
+    }
+
+    fun fromFhirR4BDateTime(
+      fhirDateTime: com.google.fhir.model.r4b.FhirDateTime
+    ): FhirPathDateTime {
+      return fromString(fhirDateTime.toString())
+    }
+
+    fun fromFhirR5DateTime(fhirDateTime: com.google.fhir.model.r5.FhirDateTime): FhirPathDateTime {
       return fromString(fhirDateTime.toString())
     }
   }

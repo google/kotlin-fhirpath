@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.backboneElements
-import com.google.fhir.fhirpath.codegen.r4.schema.capitalized
-import com.google.fhir.fhirpath.codegen.r4.schema.getElementName
-import com.google.fhir.fhirpath.codegen.r4.schema.getNestedClassName
-import com.google.fhir.fhirpath.codegen.r4.schema.rootElements
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.backboneElements
+import com.google.fhir.fhirpath.codegen.model.schema.capitalized
+import com.google.fhir.fhirpath.codegen.model.schema.getElementName
+import com.google.fhir.fhirpath.codegen.model.schema.getNestedClassName
+import com.google.fhir.fhirpath.codegen.model.schema.rootElements
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
@@ -34,13 +35,13 @@ import kotlin.collections.iterator
 object ModelExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtensionPackageName: String,
     structureDefinition: StructureDefinition,
   ): FileSpec {
     val modelClassName = ClassName(modelPackageName, structureDefinition.name.capitalized())
 
     return FileSpec.builder(
-        fhirPathExtPackageName,
+        modelExtensionPackageName,
         "More${structureDefinition.name.capitalized()}s",
       )
       .addFunction(
@@ -80,16 +81,25 @@ object ModelExtensionFileSpecGenerator {
           .addModifiers(KModifier.INTERNAL)
           .receiver(modelClassName)
           .returns(LIST.parameterizedBy(Any::class.asTypeName()))
-          .addCode("return buildList {\n")
-          .apply {
-            for (element in structureDefinition.rootElements) {
-              val elementName = element.getElementName()
-              addCode(
-                "  this@getAllChildren.%N?.let { if (it is kotlin.collections.List<*>) addAll(it as Collection<Any>) else add(it) }\n",
-                elementName,
-              )
-            }
-          }
+          .addCode(
+            CodeBlock.builder()
+              .add("return buildList {\n")
+              .apply {
+                indent()
+                for (element in structureDefinition.rootElements) {
+                  val elementName = element.getElementName()
+                  if (element.max == "*") {
+                    add("addAll(this@getAllChildren.%N)\n", elementName)
+                  } else if (element.min == 0) {
+                    add("this@getAllChildren.%N?.let { add(it) }\n", elementName)
+                  } else {
+                    add("add(this@getAllChildren.%N)\n", elementName)
+                  }
+                }
+                unindent()
+              }
+              .build()
+          )
           .addCode("}\n")
           .build()
       )
@@ -132,16 +142,25 @@ object ModelExtensionFileSpecGenerator {
               .addModifiers(KModifier.INTERNAL)
               .receiver(backboneElement.key.getNestedClassName(modelClassName))
               .returns(LIST.parameterizedBy(Any::class.asTypeName()))
-              .addCode("return buildList {\n")
-              .apply {
-                for (element in backboneElement.value) {
-                  val elementName = element.getElementName()
-                  addCode(
-                    "  this@getAllChildren.%N?.let { if (it is kotlin.collections.List<*>) addAll(it as Collection<Any>) else add(it) }\n",
-                    elementName,
-                  )
-                }
-              }
+              .addCode(
+                CodeBlock.builder()
+                  .add("return buildList {\n")
+                  .indent()
+                  .apply {
+                    for (element in backboneElement.value) {
+                      val elementName = element.getElementName()
+                      if (element.max == "*") {
+                        add("addAll(this@getAllChildren.%N)\n", elementName)
+                      } else if (element.min == 0) {
+                        add("this@getAllChildren.%N?.let { add(it) }\n", elementName)
+                      } else {
+                        add("add(this@getAllChildren.%N)\n", elementName)
+                      }
+                    }
+                  }
+                  .unindent()
+                  .build()
+              )
               .addCode("}\n")
               .build()
           )

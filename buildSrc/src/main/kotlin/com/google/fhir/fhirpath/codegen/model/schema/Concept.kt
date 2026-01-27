@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.types
+package com.google.fhir.fhirpath.codegen.model.schema
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import kotlinx.serialization.Serializable
 
-data class FhirPathQuantity(val value: BigDecimal? = null, val unit: String? = null)
+@Serializable
+data class Concept(val code: String, val display: String? = null, val definition: String? = null)

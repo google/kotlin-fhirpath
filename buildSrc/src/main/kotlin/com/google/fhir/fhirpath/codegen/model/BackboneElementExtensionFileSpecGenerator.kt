@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition.Kind
-import com.google.fhir.fhirpath.codegen.r4.schema.capitalized
-import com.google.fhir.model.r4.terminologies.ResourceType
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.backboneElements
+import com.google.fhir.fhirpath.codegen.model.schema.capitalized
+import com.google.fhir.fhirpath.codegen.model.schema.getNestedClassName
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -27,56 +27,32 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.LIST
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.asTypeName
+import kotlin.collections.iterator
 
-object ResourceExtensionFileSpecGenerator {
+object BackboneElementExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhriPathPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    val resourceType = ClassName(modelPackageName, "Resource")
-    return FileSpec.builder(fhirPathExtPackageName, "MoreResources")
-      .addFunction(
-        FunSpec.builder("getFhirType")
-          .addModifiers(KModifier.INTERNAL)
-          .receiver(resourceType)
-          .returns(ClassName(fhriPathPackageName, "FhirType").copy(nullable = true))
-          .beginControlFlow("return when(this)")
-          .apply {
-            for (structureDefinition in structureDefinitions) {
-              val typeName = structureDefinition.name.capitalized()
-              when (structureDefinition.kind) {
-                Kind.RESOURCE -> {
-                  addStatement(
-                    "is %T -> %T(%T.%N)",
-                    ClassName(modelPackageName, typeName),
-                    ClassName("com.google.fhir.fhirpath", "FhirResourceType"),
-                    ResourceType::class,
-                    typeName,
-                  )
-                }
-                else -> error(": ${structureDefinition.kind} for ${structureDefinition.name}")
-              }
-            }
-            addStatement("else -> null")
-          }
-          .endControlFlow()
-          .build()
-      )
+    return FileSpec.builder(modelExtPackageName, "MoreBackboneElements")
       .addFunction(
         FunSpec.builder("getProperty")
           .addModifiers(KModifier.INTERNAL)
-          .receiver(resourceType)
+          .receiver(ClassName(modelPackageName, "BackboneElement"))
           .returns(Any::class.asTypeName().copy(nullable = true))
           .addParameter(name = "name", type = String::class)
           .beginControlFlow("return when(this)")
           .apply {
             for (structureDefinition in structureDefinitions) {
-              addStatement(
-                "is %T -> getProperty(name)",
-                ClassName(modelPackageName, structureDefinition.name.capitalized()),
-              )
+              val modelClassName =
+                ClassName(modelPackageName, structureDefinition.name.capitalized())
+              for (backboneElement in structureDefinition.backboneElements) {
+                addStatement(
+                  "is %T -> getProperty(name)",
+                  backboneElement.key.getNestedClassName(modelClassName),
+                )
+              }
             }
             addStatement("else -> null")
           }
@@ -86,16 +62,20 @@ object ResourceExtensionFileSpecGenerator {
       .addFunction(
         FunSpec.builder("hasProperty")
           .addModifiers(KModifier.INTERNAL)
-          .receiver(resourceType)
+          .receiver(ClassName(modelPackageName, "BackboneElement"))
           .returns(Boolean::class)
           .addParameter(name = "name", type = String::class)
           .beginControlFlow("return when(this)")
           .apply {
             for (structureDefinition in structureDefinitions) {
-              addStatement(
-                "is %T -> hasProperty(name)",
-                ClassName(modelPackageName, structureDefinition.name.capitalized()),
-              )
+              val modelClassName =
+                ClassName(modelPackageName, structureDefinition.name.capitalized())
+              for (backboneElement in structureDefinition.backboneElements) {
+                addStatement(
+                  "is %T -> hasProperty(name)",
+                  backboneElement.key.getNestedClassName(modelClassName),
+                )
+              }
             }
             addStatement("else -> false")
           }
@@ -105,15 +85,19 @@ object ResourceExtensionFileSpecGenerator {
       .addFunction(
         FunSpec.builder("getAllChildren")
           .addModifiers(KModifier.INTERNAL)
-          .receiver(resourceType)
+          .receiver(ClassName(modelPackageName, "BackboneElement"))
           .returns(LIST.parameterizedBy(Any::class.asTypeName()))
           .beginControlFlow("return when(this)")
           .apply {
             for (structureDefinition in structureDefinitions) {
-              addStatement(
-                "is %T -> getAllChildren()",
-                ClassName(modelPackageName, structureDefinition.name.capitalized()),
-              )
+              val modelClassName =
+                ClassName(modelPackageName, structureDefinition.name.capitalized())
+              for (backboneElement in structureDefinition.backboneElements) {
+                addStatement(
+                  "is %T -> getAllChildren()",
+                  backboneElement.key.getNestedClassName(modelClassName),
+                )
+              }
             }
             addStatement("else -> emptyList()")
           }

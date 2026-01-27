@@ -19,13 +19,13 @@ Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/
 
 ## Key features
 
-* Built with an [ANTLR](https://www.antlr.org/)-generated parser for strict adherence to the formal
-  FHIRPath grammar
-* Conforms strictly to the specification, with predictable and well-documented behavior
+* Strict conformation to the FHIRPath specification, with predictable and
+  [well-documented](#conformance) behavior
+* Built with an [ANTLR](https://www.antlr.org/)-generated parser for adherence to the formal grammar
 * Support for validation, conversion, and comparison between compatible
   [UCUM](http://unitsofmeasure.org/ucum.html) units
-* Designed for portability, providing a single engine across JVM, Android, iOS, Web (JS), and Native
-  platforms
+* Multiplatform support across Android, iOS, Desktop (JVM), Server-side (JVM), and Web (Wasm/JS)
+* Support for FHIR R4, R4B, R5, and future versions
 * Tested against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) to
   guarantee correctness
 
@@ -38,8 +38,7 @@ experimental nature of the sections marked as STU (Standard for Trial Use) in th
 
 ## FHIR version support
 
-The library currently supports R4 only. Support for other versions will be added as the library
-matures.
+The library supports FHIR R4, R4B and R5. Support will be added for future FHIR versions.
 
 ## Implementation
 
@@ -84,19 +83,15 @@ The following table lists the chosen internal types for the FHIRPath primitive t
 | Integer                                                                     | kotlin.Int                                                                    |
 | Long                                                                        | kotlin.Long                                                                   |
 | Decimal                                                                     | com.ionspin.kotlin.bignum.decimal.BigDecimal                                  |
-| Date                                                                        | FhirDate(*)                                                                   |
-| DateTime                                                                    | FhirPathDateTime(**)                                                          |
-| Time                                                                        | FhirPathTime(**)                                                              |
-| Quantity                                                                    | FhirPathQuantity(**)                                                          |
+| Date                                                                        | FhirPathDate                                                                  |
+| DateTime                                                                    | FhirPathDateTime                                                              |
+| Time                                                                        | FhirPathTime                                                                  |
+| Quantity                                                                    | FhirPathQuantity                                                              |
 
-(*): Classes defined in [Kotlin FHIR](https://github.com/google/kotlin-fhir)
-(**): Classes defined in this project
-
-Classes from the [Kotlin FHIR](https://github.com/google/kotlin-fhir) are used for more complex
-types that do not have direct representations in Kotlin. For DateTime and Time, the requirements in
-FHIRPath are more lenient than in the FHIR specification. As a result, custom classes need to be
-authored to handle cases where the minutes, seconds, or milliseconds are not present (allowed in
-FHIRPath but not allowed in FHIR).
+This project defines Date, DateTime, Time, and Quantity classes in order to implement the FHIRPath
+specification across different FHIR versions. In particular, DateTime and Time in FHIRPath may
+include partial time (e.g. missing minutes and seconds), which is not allowed in FHIR. Therefore,
+new implementations are needed.
 
 **Note on type conversion**: FHIR primitive types (e.g., `com.google.fhir.model.r4.String`) are not immediately converted to Kotlin primitives when extracted from resources. This is because FHIR primitives can have extensions that users may need to access. Instead, conversion to Kotlin primitives happens at the last moment—when values need to be compared for equality or membership operations. The `toFhirPathType()` function in `MoreAny.kt` handles this conversion.
 
@@ -159,12 +154,18 @@ using intervals, it is not part of the FHIRPath specification. For simplicity, t
 
 ### Error handling
 
-The FHIRPath specification [does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws an exception) or a lenient (e.g. returns an empty collection) approach. However, the [official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require lenient type checking. To accommodate such cases, this implementation returns an empty collection when the FHIRPath expression attempts to access a data element that does not exist.
+The FHIRPath specification
+[does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired
+behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws
+an exception) or a lenient (e.g. returns an empty collection) approach. However, the
+[official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require
+lenient type checking. To accommodate such cases, this implementation returns an empty collection
+when the FHIRPath expression attempts to access a data element that does not exist.
 
 ## Conformance
 
-Due to the library's WIP status, not all test cases from the published official test suites are
-passing. The failures are documented in the table below.
+Test failures against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) are
+documented in the table below.
 
 |              Test case               |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                  Note                                                                                   |
 |--------------------------------------|--------------------|-----|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -175,7 +176,6 @@ passing. The failures are documented in the table below.
 | `testQuantityLiteralWeekToString`    | Specification/Test |     |                                                        | As above.                                                                                                                                                               |
 | `testQuantity4`                      | Test               |     | [PR](https://github.com/FHIR/fhir-test-cases/pull/243) |                                                                                                                                                                         |
 | `testSubSetOf3`                      | Specification/Test |     |                                                        | The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of "$this" is unclear (https://jira.hl7.org/browse/FHIR-44601) |
-| `testRepeat*`                        | Implementation     |     |                                                        | Function `repeat` is not implemented.                                                                                                                                   |
 | `testIif11`                          | Implementation     |     |                                                        | https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601                                                                                          |
 | `testEncode*`                        | Implementation     | STU |                                                        | Function `encode` is not implemented.                                                                                                                                   |
 | `testDecode*`                        | Implementation     | STU |                                                        | Function `decode` is not implemented.                                                                                                                                   |
@@ -209,10 +209,10 @@ passing. The failures are documented in the table below.
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
 
-The root cause column documents if the test failure is caused by issues with the implementation
-(this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
-or is under investigation. We exclude test cases that would fail due to issues in the tests and the
-specification itself. But we track the ongoing discussions and resolutions in this table.
+The root cause column documents if the test failure is caused by implementation issues in this
+repository, if the test cases themselves are problematic, or it is believed that the specification
+itself is ambiguous or inconsistent. For issues in the test cases and the specification, discussions
+and proposals should be linked in the table above.
 
 ## User Guide
 
@@ -263,15 +263,17 @@ dependencies {
 
 ### Evaluating FHIRPath expressions
 
-To evaluate a FHIRPath expression, use `evaluateFhirPath` function:
+To evaluate a FHIRPath expression, create a `FhirPathEngine` for the correct FHIR version and use
+`evaluateExpression` function:
 
 ```
-import com.google.fhir.fhirpath.evaluateFhirPath
+import com.google.fhir.fhirpath.FhirPathEngine
 import com.google.fhir.model.r4.FhirR4Json
 
 val patientExampleJson = ... // Load "patient-example.json"
 val patient = FhirR4Json().decodeFromString(patientExampleJson)
-val results = evaluateFhirPath("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
+val fhirPathEngine = FhirPathEngine.forR4()
+val results = fhirPathEngine.evaluateExpression("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
 ```
 
 ## Developer Guide
@@ -293,10 +295,12 @@ To run the model extension codegen in `buildSrc` locally:
 
 ```shell
 ./gradlew generateR4Helpers
+./gradlew generateR4BHelpers
+./gradlew generateR5Helpers
 ```
 
 The generated code will be located in `fhir-path/build/generated` under packages
-`com.google.fhir.fhirpath` and `com.google.fhir.fhirpath.ext`.
+`com.google.fhir.model.<FHIR_VERSION>.ext` and `com.google.fhir.fhirpath`.
 
 ### UCUM helpers
 

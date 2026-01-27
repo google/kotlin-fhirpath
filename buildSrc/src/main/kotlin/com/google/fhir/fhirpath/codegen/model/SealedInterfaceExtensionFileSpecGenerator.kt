@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.fhir.fhirpath.codegen.r4
+package com.google.fhir.fhirpath.codegen.model
 
-import com.google.fhir.fhirpath.codegen.r4.schema.StructureDefinition
-import com.google.fhir.fhirpath.codegen.r4.schema.capitalized
+import com.google.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import com.google.fhir.fhirpath.codegen.model.schema.capitalized
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -27,10 +27,10 @@ import com.squareup.kotlinpoet.asTypeName
 object SealedInterfaceExtensionFileSpecGenerator {
   fun generate(
     modelPackageName: String,
-    fhirPathExtPackageName: String,
+    modelExtensionPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
-    return FileSpec.builder(fhirPathExtPackageName, "MoreSealedInterfaces")
+    return FileSpec.builder(modelExtensionPackageName, "MoreSealedInterfaces")
       .addFunction(
         FunSpec.builder("getPropertyInChoiceValue")
           .addModifiers(KModifier.INTERNAL)

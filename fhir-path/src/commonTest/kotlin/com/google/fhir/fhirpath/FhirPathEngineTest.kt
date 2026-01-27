@@ -16,6 +16,7 @@
 
 package com.google.fhir.fhirpath
 
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
 import com.google.fhir.model.r4.FhirR4Json
 import com.google.fhir.model.r4.Resource
@@ -33,6 +34,8 @@ private const val TEST_INPUT_DIR = "${TEST_RESOURCE_DIR}/resources"
 
 private val jsonR4 = FhirR4Json()
 
+private val fhirPathEngine = FhirPathEngine.forR4()
+
 /**
  * A map from the test group name to the reason why the test group is skipped.
  *
@@ -40,7 +43,6 @@ private val jsonR4 = FhirR4Json()
  */
 val skippedTestGroupToReasonMap =
   mapOf(
-    "testRepeat" to "Unimplemented",
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
     "testTrace" to "Unimplemented",
@@ -63,6 +65,7 @@ val skippedTestGroupToReasonMap =
  */
 val skippedTestCaseToReasonMap =
   mapOf(
+    "testPolymorphismB" to "Strict mode is not implemented yet",
     "testPolymorphismAsB" to
       "No error should be thrown according to https://hl7.org/fhirpath/#as-type-specifier",
     "testDateTimeGreaterThanDate1" to
@@ -103,7 +106,6 @@ val skippedTestCaseToReasonMap =
       "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
     "testSimpleFail" to "Strict mode is not implemented yet",
     "testSimpleWithWrongContext" to "Strict mode is not implemented yet",
-    "testPolymorphismB" to "Strict mode is not implemented yet",
     "testPolymorphicsB" to "Allow invalid test where it's not strict mode but expects output",
     "testIndex" to "TBD",
     "testPeriodInvariantOld" to "hasValue() is not implemented.",
@@ -136,14 +138,14 @@ class FhirPathEngineTest :
           ) {
             if (testCase.expression.invalid != null) {
               assertFailsWith<Exception> {
-                evaluateFhirPath(
+                fhirPathEngine.evaluateExpression(
                   testCase.expression.value,
                   testCase.inputfile?.let { inputMap[it] },
                 )
               }
             } else {
               val results =
-                evaluateFhirPath(
+                fhirPathEngine.evaluateExpression(
                   testCase.expression.value,
                   testCase.inputfile?.let { inputMap[it] },
                 )
@@ -162,7 +164,7 @@ private fun assertEquals(expected: List<Output>, actual: Collection<Any>) {
 
 private fun assertEquals(expected: Output, actual: Any) {
   when (expected.type) {
-    "date" -> assertEquals(expected.value, "@$actual")
+    "date" -> assertEquals(FhirPathDate.fromString(expected.value.trimStart('@')), actual)
     "dateTime" -> assertEquals(FhirPathDateTime.fromString(expected.value.trimStart('@')), actual)
     "code" -> assertEquals(expected.value, actual)
     "string" -> {

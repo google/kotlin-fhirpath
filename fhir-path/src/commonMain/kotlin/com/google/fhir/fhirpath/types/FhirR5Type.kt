@@ -16,6 +16,14 @@
 
 package com.google.fhir.fhirpath.types
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.google.fhir.model.r5.terminologies.ResourceType
 
-data class FhirPathQuantity(val value: BigDecimal? = null, val unit: String? = null)
+internal sealed interface FhirR5Type : FhirType {
+  abstract override val typeName: String
+  override val fhirVersion: FhirVersion
+    get() = FhirVersion.R5
+}
+
+internal data class FhirR5ResourceType(val resourceType: ResourceType) : FhirR5Type {
+  override val typeName: String = resourceType.getCode()
+}
