@@ -32,10 +32,7 @@ internal fun FhirPathQuantity.toEquivalentCanonicalized() =
   toEquivalentUcumDefiniteDuration().stripUcumPrefix().toCanonicalizedUcumUnit()
 
 /** Multiplies two quantities, combining their UCUM units. */
-internal fun multiplyQuantities(
-  left: FhirPathQuantity,
-  right: FhirPathQuantity,
-): FhirPathQuantity {
+internal fun multiplyQuantities(left: FhirPathQuantity, right: FhirPathQuantity): FhirPathQuantity {
   val leftCanonical = left.toEqualCanonicalized()
   val rightCanonical = right.toEqualCanonicalized()
 
