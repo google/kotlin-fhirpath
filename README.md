@@ -93,6 +93,11 @@ specification across different FHIR versions. In particular, DateTime and Time i
 include partial time (e.g. missing minutes and seconds), which is not allowed in FHIR. Therefore,
 new implementations are needed.
 
+**Note on type conversion:** Conversion from FHIR types to FHIRPath types does not occur
+immediately after data elements are extracted from FHIR resources in order to preserve properties
+such as `id` and `extension`. Instead, it only occurs when needed—for checking equality,
+comparison, as well as before other functions and operations.
+
 ### Timezone offset in date time values
 
 This FHIRPath implementation adopts a strict, safety-first approach to date time comparisons,
@@ -206,8 +211,6 @@ documented in the table below.
 | `testFHIRPathIsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
-| `testCombine2`                       | Implementation     |     |                                                        | FHIR String and Kotlin String comparison issue in `exclude()` function.                                                                                                 |
-| `testCombine3`                       | Implementation     |     |                                                        | As above.                                                                                                                                                               |
 
 The root cause column documents if the test failure is caused by implementation issues in this
 repository, if the test cases themselves are problematic, or it is believed that the specification

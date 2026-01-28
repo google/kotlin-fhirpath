@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package com.google.fhir.fhirpath.functions
+
+import com.google.fhir.fhirpath.toFhirPathType
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 
 /** See [specification](https://hl7.org/fhirpath/N1/#empty-boolean). */
 internal fun Collection<Any>.empty(): Collection<Boolean> = listOf(isEmpty())
@@ -34,20 +37,38 @@ internal fun Collection<Boolean>.allFalse(): Collection<Boolean> = listOf(all { 
 internal fun Collection<Boolean>.anyFalse(): Collection<Boolean> = listOf(any { !it })
 
 /** See [specification](https://hl7.org/fhirpath/N1/#subsetofother-collection-boolean). */
-internal fun Collection<Any>.subsetOf(params: Collection<Any>): Collection<Boolean> =
-  listOf(all { params.contains(it) })
+internal fun Collection<Any>.subsetOf(
+  params: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Boolean> {
+  val paramsConverted = params.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
+  val thisConverted = this.map { it.toFhirPathType(fhirPathTypeResolver) }
+  return listOf(paramsConverted.containsAll(thisConverted))
+}
 
 /** See [specification](https://hl7.org/fhirpath/N1/#supersetofother-collection-boolean). */
-internal fun Collection<Any>.supersetOf(params: Collection<Any>): Collection<Boolean> =
-  listOf(params.all { this.contains(it) })
+internal fun Collection<Any>.supersetOf(
+  params: Collection<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Boolean> {
+  val thisConverted = this.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
+  val paramsConverted = params.map { it.toFhirPathType(fhirPathTypeResolver) }
+  return listOf(thisConverted.containsAll(paramsConverted))
+}
 
 /** See [specification](https://hl7.org/fhirpath/N1/#count-integer). */
 internal fun Collection<Any>.count(): Collection<Int> = listOf(size)
 
 /** See [specification](https://hl7.org/fhirpath/N1/#distinct-collection). */
-// Use Kotlin's distinct()
-// internal fun Collection<Any>.distinct(): Collection<Any>
+internal fun Collection<Any>.distinctFun(
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Any> {
+  val seen = mutableSetOf<Any>()
+  return map { it.toFhirPathType(fhirPathTypeResolver) }.filter { seen.add(it) }
+}
 
 /** See [specification](https://hl7.org/fhirpath/N1/#isdistinct-boolean). */
-internal fun Collection<Any>.isDistinct(): Collection<Boolean> =
-  listOf(count() == distinct().count())
+internal fun Collection<Any>.isDistinct(
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Boolean> =
+  listOf(count() == distinctFun(fhirPathTypeResolver).count())
