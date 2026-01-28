@@ -58,8 +58,6 @@ internal fun Collection<Any>.exclude(
   other: Collection<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
 ): Collection<Any> {
-  val otherConverted = other.map { it.toFhirPathType(fhirPathTypeResolver) }
-  return this.toMutableList().apply {
-    removeAll { context -> otherConverted.contains(context.toFhirPathType(fhirPathTypeResolver)) }
-  }
+  val otherConverted = other.map { it.toFhirPathType(fhirPathTypeResolver) }.toSet()
+  return this.map { it.toFhirPathType(fhirPathTypeResolver) }.filterNot { otherConverted.contains(it) }
 }

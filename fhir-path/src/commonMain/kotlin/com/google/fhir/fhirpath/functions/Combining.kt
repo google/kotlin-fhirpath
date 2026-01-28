@@ -32,7 +32,7 @@ internal fun Collection<Any>.union(
   fhirPathTypeResolver: FhirPathTypeResolver,
 ): Collection<Any> {
   val seen = mutableSetOf<Any>()
-  return (this + other).filter { seen.add(it.toFhirPathType(fhirPathTypeResolver)) }
+  return (this + other).map { it.toFhirPathType(fhirPathTypeResolver) }.filter { seen.add(it) }
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#combineother-collection-collection). */

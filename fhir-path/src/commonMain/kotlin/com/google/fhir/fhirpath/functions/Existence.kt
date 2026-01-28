@@ -64,7 +64,7 @@ internal fun Collection<Any>.distinctFun(
   fhirPathTypeResolver: FhirPathTypeResolver,
 ): Collection<Any> {
   val seen = mutableSetOf<Any>()
-  return filter { seen.add(it.toFhirPathType(fhirPathTypeResolver)) }
+  return map { it.toFhirPathType(fhirPathTypeResolver) }.filter { seen.add(it) }
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#isdistinct-boolean). */
