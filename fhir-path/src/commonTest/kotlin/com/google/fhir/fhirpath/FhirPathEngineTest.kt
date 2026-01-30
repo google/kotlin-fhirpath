@@ -98,10 +98,6 @@ val skippedTestCaseToReasonMap =
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
     "testMinus5" to
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766",
-    "testPrecedence3" to
-      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251",
-    "testPrecedence4" to
-      "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251",
     "testDollarOrderNotAllowed" to
       "Ordered function validation not implemented. Test expects error when using skip() on unordered collection (children()), but engine does not track collection ordering.",
     "testSimpleFail" to "Strict mode is not implemented yet",
@@ -113,6 +109,7 @@ val skippedTestCaseToReasonMap =
     "testCombine2" to "FHIR String and Kotlin String comparison issue in exclude()",
     "testCombine3" to "As above",
     "testContainedId" to "TBD",
+    "testPrimitiveExtensions" to "Function `hasValue` is not implemented.",
   )
 
 @OptIn(ExperimentalKotest::class)
