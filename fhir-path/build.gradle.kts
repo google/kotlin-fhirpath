@@ -63,6 +63,10 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
 tasks.withType<Test>().configureEach {
     // Provide root directory reference for test code to access third_party
     systemProperty("projectRootDir", project.rootDir.absolutePath)
+    // Show stdout/stderr from tests (useful for trace function debugging)
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 kotlin {
