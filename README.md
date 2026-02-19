@@ -19,13 +19,13 @@ Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/
 
 ## Key features
 
-* Built with an [ANTLR](https://www.antlr.org/)-generated parser for strict adherence to the formal
-  FHIRPath grammar
-* Conforms strictly to the specification, with predictable and well-documented behavior
+* Strict conformation to the FHIRPath specification, with predictable and
+  [well-documented](#conformance) behavior
+* Built with an [ANTLR](https://www.antlr.org/)-generated parser for adherence to the formal grammar
 * Support for validation, conversion, and comparison between compatible
   [UCUM](http://unitsofmeasure.org/ucum.html) units
-* Designed for portability, providing a single engine across JVM, Android, iOS, Web (JS), and Native
-  platforms
+* Multiplatform support across Android, iOS, Desktop (JVM), Server-side (JVM), and Web (Wasm/JS)
+* Support for FHIR R4, R4B, R5, and future versions
 * Tested against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) to
   guarantee correctness
 
@@ -38,8 +38,7 @@ experimental nature of the sections marked as STU (Standard for Trial Use) in th
 
 ## FHIR version support
 
-The library currently supports R4 only. Support for other versions will be added as the library
-matures.
+The library supports FHIR R4, R4B and R5. Support will be added for future FHIR versions.
 
 ## Implementation
 
@@ -84,19 +83,15 @@ The following table lists the chosen internal types for the FHIRPath primitive t
 | Integer                                                                     | kotlin.Int                                                                    |
 | Long                                                                        | kotlin.Long                                                                   |
 | Decimal                                                                     | com.ionspin.kotlin.bignum.decimal.BigDecimal                                  |
-| Date                                                                        | FhirDate(*)                                                                   |
-| DateTime                                                                    | FhirPathDateTime(**)                                                          |
-| Time                                                                        | FhirPathTime(**)                                                              |
-| Quantity                                                                    | Quantity(*)                                                                   |
+| Date                                                                        | FhirPathDate                                                                  |
+| DateTime                                                                    | FhirPathDateTime                                                              |
+| Time                                                                        | FhirPathTime                                                                  |
+| Quantity                                                                    | FhirPathQuantity                                                              |
 
-(*): Classes defined in [Kotlin FHIR](https://github.com/google/kotlin-fhir)
-(**): Classes defined in this project
-
-Classes from the [Kotlin FHIR](https://github.com/google/kotlin-fhir) are used for more complex
-types that do not have direct representations in Kotlin. For DateTime and Time, the requirements in
-FHIRPath are more lenient than in the FHIR specification. As a result, custom classes need to be
-authored to handle cases where the minutes, seconds, or milliseconds are not present (allowed in
-FHIRPath but not allowed in FHIR).
+This project defines Date, DateTime, Time, and Quantity classes in order to implement the FHIRPath
+specification across different FHIR versions. In particular, DateTime and Time in FHIRPath may
+include partial time (e.g. missing minutes and seconds), which is not allowed in FHIR. Therefore,
+new implementations are needed.
 
 ### Timezone offset in date time values
 
@@ -155,10 +150,20 @@ using intervals, it is not part of the FHIRPath specification. For simplicity, t
 @2025-01-01T00+05:30 = @2025-01-01T00+05:45   // returns {}
 ```
 
+### Error handling
+
+The FHIRPath specification
+[does not specify](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation) the desired
+behavior when type checking errors occur, allowing the implementation to adopt a strict (e.g. throws
+an exception) or a lenient (e.g. returns an empty collection) approach. However, the
+[official test suite](https://github.com/FHIR/fhir-test-cases) include test cases that require
+lenient type checking. To accommodate such cases, this implementation returns an empty collection
+when the FHIRPath expression attempts to access a data element that does not exist.
+
 ## Conformance
 
-Due to the library's WIP status, not all test cases from the published official test suites are
-passing. The failures are documented in the table below.
+Test failures against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) are
+documented in the table below.
 
 |              Test case               |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                  Note                                                                                   |
 |--------------------------------------|--------------------|-----|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -169,12 +174,6 @@ passing. The failures are documented in the table below.
 | `testQuantityLiteralWeekToString`    | Specification/Test |     |                                                        | As above.                                                                                                                                                               |
 | `testQuantity4`                      | Test               |     | [PR](https://github.com/FHIR/fhir-test-cases/pull/243) |                                                                                                                                                                         |
 | `testSubSetOf3`                      | Specification/Test |     |                                                        | The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of "$this" is unclear (https://jira.hl7.org/browse/FHIR-44601) |
-| `testDistinct2`                      | Implementation     |     |                                                        | Function `descendants` is not implemented.                                                                                                                              |
-| `testDistinct3`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testDistinct5`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testDistinct6`                      | Implementation     |     |                                                        | As above.                                                                                                                                                               |
-| `testRepeat*`                        | Implementation     |     |                                                        | Function `repeat` is not implemented.                                                                                                                                   |
-| `testAggregate*`                     | Implementation     |     |                                                        | Function `aggregate` is not implemented.                                                                                                                                |
 | `testIif11`                          | Implementation     |     |                                                        | https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601                                                                                          |
 | `testEncode*`                        | Implementation     | STU |                                                        | Function `encode` is not implemented.                                                                                                                                   |
 | `testDecode*`                        | Implementation     | STU |                                                        | Function `decode` is not implemented.                                                                                                                                   |
@@ -182,7 +181,6 @@ passing. The failures are documented in the table below.
 | `testUnescape*`                      | Implementation     | STU |                                                        | Function `unescape` is not implemented.                                                                                                                                 |
 | `testTrace*`                         | Implementation     |     |                                                        | Function `trace` is not implemented.                                                                                                                                    |
 | `testNow1`                           | Specification/Test |     |                                                        | As `testDateTimeGreaterThanDate1`.                                                                                                                                      |
-| `testCombine*`                       | Implementation     |     |                                                        | Function `combine` is not implemented.                                                                                                                                  |
 | `testPlusDate13`                     | Specification/Test |     |                                                        | https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766                       |
 | `testPlusDate15`                     | Specification/Test |     |                                                        | As above.                                                                                                                                                               |
 | `testPlusDate18`                     | Implementation     |     |                                                        | To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.                                       |
@@ -191,8 +189,6 @@ passing. The failures are documented in the table below.
 | `testPlusDate21`                     | Specification/Test |     |                                                        | As `testPlusDate13`.                                                                                                                                                    |
 | `testPlusDate22`                     | Specification/Test |     |                                                        | As `testPlusDate13`.                                                                                                                                                    |
 | `testMinus5`                         | Specification/Test |     |                                                        | As `testPlusDate13`.                                                                                                                                                    |
-| `testPrecedence3`                    | Specification/Test |     | https://github.com/FHIR/fhir-test-cases/pull/249       | https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251                                      |
-| `testPrecedence4`                    | Specification/Test |     | https://github.com/FHIR/fhir-test-cases/pull/249       | https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/FHIRPath.20test.20suite.20for.20precedence.20correct.3F/with/564497251                                      |
 | `testVariables*`                     | Implementation     |     |                                                        | Variables are not implemented.                                                                                                                                          |
 | `testExtension*`                     | Implementation     |     |                                                        | Function `extension` is not implemented.                                                                                                                                |
 | `testType*`                          | Implementation     |     |                                                        | Function `type` is not implemented.                                                                                                                                     |
@@ -207,13 +203,16 @@ passing. The failures are documented in the table below.
 | `testFHIRPathIsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
+| `testCombine2`                       | Implementation     |     |                                                        | FHIR String and Kotlin String comparison issue in `exclude()` function.                                                                                                 |
+| `testCombine3`                       | Implementation     |     |                                                        | As above.                                                                                                                                                               |
+| `testPrimitiveExtensions`            | Implementation     |     |                                                        | Function `hasValue` is not implemented.                                                                                                                                 |
 | `testSort8`                          | Specification/Test |     |                                                        | Test uses `-$this` for descending string sort, but spec uses `asc`/`desc`.                                                                                              |
 | `testSort10`                         | Specification/Test |     |                                                        | Test uses `-` prefix for descending sort, but spec uses `asc`/`desc`.                                                                                                   |
 
-The root cause column documents if the test failure is caused by issues with the implementation
-(this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
-or is under investigation. We exclude test cases that would fail due to issues in the tests and the
-specification itself. But we track the ongoing discussions and resolutions in this table.
+The root cause column documents if the test failure is caused by implementation issues in this
+repository, if the test cases themselves are problematic, or it is believed that the specification
+itself is ambiguous or inconsistent. For issues in the test cases and the specification, discussions
+and proposals should be linked in the table above.
 
 ## User Guide
 
@@ -264,15 +263,17 @@ dependencies {
 
 ### Evaluating FHIRPath expressions
 
-To evaluate a FHIRPath expression, use `evaluateFhirPath` function:
+To evaluate a FHIRPath expression, create a `FhirPathEngine` for the correct FHIR version and use
+`evaluateExpression` function:
 
 ```
-import com.google.fhir.fhirpath.evaluateFhirPath
+import com.google.fhir.fhirpath.FhirPathEngine
 import com.google.fhir.model.r4.FhirR4Json
 
 val patientExampleJson = ... // Load "patient-example.json"
 val patient = FhirR4Json().decodeFromString(patientExampleJson)
-val results = evaluateFhirPath("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
+val fhirPathEngine = FhirPathEngine.forR4()
+val results = fhirPathEngine.evaluateExpression("name.given", patient)  // ["Peter", "James", "Jim", "Peter", "James"]
 ```
 
 ## Developer Guide
@@ -294,10 +295,12 @@ To run the model extension codegen in `buildSrc` locally:
 
 ```shell
 ./gradlew generateR4Helpers
+./gradlew generateR4BHelpers
+./gradlew generateR5Helpers
 ```
 
 The generated code will be located in `fhir-path/build/generated` under packages
-`com.google.fhir.fhirpath` and `com.google.fhir.fhirpath.ext`.
+`com.google.fhir.model.<FHIR_VERSION>.ext` and `com.google.fhir.fhirpath`.
 
 ### UCUM helpers
 
@@ -359,12 +362,16 @@ repositories for code generation and testing purposes:
   - [`resources`](third_party/fhir-test-cases/r4/resources) JSON versions of the relevant test
     resources generated using [Anton V.](https://www.antvaset.com/)'s
     [FHIR Converter](https://www.antvaset.com/fhir-converter) alongside the XML versions
-    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4))
+    ([commit](https://github.com/FHIR/fhir-test-cases/tree/dc86fa6f5225ac27b42046bb3ba2254ff688d3df/r4)). The XML and JSON resource files in the fhir-test-cases repository are inconsistent; we use XML files converted to JSON.
 - [`fhirpath-2.0.0`](third_party/fhirpath-2.0.0/): the formal
   [antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
   [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
 - [`hl7.fhir.r4.core`](third_party/hl7.fhir.r4.core/): content from
   [FHIR R4](https://hl7.org/fhir/R4/) for code generation
+- [`hl7.fhir.r4b.core`](third_party/hl7.fhir.r4b.core/): content from
+  [FHIR R4B](https://hl7.org/fhir/R4B/) for code generation
+- [`hl7.fhir.r5.core`](third_party/hl7.fhir.r5.core/): content from
+  [FHIR R5](https://hl7.org/fhir/R5/) for code generation
 - [`ucum`](third_party/ucum/): content from the [UCUM](https://github.com/ucum-org/ucum) repo
 
 ## Disclaimer

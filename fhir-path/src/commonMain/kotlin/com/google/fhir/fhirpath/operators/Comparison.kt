@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package com.google.fhir.fhirpath.operators
 
 import com.google.fhir.fhirpath.asComparableOperands
 import com.google.fhir.fhirpath.toEqualCanonicalized
+import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
+import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.types.FhirPathTime
-import com.google.fhir.model.r4.FhirDate
-import com.google.fhir.model.r4.Quantity
+import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
-internal fun compare(left: Any, right: Any): Int? {
-  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands()
+internal fun compare(left: Any, right: Any, fhirPathTypeResolver: FhirPathTypeResolver): Int? {
+  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands(fhirPathTypeResolver)
 
   return when {
     leftFhirPath is String && rightFhirPath is String -> {
@@ -40,27 +41,18 @@ internal fun compare(left: Any, right: Any): Int? {
     leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
       leftFhirPath.compareTo(rightFhirPath)
     }
-    leftFhirPath is Quantity && rightFhirPath is Quantity -> {
+    leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
       with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
-        if (first.code?.value!! != second.code?.value!!) return null
-        return first.value?.value?.compareTo(second.value!!.value!!)
+        if (first.unit!! != second.unit!!) return null
+        return first.value?.compareTo(second.value!!)
       }
     }
-    leftFhirPath is FhirDate && rightFhirPath is FhirDate -> leftFhirPath.compareTo(rightFhirPath)
+    leftFhirPath is FhirPathDate && rightFhirPath is FhirPathDate ->
+      leftFhirPath.compareTo(rightFhirPath)
     leftFhirPath is FhirPathDateTime && rightFhirPath is FhirPathDateTime ->
       leftFhirPath.compareTo(rightFhirPath)
     leftFhirPath is FhirPathTime && rightFhirPath is FhirPathTime ->
       leftFhirPath.compareTo(rightFhirPath)
     else -> error("Cannot compare $leftFhirPath and $rightFhirPath")
-  }
-}
-
-private fun FhirDate.compareTo(other: FhirDate): Int? {
-  return when {
-    this is FhirDate.Year && other is FhirDate.Year -> this.value compareTo other.value
-    this is FhirDate.YearMonth && other is FhirDate.YearMonth ->
-      compareValuesBy(this, other, { it.value.year }, { it.value.month })
-    this is FhirDate.Date && other is FhirDate.Date -> this.date compareTo other.date
-    else -> null
   }
 }
