@@ -453,8 +453,7 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
   /**
    * Compares two items using multiple key selectors for sorting.
    *
-   * Example: sort(-family, given) compares by family descending, then by given ascending.
-   * Per FHIRPath spec, empty values are always sorted first regardless of sort direction.
+   * Per FHIRPath spec, empty values are always sorted first.
    */
   private fun compareByKeySelectors(
     a: Any,
@@ -462,25 +461,14 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
     keySelectors: List<fhirpathParser.ExpressionContext>,
   ): Int {
     for (selector in keySelectors) {
-      val isDescending = selector.isDescendingSort()
-      val expression = if (isDescending) selector.unwrapPolarity() else selector
+      val aKey = evaluateWithThis(a) { visit(selector).singleOrNull()?.toFhirPathType() }
+      val bKey = evaluateWithThis(b) { visit(selector).singleOrNull()?.toFhirPathType() }
 
-      val aKey = evaluateWithThis(a) { visit(expression).singleOrNull()?.toFhirPathType() }
-      val bKey = evaluateWithThis(b) { visit(expression).singleOrNull()?.toFhirPathType() }
-
-      val result = compareKeys(aKey, bKey, isDescending)
+      val result = compareKeys(aKey, bKey)
       if (result != 0) return result
     }
     return 0
   }
-
-  /** Checks if this expression is a descending sort (prefixed with -). */
-  private fun fhirpathParser.ExpressionContext.isDescendingSort(): Boolean =
-    this is fhirpathParser.PolarityExpressionContext && getChild(0)?.text == "-"
-
-  /** Unwraps the inner expression from a polarity expression (-expr -> expr). */
-  private fun fhirpathParser.ExpressionContext.unwrapPolarity(): fhirpathParser.ExpressionContext =
-    (this as fhirpathParser.PolarityExpressionContext).expression()
 
   /** Evaluates a block with the given item pushed onto thisStack. */
   private fun evaluateWithThis(item: Any, block: () -> Any?): Any? {
@@ -492,15 +480,12 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
    * Compares two keys for sorting.
    * Empty values always come first per FHIRPath spec.
    */
-  private fun compareKeys(aKey: Any?, bKey: Any?, isDescending: Boolean): Int =
+  private fun compareKeys(aKey: Any?, bKey: Any?): Int =
     when {
       aKey == null && bKey == null -> 0
       aKey == null -> -1 // Empty always first
       bKey == null -> 1 // Empty always first
-      else -> {
-        val cmp = compare(aKey, bKey) ?: 0
-        if (isDescending) -cmp else cmp
-      }
+      else -> compare(aKey, bKey) ?: 0
     }
 
   override fun visitThisInvocation(ctx: fhirpathParser.ThisInvocationContext): Collection<Any> {

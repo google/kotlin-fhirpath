@@ -108,6 +108,10 @@ val skippedTestCaseToReasonMap =
     "testPeriodInvariantOld" to "hasValue() is not implemented.",
     "testPeriodInvariantNew" to "lowBoundary() and lowBoundary() are not implemented.",
     "testContainedId" to "TBD",
+    "testSort8" to
+      "Test uses `-\$this` for descending string sort, but spec uses asc/desc.",
+    "testSort10" to
+      "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
   )
 
 @OptIn(ExperimentalKotest::class)

@@ -207,6 +207,8 @@ passing. The failures are documented in the table below.
 | `testFHIRPathIsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testFHIRPathAsFunction*`            | Implementation     |     |                                                        |                                                                                                                                                                         |
 | `testContainedId`                    | Implementation     |     |                                                        |                                                                                                                                                                         |
+| `testSort8`                          | Specification/Test |     |                                                        | Test uses `-$this` for descending string sort, but spec uses `asc`/`desc`.                                                                                              |
+| `testSort10`                         | Specification/Test |     |                                                        | Test uses `-` prefix for descending sort, but spec uses `asc`/`desc`.                                                                                                   |
 
 The root cause column documents if the test failure is caused by issues with the implementation
 (this repository), the [tests](https://github.com/FHIR/fhir-test-cases), the specification itself,
