@@ -534,7 +534,13 @@ internal class FhirPathEvaluator(
 
         if (keySelectors.isEmpty()) {
           // sort() with no arguments: sort by $this ascending
-          context.sortedWith { a, b -> compare(a.toFhirPathType(), b.toFhirPathType()) ?: 0 }
+          context.sortedWith { a, b ->
+            compare(
+              a.toFhirPathType(fhirPathTypeResolver),
+              b.toFhirPathType(fhirPathTypeResolver),
+              fhirPathTypeResolver,
+            ) ?: 0
+          }
         } else {
           // sort(key1, -key2, ...) with one or more key selectors
           context.sortedWith { a, b -> compareByKeySelectors(a, b, keySelectors) }
@@ -580,8 +586,10 @@ internal class FhirPathEvaluator(
     keySelectors: List<fhirpathParser.ExpressionContext>,
   ): Int {
     for (selector in keySelectors) {
-      val aKey = evaluateWithThis(a) { visit(selector).singleOrNull()?.toFhirPathType() }
-      val bKey = evaluateWithThis(b) { visit(selector).singleOrNull()?.toFhirPathType() }
+      val aKey =
+        evaluateWithThis(a) { visit(selector).singleOrNull()?.toFhirPathType(fhirPathTypeResolver) }
+      val bKey =
+        evaluateWithThis(b) { visit(selector).singleOrNull()?.toFhirPathType(fhirPathTypeResolver) }
 
       val result = compareKeys(aKey, bKey)
       if (result != 0) return result
@@ -601,7 +609,7 @@ internal class FhirPathEvaluator(
       aKey == null && bKey == null -> 0
       aKey == null -> -1 // Empty always first
       bKey == null -> 1 // Empty always first
-      else -> compare(aKey, bKey) ?: 0
+      else -> compare(aKey, bKey, fhirPathTypeResolver) ?: 0
     }
 
   override fun visitThisInvocation(ctx: fhirpathParser.ThisInvocationContext): Collection<Any> {
