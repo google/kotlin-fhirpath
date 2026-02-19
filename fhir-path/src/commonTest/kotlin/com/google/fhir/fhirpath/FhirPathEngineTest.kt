@@ -109,10 +109,8 @@ val skippedTestCaseToReasonMap =
     "testCombine3" to "As above",
     "testContainedId" to "TBD",
     "testPrimitiveExtensions" to "Function `hasValue` is not implemented.",
-    "testSort8" to
-      "Test uses `-\$this` for descending string sort, but spec uses asc/desc.",
-    "testSort10" to
-      "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
+    "testSort8" to "Test uses `-\$this` for descending string sort, but spec uses asc/desc.",
+    "testSort10" to "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
   )
 
 @OptIn(ExperimentalKotest::class)

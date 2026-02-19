@@ -503,7 +503,12 @@ internal class FhirPathEvaluator(
               finalResults.add(result)
               queue.addLast(result)
             } else {
-              if (finalResults.none { it.toFhirPathType(fhirPathTypeResolver) == result.toFhirPathType(fhirPathTypeResolver) }) {
+              if (
+                finalResults.none {
+                  it.toFhirPathType(fhirPathTypeResolver) ==
+                    result.toFhirPathType(fhirPathTypeResolver)
+                }
+              ) {
                 finalResults.add(result)
               }
             }
@@ -590,10 +595,7 @@ internal class FhirPathEvaluator(
     return block().also { thisStack.removeLast() }
   }
 
-  /**
-   * Compares two keys for sorting.
-   * Empty values always come first per FHIRPath spec.
-   */
+  /** Compares two keys for sorting. Empty values always come first per FHIRPath spec. */
   private fun compareKeys(aKey: Any?, bKey: Any?): Int =
     when {
       aKey == null && bKey == null -> 0
