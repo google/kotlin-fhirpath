@@ -16,8 +16,11 @@
 
 package com.google.fhir.fhirpath.operators
 
-import com.google.fhir.fhirpath.divideQuantities
-import com.google.fhir.fhirpath.multiplyQuantities
+import com.google.fhir.fhirpath.div
+import com.google.fhir.fhirpath.formatUcumUnit
+import com.google.fhir.fhirpath.parseUcumUnit
+import com.google.fhir.fhirpath.times
+import com.google.fhir.fhirpath.toEqualCanonicalized
 import com.google.fhir.fhirpath.toFhirPathType
 import com.google.fhir.fhirpath.types.FhirPathDate
 import com.google.fhir.fhirpath.types.FhirPathDateTime
@@ -85,7 +88,7 @@ internal fun multiplication(
       listOf(leftItem * rightItem)
     }
     leftItem is FhirPathQuantity && rightItem is FhirPathQuantity -> {
-      listOf(multiplyQuantities(leftItem, rightItem))
+      listOf(leftItem * rightItem)
     }
     else -> error("Cannot multiply $leftItem and $rightItem")
   }
@@ -101,7 +104,7 @@ internal fun division(
   val rightItem = right.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
 
   if (leftItem is FhirPathQuantity && rightItem is FhirPathQuantity) {
-    return divideQuantities(leftItem, rightItem, DECIMAL_MODE)?.let { listOf(it) } ?: emptyList()
+    return (leftItem / rightItem)?.let { listOf(it) } ?: emptyList()
   }
 
   val leftBigDecimal =
@@ -247,6 +250,38 @@ internal fun concat(left: Collection<Any>, right: Collection<Any>): Collection<A
 
 private operator fun FhirPathQuantity.times(multiplier: BigDecimal): FhirPathQuantity {
   return FhirPathQuantity(value = this.value!! * multiplier, unit = this.unit)
+}
+
+/** Multiplies two quantities, combining their UCUM units. */
+private operator fun FhirPathQuantity.times(other: FhirPathQuantity): FhirPathQuantity {
+  val leftCanonical = this.toEqualCanonicalized()
+  val rightCanonical = other.toEqualCanonicalized()
+
+  val resultValue = leftCanonical.value!! * rightCanonical.value!!
+
+  val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
+  val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
+  val combinedUnits = leftUnits * rightUnits
+  val resultUnitString = formatUcumUnit(combinedUnits)
+
+  return FhirPathQuantity(value = resultValue, unit = resultUnitString)
+}
+
+/** Divides two quantities, combining their UCUM units. Returns `null` if the divisor is zero. */
+private operator fun FhirPathQuantity.div(other: FhirPathQuantity): FhirPathQuantity? {
+  val leftCanonical = this.toEqualCanonicalized()
+  val rightCanonical = other.toEqualCanonicalized()
+
+  if (rightCanonical.value!! == BigDecimal.ZERO) return null
+
+  val resultValue = leftCanonical.value!!.divide(rightCanonical.value, DECIMAL_MODE)
+
+  val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
+  val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
+  val combinedUnits = leftUnits / rightUnits
+  val resultUnitString = formatUcumUnit(combinedUnits)
+
+  return FhirPathQuantity(value = resultValue, unit = resultUnitString)
 }
 
 private operator fun FhirPathDate.plus(duration: FhirPathQuantity): FhirPathDate {

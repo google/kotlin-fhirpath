@@ -20,8 +20,6 @@ import com.google.fhir.fhirpath.types.FhirPathQuantity
 import com.google.fhir.fhirpath.ucum.BaseUnit
 import com.google.fhir.fhirpath.ucum.Prefix
 import com.google.fhir.fhirpath.ucum.Unit
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.math.pow
 
@@ -30,42 +28,6 @@ internal fun FhirPathQuantity.toEqualCanonicalized() =
 
 internal fun FhirPathQuantity.toEquivalentCanonicalized() =
   toEquivalentUcumDefiniteDuration().stripUcumPrefix().toCanonicalizedUcumUnit()
-
-/** Multiplies two quantities, combining their UCUM units. */
-internal fun multiplyQuantities(left: FhirPathQuantity, right: FhirPathQuantity): FhirPathQuantity {
-  val leftCanonical = left.toEqualCanonicalized()
-  val rightCanonical = right.toEqualCanonicalized()
-
-  val resultValue = leftCanonical.value!! * rightCanonical.value!!
-
-  val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
-  val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
-  val combinedUnits = leftUnits * rightUnits
-  val resultUnitString = formatUcumUnit(combinedUnits)
-
-  return FhirPathQuantity(value = resultValue, unit = resultUnitString)
-}
-
-/** Divides two quantities, combining their UCUM units. Returns `null` if the divisor is zero. */
-internal fun divideQuantities(
-  left: FhirPathQuantity,
-  right: FhirPathQuantity,
-  decimalMode: DecimalMode,
-): FhirPathQuantity? {
-  val leftCanonical = left.toEqualCanonicalized()
-  val rightCanonical = right.toEqualCanonicalized()
-
-  if (rightCanonical.value!! == BigDecimal.ZERO) return null
-
-  val resultValue = leftCanonical.value!!.divide(rightCanonical.value, decimalMode)
-
-  val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
-  val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
-  val combinedUnits = leftUnits / rightUnits
-  val resultUnitString = formatUcumUnit(combinedUnits)
-
-  return FhirPathQuantity(value = resultValue, unit = resultUnitString)
-}
 
 /**
  * Converts a FHIRPath calendar duration to the equal UCUM definite unit if there is one. Returns
@@ -273,7 +235,7 @@ internal fun parseUcumUnit(unitString: String): Map<String, Int> {
  * - `{g=1} * {m=1}` → `{g=1, m=1}`
  * - `{m=1} * {m=-1}` → `{}` (dimensionless)
  */
-private operator fun Map<String, Int>.times(other: Map<String, Int>): Map<String, Int> {
+internal operator fun Map<String, Int>.times(other: Map<String, Int>): Map<String, Int> {
   val result = this.toMutableMap()
   for ((unit, exponent) in other) {
     result[unit] = (result[unit] ?: 0) + exponent
@@ -296,7 +258,7 @@ private operator fun Map<String, Int>.times(other: Map<String, Int>): Map<String
  * - `{m=1} / {s=1}` → `{m=1, s=-1}`
  * - `{}` / `{s=1}` → `{s=-1}`
  */
-private operator fun Map<String, Int>.div(other: Map<String, Int>): Map<String, Int> {
+internal operator fun Map<String, Int>.div(other: Map<String, Int>): Map<String, Int> {
   val result = this.toMutableMap()
   for ((unit, exponent) in other) {
     result[unit] = (result[unit] ?: 0) - exponent
@@ -319,7 +281,7 @@ private operator fun Map<String, Int>.div(other: Map<String, Int>): Map<String, 
  *
  * Throws error if any unit has exponent 0 (should never happen due to filtering).
  */
-private fun formatUcumUnit(units: Map<String, Int>): String {
+internal fun formatUcumUnit(units: Map<String, Int>): String {
   if (units.isEmpty()) return "'1'"
 
   val unitString =
