@@ -259,9 +259,8 @@ private operator fun FhirPathQuantity.times(other: FhirPathQuantity): FhirPathQu
 
   val resultValue = leftCanonical.value!! * rightCanonical.value!!
 
-  val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
-  val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
-  val combinedUnits = leftUnits * rightUnits
+  val combinedUnits =
+    parseUcumUnit(leftCanonical.unit ?: "") * parseUcumUnit(rightCanonical.unit ?: "")
   val resultUnitString = formatUcumUnit(combinedUnits)
 
   return FhirPathQuantity(value = resultValue, unit = resultUnitString)
@@ -276,9 +275,8 @@ private operator fun FhirPathQuantity.div(other: FhirPathQuantity): FhirPathQuan
 
   val resultValue = leftCanonical.value!!.divide(rightCanonical.value, DECIMAL_MODE)
 
-  val leftUnits = parseUcumUnit(leftCanonical.unit ?: "")
-  val rightUnits = parseUcumUnit(rightCanonical.unit ?: "")
-  val combinedUnits = leftUnits / rightUnits
+  val combinedUnits =
+    parseUcumUnit(leftCanonical.unit ?: "") / parseUcumUnit(rightCanonical.unit ?: "")
   val resultUnitString = formatUcumUnit(combinedUnits)
 
   return FhirPathQuantity(value = resultValue, unit = resultUnitString)
