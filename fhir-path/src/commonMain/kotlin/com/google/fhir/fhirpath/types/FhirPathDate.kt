@@ -20,7 +20,7 @@ import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.YearMonth
 
-internal data class FhirPathDate(val year: Int, val month: Int? = null, val day: Int? = null) {
+data class FhirPathDate(val year: Int, val month: Int? = null, val day: Int? = null) {
 
   enum class Precision {
     YEAR,
