@@ -45,7 +45,6 @@ val skippedTestGroupToReasonMap =
   mapOf(
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
-    "testTrace" to "Unimplemented",
     "testSort" to "Function `sort` is not defined in the specification",
     "testVariables" to "Unimplemented",
     "testExtension" to "Unimplemented",
