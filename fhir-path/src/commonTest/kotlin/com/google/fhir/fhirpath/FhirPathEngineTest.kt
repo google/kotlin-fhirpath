@@ -46,7 +46,6 @@ val skippedTestGroupToReasonMap =
     "testEncodeDecode" to "Unimplemented",
     "testEscapeUnescape" to "Unimplemented",
     "testTrace" to "Unimplemented",
-    "testSort" to "Function `sort` is not defined in the specification",
     "testVariables" to "Unimplemented",
     "testExtension" to "Unimplemented",
     "testType" to "Unimplemented",
@@ -110,6 +109,8 @@ val skippedTestCaseToReasonMap =
     "testCombine3" to "As above",
     "testContainedId" to "TBD",
     "testPrimitiveExtensions" to "Function `hasValue` is not implemented.",
+    "testSort8" to "Test uses `-\$this` for descending string sort, but spec uses asc/desc.",
+    "testSort10" to "Test uses `-` prefix for descending sort, but spec uses asc/desc.",
   )
 
 @OptIn(ExperimentalKotest::class)

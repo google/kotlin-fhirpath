@@ -503,7 +503,12 @@ internal class FhirPathEvaluator(
               finalResults.add(result)
               queue.addLast(result)
             } else {
-              if (finalResults.none { it.toFhirPathType(fhirPathTypeResolver) == result.toFhirPathType(fhirPathTypeResolver) }) {
+              if (
+                finalResults.none {
+                  it.toFhirPathType(fhirPathTypeResolver) ==
+                    result.toFhirPathType(fhirPathTypeResolver)
+                }
+              ) {
                 finalResults.add(result)
               }
             }
@@ -520,6 +525,26 @@ internal class FhirPathEvaluator(
         // TODO: implement this for multiplatform.
         println("$name $projection")
         context
+      }
+      "sort" -> {
+        // See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#sort).
+        if (context.size <= 1) return context.toList()
+
+        val keySelectors = functionNode.paramList()?.expression() ?: emptyList()
+
+        if (keySelectors.isEmpty()) {
+          // sort() with no arguments: sort by $this ascending
+          context.sortedWith { a, b ->
+            compare(
+              a.toFhirPathType(fhirPathTypeResolver),
+              b.toFhirPathType(fhirPathTypeResolver),
+              fhirPathTypeResolver,
+            ) ?: 0
+          }
+        } else {
+          // sort(key1, -key2, ...) with one or more key selectors
+          context.sortedWith { a, b -> compareByKeySelectors(a, b, keySelectors) }
+        }
       }
       "is" -> {
         val type =
@@ -549,6 +574,43 @@ internal class FhirPathEvaluator(
       }
     }
   }
+
+  /**
+   * Compares two items using multiple key selectors for sorting.
+   *
+   * Per FHIRPath spec, empty values are always sorted first.
+   */
+  private fun compareByKeySelectors(
+    a: Any,
+    b: Any,
+    keySelectors: List<fhirpathParser.ExpressionContext>,
+  ): Int {
+    for (selector in keySelectors) {
+      val aKey =
+        evaluateWithThis(a) { visit(selector).singleOrNull()?.toFhirPathType(fhirPathTypeResolver) }
+      val bKey =
+        evaluateWithThis(b) { visit(selector).singleOrNull()?.toFhirPathType(fhirPathTypeResolver) }
+
+      val result = compareKeys(aKey, bKey)
+      if (result != 0) return result
+    }
+    return 0
+  }
+
+  /** Evaluates a block with the given item pushed onto thisStack. */
+  private fun evaluateWithThis(item: Any, block: () -> Any?): Any? {
+    thisStack.addLast(item)
+    return block().also { thisStack.removeLast() }
+  }
+
+  /** Compares two keys for sorting. Empty values always come first per FHIRPath spec. */
+  private fun compareKeys(aKey: Any?, bKey: Any?): Int =
+    when {
+      aKey == null && bKey == null -> 0
+      aKey == null -> -1 // Empty always first
+      bKey == null -> 1 // Empty always first
+      else -> compare(aKey, bKey, fhirPathTypeResolver) ?: 0
+    }
 
   override fun visitThisInvocation(ctx: fhirpathParser.ThisInvocationContext): Collection<Any> {
     return listOf(thisStack.last())
