@@ -26,7 +26,6 @@ import com.google.fhir.fhirpath.types.FhirPathTypeResolver
 import com.google.fhir.fhirpath.types.FhirR4BTypeResolver
 import com.google.fhir.fhirpath.types.FhirR4TypeResolver
 import com.google.fhir.fhirpath.types.FhirR5TypeResolver
-import com.google.fhir.model.r4.Resource
 import org.antlr.v4.kotlinruntime.BailErrorStrategy
 import org.antlr.v4.kotlinruntime.CharStreams
 import org.antlr.v4.kotlinruntime.CommonTokenStream
@@ -49,7 +48,7 @@ internal constructor(
    */
   fun evaluateExpression(
     expression: String,
-    resource: Resource?,
+    resource: Any?,
     variables: Map<String, Any?> = emptyMap(),
   ): Collection<Any> {
     val lexer = fhirpathLexer(CharStreams.fromString(expression))
