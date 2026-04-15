@@ -42,13 +42,13 @@ internal constructor(
    * Evaluates a FHIRPath expression against a single FHIR resource.
    *
    * @param expression The FHIRPath string to evaluate (e.g., "Patient.name.given").
-   * @param resource The initial FHIR resource to run the expression against.
+   * @param base The initial FHIR resource or element to run the expression against.
    * @param variables Environment variables accessible via %name syntax in the expression.
    * @return @return A collection of elements as the result of the evaluation.
    */
   fun evaluateExpression(
     expression: String,
-    resource: Any?,
+    base: Any?,
     variables: Map<String, Any?> = emptyMap(),
   ): Collection<Any> {
     val lexer = fhirpathLexer(CharStreams.fromString(expression))
@@ -69,7 +69,7 @@ internal constructor(
       )
     }
 
-    evaluator.initialize(context = resource, variables = variables)
+    evaluator.initialize(context = base, variables = variables)
 
     // Convert the items in the result collection from FHIR types to FHIRPath types if it has not
     // occurred in FHIRPath evaluation. Without this conversion, `Patient.name.given` would return

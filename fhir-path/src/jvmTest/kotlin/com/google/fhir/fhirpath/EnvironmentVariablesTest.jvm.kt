@@ -32,33 +32,33 @@ class EnvironmentVariablesTest {
 
   @Test
   fun `sct returns SNOMED CT URL`() {
-    val result = fhirPathEngine.evaluateExpression(expression = "%sct", resource = null)
+    val result = fhirPathEngine.evaluateExpression(expression = "%sct", base = null)
     assertEquals(listOf("http://snomed.info/sct"), result.toList())
   }
 
   @Test
   fun `loinc returns LOINC URL`() {
-    val result = fhirPathEngine.evaluateExpression(expression = "%loinc", resource = null)
+    val result = fhirPathEngine.evaluateExpression(expression = "%loinc", base = null)
     assertEquals(listOf("http://loinc.org"), result.toList())
   }
 
   @Test
   fun `ucum returns UCUM URL`() {
-    val result = fhirPathEngine.evaluateExpression(expression = "%ucum", resource = null)
+    val result = fhirPathEngine.evaluateExpression(expression = "%ucum", base = null)
     assertEquals(listOf("http://unitsofmeasure.org"), result.toList())
   }
 
   @Test
   fun `vs-name returns ValueSet URL`() {
     val result =
-      fhirPathEngine.evaluateExpression(expression = "%'vs-administrative-gender'", resource = null)
+      fhirPathEngine.evaluateExpression(expression = "%'vs-administrative-gender'", base = null)
     assertEquals(listOf("http://hl7.org/fhir/ValueSet/administrative-gender"), result.toList())
   }
 
   @Test
   fun `ext-name returns StructureDefinition URL`() {
     val result =
-      fhirPathEngine.evaluateExpression(expression = "%'ext-patient-birthPlace'", resource = null)
+      fhirPathEngine.evaluateExpression(expression = "%'ext-patient-birthPlace'", base = null)
     assertEquals(
       listOf("http://hl7.org/fhir/StructureDefinition/patient-birthPlace"),
       result.toList(),
@@ -70,7 +70,7 @@ class EnvironmentVariablesTest {
     val result =
       fhirPathEngine.evaluateExpression(
         expression = "%myVar",
-        resource = null,
+        base = null,
         variables = mapOf("myVar" to "hello"),
       )
     assertEquals(listOf("hello"), result.toList())
@@ -81,7 +81,7 @@ class EnvironmentVariablesTest {
     val result =
       fhirPathEngine.evaluateExpression(
         expression = "%nullVar",
-        resource = null,
+        base = null,
         variables = mapOf("nullVar" to null),
       )
     assertEquals(emptyList<Any>(), result.toList())
@@ -90,7 +90,7 @@ class EnvironmentVariablesTest {
   @Test
   fun `unknown environment variable throws error`() {
     assertFailsWith<Exception> {
-      fhirPathEngine.evaluateExpression(expression = "%unknownVar", resource = null)
+      fhirPathEngine.evaluateExpression(expression = "%unknownVar", base = null)
     }
   }
 }
