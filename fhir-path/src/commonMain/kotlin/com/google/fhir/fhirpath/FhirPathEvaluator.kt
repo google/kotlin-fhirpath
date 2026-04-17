@@ -58,10 +58,14 @@ import kotlin.time.Instant
  * @param initialContext The starting com.google.fhir.fhirpath.codegen.collection of FHIR resources
  *   for the expression.
  */
+data class TraceEntry(val value: Any, val path: String)
+
 internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Collection<Any>>() {
 
   private val contextStack = ArrayDeque<Collection<Any>>()
   private val thisStack = ArrayDeque<Any>()
+  private val _traces = mutableMapOf<String, MutableList<List<TraceEntry>>>()
+  val traces: Map<String, List<List<TraceEntry>>> get() = _traces
 
   // Ensure determinism of current date and time functions by getting the current timestamp once.
   // See https://hl7.org/fhirpath/N1/#current-date-and-time-functions.
@@ -430,6 +434,15 @@ internal class FhirPathEvaluator(initialContext: Any?) : fhirpathBaseVisitor<Col
         // Convert to readable values for logging (e.g., FHIR String -> Kotlin String)
         val readableValues = logValue.map { it.toFhirPathType() }
         println("trace[$name]: $readableValues")
+
+        val parentExpr =
+          (ctx.getParent() as? fhirpathParser.InvocationExpressionContext)?.expression()?.text
+        val resourceType = contextStack.first().singleOrNull()?.let { it::class.simpleName } ?: ""
+        val basePath = if (parentExpr != null) "$resourceType.$parentExpr" else resourceType
+        val entries = readableValues.mapIndexed { i, value ->
+          TraceEntry(value = value, path = "$basePath[$i]")
+        }
+        _traces.getOrPut(name) { mutableListOf() }.add(entries)
 
         context
       }
