@@ -33,6 +33,18 @@ import org.antlr.v4.kotlinruntime.Token
  *   the evaluation. Non-FHIR results (literals) are filtered out.
  */
 fun evaluateFhirPath(expression: String, resource: Resource?): Collection<Any> {
+  return evaluateFhirPathWithTraces(expression, resource).result
+}
+
+data class FhirPathResult(
+  val result: Collection<Any>,
+  val traces: Map<String, List<List<TraceEntry>>>,
+)
+
+fun evaluateFhirPathWithTraces(
+  expression: String,
+  resource: Resource?,
+): FhirPathResult {
   val lexer = fhirpathLexer(CharStreams.fromString(expression))
   val tokenStream = CommonTokenStream(lexer)
   val parser =
@@ -53,5 +65,5 @@ fun evaluateFhirPath(expression: String, resource: Resource?): Collection<Any> {
 
   val evaluator = FhirPathEvaluator(initialContext = resource)
   val result = evaluator.visit(parsedExpression)
-  return result
+  return FhirPathResult(result, evaluator.traces)
 }
