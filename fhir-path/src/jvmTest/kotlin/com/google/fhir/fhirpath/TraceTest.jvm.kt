@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test
 
 private val jsonR4 = FhirR4Json { ignoreUnknownKeys = true }
 
+private val engine = FhirPathEngine.forR4()
+
 private fun loadPatient(): Resource {
   val json =
     File(
@@ -39,22 +41,20 @@ class TraceTest {
   @Test
   fun `trace captures values without projection`() {
     val patient = loadPatient()
-    val result = evaluateFhirPathWithTraces("name.trace('names').given", patient)
+    engine.evaluateExpression("name.trace('names').given", patient)
 
-    assertTrue(result.traces.containsKey("names"))
-    val traceInvocations = result.traces["names"]!!
-    assertEquals(1, traceInvocations.size)
-    assertEquals(3, traceInvocations[0].size)
+    assertTrue(engine.traces.containsKey("names"))
+    val entries = engine.traces["names"]!!
+    assertEquals(3, entries.size)
   }
 
   @Test
   fun `trace captures values with projection`() {
     val patient = loadPatient()
-    val result = evaluateFhirPathWithTraces("name.trace('families', family).given", patient)
+    engine.evaluateExpression("name.trace('families', family).given", patient)
 
-    val traceInvocations = result.traces["families"]!!
-    assertEquals(1, traceInvocations.size)
-    val values = traceInvocations[0].map { it.value }
+    val entries = engine.traces["families"]!!
+    val values = entries.map { it.value }
     assertTrue(values.contains("Chalmers"))
     assertTrue(values.contains("Windsor"))
   }
@@ -62,9 +62,9 @@ class TraceTest {
   @Test
   fun `trace paths are derived from expression`() {
     val patient = loadPatient()
-    val result = evaluateFhirPathWithTraces("name.trace('names')", patient)
+    engine.evaluateExpression("name.trace('names')", patient)
 
-    val entries = result.traces["names"]!![0]
+    val entries = engine.traces["names"]!!
     assertEquals("Patient.name[0]", entries[0].path)
     assertEquals("Patient.name[1]", entries[1].path)
     assertEquals("Patient.name[2]", entries[2].path)
@@ -73,9 +73,9 @@ class TraceTest {
   @Test
   fun `trace with deeper path includes full expression`() {
     val patient = loadPatient()
-    val result = evaluateFhirPathWithTraces("name.given.trace('givens')", patient)
+    engine.evaluateExpression("name.given.trace('givens')", patient)
 
-    val entries = result.traces["givens"]!![0]
+    val entries = engine.traces["givens"]!!
     assertTrue(entries.isNotEmpty())
     assertTrue(entries[0].path.startsWith("Patient.name.given["))
   }
@@ -83,41 +83,41 @@ class TraceTest {
   @Test
   fun `multiple traces with different labels`() {
     val patient = loadPatient()
-    val result =
-      evaluateFhirPathWithTraces(
-        "name.trace('all').where(use = 'official').trace('official').given",
-        patient,
-      )
+    engine.evaluateExpression(
+      "name.trace('all').where(use = 'official').trace('official').given",
+      patient,
+    )
 
-    assertTrue(result.traces.containsKey("all"))
-    assertTrue(result.traces.containsKey("official"))
-    assertEquals(3, result.traces["all"]!![0].size)
-    assertEquals(1, result.traces["official"]!![0].size)
+    assertTrue(engine.traces.containsKey("all"))
+    assertTrue(engine.traces.containsKey("official"))
+    assertEquals(3, engine.traces["all"]!!.size)
+    assertEquals(1, engine.traces["official"]!!.size)
   }
 
   @Test
   fun `no trace in expression produces empty traces map`() {
     val patient = loadPatient()
-    val result = evaluateFhirPathWithTraces("name.given", patient)
+    engine.evaluateExpression("name.given", patient)
 
-    assertTrue(result.traces.isEmpty())
+    assertTrue(engine.traces.isEmpty())
   }
 
   @Test
   fun `trace does not alter evaluation result`() {
     val patient = loadPatient()
-    val withTrace = evaluateFhirPathWithTraces("name.trace('t').given.count()", patient)
-    val withoutTrace = evaluateFhirPath("name.given.count()", patient)
+    val withTrace = engine.evaluateExpression("name.trace('t').given.count()", patient)
+    val withoutTrace = engine.evaluateExpression("name.given.count()", patient)
 
-    assertEquals(withoutTrace.toList(), withTrace.result.toList())
+    assertEquals(withoutTrace.toList(), withTrace.toList())
   }
 
   @Test
-  fun `expression without trace produces empty traces map`() {
+  fun `traces are cleared between evaluations`() {
     val patient = loadPatient()
-    val result = evaluateFhirPathWithTraces("name.given.count()", patient)
+    engine.evaluateExpression("name.trace('first')", patient)
+    assertTrue(engine.traces.containsKey("first"))
 
-    assertEquals(listOf(5), result.result.toList())
-    assertTrue(result.traces.isEmpty())
+    engine.evaluateExpression("name.given.count()", patient)
+    assertTrue(engine.traces.isEmpty())
   }
 }

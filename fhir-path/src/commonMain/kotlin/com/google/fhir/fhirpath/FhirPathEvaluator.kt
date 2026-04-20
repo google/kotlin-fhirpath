@@ -59,6 +59,8 @@ import kotlin.time.Instant
  * @param initialContext The starting com.google.fhir.fhirpath.codegen.collection of FHIR resources
  *   for the expression.
  */
+data class TraceEntry(val value: Any, val path: String)
+
 internal class FhirPathEvaluator(
   val fhirPathTypeResolver: FhirPathTypeResolver,
   val fhirModelNavigator: FhirModelNavigator,
@@ -68,6 +70,8 @@ internal class FhirPathEvaluator(
   private val thisStack = ArrayDeque<Any>()
   private val totalStack = ArrayDeque<Collection<Any>>()
   private val variables = mutableMapOf<String, Any?>()
+  private val _traces = mutableMapOf<String, MutableList<TraceEntry>>()
+  val traces: Map<String, List<TraceEntry>> get() = _traces
   @OptIn(ExperimentalTime::class) private var now: Instant = Clock.System.now()
 
   @OptIn(ExperimentalTime::class)
@@ -77,6 +81,7 @@ internal class FhirPathEvaluator(
     thisStack.clear()
     totalStack.clear()
     this.variables.clear()
+    _traces.clear()
 
     if (context != null) {
       resource = context
@@ -536,7 +541,7 @@ internal class FhirPathEvaluator(
           }
 
         // Convert to readable values for logging (e.g., FHIR String -> Kotlin String)
-        val readableValues = logValue.map { it.toFhirPathType() }
+        val readableValues = logValue.map { it.toFhirPathType(fhirPathTypeResolver) }
         println("trace[$name]: $readableValues")
 
         val parentExpr =
@@ -546,7 +551,7 @@ internal class FhirPathEvaluator(
         val entries = readableValues.mapIndexed { i, value ->
           TraceEntry(value = value, path = "$basePath[$i]")
         }
-        _traces.getOrPut(name) { mutableListOf() }.add(entries)
+        _traces.getOrPut(name) { mutableListOf() }.addAll(entries)
 
         context
       }
