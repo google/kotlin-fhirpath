@@ -542,7 +542,6 @@ internal class FhirPathEvaluator(
 
         // Convert to readable values for logging (e.g., FHIR String -> Kotlin String)
         val readableValues = logValue.map { it.toFhirPathType(fhirPathTypeResolver) }
-        println("trace[$name]: $readableValues")
 
         val parentExpr =
           (ctx.getParent() as? fhirpathParser.InvocationExpressionContext)?.expression()?.text
@@ -552,6 +551,8 @@ internal class FhirPathEvaluator(
           TraceEntry(value = value, path = "$basePath[$i]")
         }
         _traces.getOrPut(name) { mutableListOf() }.addAll(entries)
+
+        println("trace[$name]: ${entries.map { "${it.path}: ${it.value}" }}")
 
         context
       }
