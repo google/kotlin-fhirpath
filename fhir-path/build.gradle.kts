@@ -1,7 +1,7 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import com.google.fhir.fhirpath.codegen.model.FhirModelHelperGenerationTask
-import com.google.fhir.fhirpath.codegen.ucum.UcumHelperGenerationTask
+import dev.ohs.fhir.fhirpath.codegen.model.FhirModelHelperGenerationTask
+import dev.ohs.fhir.fhirpath.codegen.ucum.UcumHelperGenerationTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
@@ -42,7 +42,7 @@ val generateUcumHelpers = tasks.register<UcumHelperGenerationTask>("generateUcum
     this.ucumFile.set(
         File(project.rootDir, "third_party/ucum/ucum-essence.xml")
     )
-    this.packageName.set("com.google.fhir.fhirpath.ucum")
+    this.packageName.set("dev.ohs.fhir.fhirpath.ucum")
     outputDirectory.set(layout.buildDirectory.dir("generated/kotlin"))
 }
 
@@ -52,7 +52,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     source = fileTree(rootProject.file("third_party/fhirpath-2.0.0")) {
         include("**/*.g4")
     }
-    packageName = "com.google.fhir.fhirpath.parsers"
+    packageName = "dev.ohs.fhir.fhirpath.parsers"
     arguments = listOf("-visitor")  // Generate visitors alongside listeners
 
     val outDir = "generated/kotlin/${packageName!!.replace(".", "/")}"
@@ -145,7 +145,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.google.fhir.fhirpath"
+    namespace = "dev.ohs.fhir.fhirpath"
     compileSdk = 35
     defaultConfig {
         minSdk = 24

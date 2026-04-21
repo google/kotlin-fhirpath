@@ -266,7 +266,7 @@ To evaluate a FHIRPath expression, create a `FhirPathEngine` for the correct FHI
 `evaluateExpression` function:
 
 ```
-import com.google.fhir.fhirpath.FhirPathEngine
+import dev.ohs.fhir.fhirpath.FhirPathEngine
 import com.google.fhir.model.r4.FhirR4Json
 
 val patientExampleJson = ... // Load "patient-example.json"
@@ -286,7 +286,7 @@ To generate the lexer, parser, and visitor locally using ANTLR Kotlin:
 ```
 
 The generated code will be placed in `fhir-path/build/generated` under package
-`com.google.fhir.fhirpath.parsers`.
+`dev.ohs.fhir.fhirpath.parsers`.
 
 ### Model extensions
 
@@ -299,7 +299,7 @@ To run the model extension codegen in `buildSrc` locally:
 ```
 
 The generated code will be located in `fhir-path/build/generated` under packages
-`com.google.fhir.model.<FHIR_VERSION>.ext` and `com.google.fhir.fhirpath`.
+`com.google.fhir.model.<FHIR_VERSION>.ext` and `dev.ohs.fhir.fhirpath`.
 
 ### UCUM helpers
 
@@ -310,7 +310,7 @@ To run the UCUM helper codegen in `buildSrc` locally:
 ```
 
 The generated code will be located in `fhir-path/build/generated` under package
-`com.google.fhir.fhirpath.ucum`.
+`dev.ohs.fhir.fhirpath.ucum`.
 
 ### Dependencies
 
