@@ -3,7 +3,7 @@ agp = "8.10.0"
 antlr-kotlin = "1.0.0"
 kotest = "5.9.1"
 kotlin = "2.2.0"
-kotlin-fhir = "1.0.0-beta01"
+kotlin-fhir = "1.0.0-beta03"
 kotlinx-serialization-json = "1.8.1"
 xmlutil = "0.91.2"
 spotless = "7.0.1"
@@ -14,7 +14,7 @@ kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.
 kotest-framework-datatest = { module = "io.kotest:kotest-framework-datatest", version.ref = "kotest" }
 kotest-framework-engine = {module = "io.kotest:kotest-framework-engine", version.ref = "kotest"}
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
-kotlin-fhir = { module = "com.google.fhir:fhir-model", version.ref = "kotlin-fhir" }
+kotlin-fhir = { module = "dev.ohs.fhir:fhir-model", version.ref = "kotlin-fhir" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }

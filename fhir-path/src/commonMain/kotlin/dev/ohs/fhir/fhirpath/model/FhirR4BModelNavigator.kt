@@ -16,15 +16,15 @@
 
 package dev.ohs.fhir.fhirpath.model
 
-import com.google.fhir.model.r4b.BackboneElement
-import com.google.fhir.model.r4b.Element
-import com.google.fhir.model.r4b.Resource
-import com.google.fhir.model.r4b.ext.getAllChildren
-import com.google.fhir.model.r4b.ext.getProperty
-import com.google.fhir.model.r4b.ext.getPropertyInChoiceValue
-import com.google.fhir.model.r4b.ext.hasProperty
-import com.google.fhir.model.r4b.ext.hasPropertyInChoiceValue
-import com.google.fhir.model.r4b.ext.unwrapChoiceValue
+import dev.ohs.fhir.model.r4b.BackboneElement
+import dev.ohs.fhir.model.r4b.Element
+import dev.ohs.fhir.model.r4b.Resource
+import dev.ohs.fhir.model.r4b.ext.getAllChildren
+import dev.ohs.fhir.model.r4b.ext.getProperty
+import dev.ohs.fhir.model.r4b.ext.getPropertyInChoiceValue
+import dev.ohs.fhir.model.r4b.ext.hasProperty
+import dev.ohs.fhir.model.r4b.ext.hasPropertyInChoiceValue
+import dev.ohs.fhir.model.r4b.ext.unwrapChoiceValue
 
 internal object FhirR4BModelNavigator : FhirModelNavigator() {
   override fun hasProperty(obj: Any, propertyName: String): Boolean {

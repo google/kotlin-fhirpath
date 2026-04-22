@@ -87,8 +87,8 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
         .toList()
 
     val fhirVersion = this.fhirVersion.get()
-    val modelPackageName = "com.google.fhir.model.$fhirVersion"
-    val modelExtPackageName = "com.google.fhir.model.$fhirVersion.ext"
+    val modelPackageName = "dev.ohs.fhir.model.$fhirVersion"
+    val modelExtPackageName = "dev.ohs.fhir.model.$fhirVersion.ext"
     val fhirPathPackageName = "dev.ohs.fhir.fhirpath.types"
 
     // Generate resource extensions for accessing elements by name (e.g. `MorePatients.kt`)
@@ -103,7 +103,7 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
     }
 
     // Generate "routers" for accessing elements by name (e.g. `MoreResources.kt`). These helpers
-    // will be in `com.google.fhir.model.<FHIR_VERSION>.ext` package.
+    // will be in `dev.ohs.fhir.model.<FHIR_VERSION>.ext` package.
 
     ResourceExtensionFileSpecGenerator.generate(
         modelPackageName = modelPackageName,
@@ -147,7 +147,7 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
       .writeTo(outputDir)
 
     // Generate primitive and complex type enums. These enum classes will be in
-    // `com.google.fhir.model.r4.ext package` since they need to subclass the sealed interface
+    // `dev.ohs.fhir.model.r4.ext package` since they need to subclass the sealed interface
     // `FhirType`.
 
     PrimitiveTypeEnumFileSpecGenerator.generate(

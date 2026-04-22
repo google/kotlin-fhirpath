@@ -25,16 +25,15 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
  *         - `FhirR4Type`
  *             - `FhirR4PrimitiveType`: generated enum class
  *             - `FhirR4ComplexType`: generated enum class
- *             - `FhirR4ResourceType`: wrapper around `com.google.fhir.model.r4.terminologies.ResourceType`
+ *             - `FhirR4ResourceType`: wrapper around `dev.ohs.fhir.model.r4.terminologies.ResourceType`
  *         - `FhirR4BType`
  *             - `FhirR4BPrimitiveType`: generated enum class
  *             - `FhirR4BComplexType`: generated enum class
- *             - `FhirR4BResourceType`: wrapper around
- *               `com.google.fhir.model.r4b.terminologies.ResourceType`
+ *             - `FhirR4BResourceType`: wrapper around `dev.ohs.fhir.model.r4b.terminologies.ResourceType`
  *         - `FhirR5Type`
  *             - `FhirR5PrimitiveType`: generated enum class
  *             - `FhirR5ComplexType`: generated enum class
- *             - `FhirR5ResourceType`: wrapper around `com.google.fhir.model.r5.terminologies.ResourceType`
+ *             - `FhirR5ResourceType`: wrapper around `dev.ohs.fhir.model.r5.terminologies.ResourceType`
  *     - `FhirPathSystemType`: enum class below representing system types used in FHIRPath
  *
  * In FHIR, primitive types are defined using FHIRPath system types as underlying types. For

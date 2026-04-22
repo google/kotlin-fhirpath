@@ -14,7 +14,7 @@ plugins {
     `maven-publish`
 }
 
-group = "com.google.fhir"
+group = "dev.ohs.fhir"
 version = "1.0.0-beta01"
 
 val fhirVersions = mapOf(

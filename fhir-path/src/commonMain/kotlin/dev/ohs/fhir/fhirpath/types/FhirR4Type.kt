@@ -16,9 +16,9 @@
 
 package dev.ohs.fhir.fhirpath.types
 
-import com.google.fhir.model.r4.Resource
-import com.google.fhir.model.r4.ext.getFhirType
-import com.google.fhir.model.r4.terminologies.ResourceType
+import dev.ohs.fhir.model.r4.Resource
+import dev.ohs.fhir.model.r4.ext.getFhirType
+import dev.ohs.fhir.model.r4.terminologies.ResourceType
 
 internal sealed interface FhirR4Type : FhirType {
   abstract override val typeName: String

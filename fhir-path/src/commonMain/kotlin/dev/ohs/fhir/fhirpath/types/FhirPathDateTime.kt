@@ -153,17 +153,15 @@ data class FhirPathDateTime(
       return FhirPathDateTime(year, month, day, hour, minute, second, offset)
     }
 
-    fun fromFhirR4DateTime(fhirDateTime: com.google.fhir.model.r4.FhirDateTime): FhirPathDateTime {
+    fun fromFhirR4DateTime(fhirDateTime: dev.ohs.fhir.model.r4.FhirDateTime): FhirPathDateTime {
       return fromString(fhirDateTime.toString())
     }
 
-    fun fromFhirR4BDateTime(
-      fhirDateTime: com.google.fhir.model.r4b.FhirDateTime
-    ): FhirPathDateTime {
+    fun fromFhirR4BDateTime(fhirDateTime: dev.ohs.fhir.model.r4b.FhirDateTime): FhirPathDateTime {
       return fromString(fhirDateTime.toString())
     }
 
-    fun fromFhirR5DateTime(fhirDateTime: com.google.fhir.model.r5.FhirDateTime): FhirPathDateTime {
+    fun fromFhirR5DateTime(fhirDateTime: dev.ohs.fhir.model.r5.FhirDateTime): FhirPathDateTime {
       return fromString(fhirDateTime.toString())
     }
   }

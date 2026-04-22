@@ -16,10 +16,10 @@
 
 package dev.ohs.fhir.fhirpath.types
 
-import com.google.fhir.model.r4b.Enumeration
-import com.google.fhir.model.r4b.Resource
-import com.google.fhir.model.r4b.ext.getFhirType
-import com.google.fhir.model.r4b.terminologies.ResourceType
+import dev.ohs.fhir.model.r4b.Enumeration
+import dev.ohs.fhir.model.r4b.Resource
+import dev.ohs.fhir.model.r4b.ext.getFhirType
+import dev.ohs.fhir.model.r4b.terminologies.ResourceType
 
 internal object FhirR4BTypeResolver : FhirPathTypeResolver() {
   override fun resolveFhirTypeFromString(name: String): FhirR4BType {
@@ -47,7 +47,7 @@ internal object FhirR4BTypeResolver : FhirPathTypeResolver() {
 
   override fun convertToString(value: Any): String? =
     when (value) {
-      is com.google.fhir.model.r4b.String -> value.value
+      is dev.ohs.fhir.model.r4b.String -> value.value
       is Enumeration<*> -> value.toString()
       else -> null
     }

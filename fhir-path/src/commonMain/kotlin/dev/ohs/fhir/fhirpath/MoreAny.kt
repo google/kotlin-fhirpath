@@ -16,6 +16,8 @@
 
 package dev.ohs.fhir.fhirpath
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.functions.DEFAULT_UNIT
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
@@ -30,8 +32,6 @@ import dev.ohs.fhir.fhirpath.types.FhirR4PrimitiveType
 import dev.ohs.fhir.fhirpath.types.FhirR5ComplexType
 import dev.ohs.fhir.fhirpath.types.FhirR5PrimitiveType
 import dev.ohs.fhir.fhirpath.types.FhirType
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 
 /**
  * Maps a FHIR R4 type to a FHIRPath system type it can be implicitly converted to and a function
@@ -43,70 +43,61 @@ internal val fhirR4TypeToFhirPathType =
   mapOf<FhirType, Pair<FhirPathSystemType, (element: Any) -> Any>>(
     // FHIR R4 primitive types
     FhirR4PrimitiveType.Boolean to
-      (FhirPathSystemType.BOOLEAN to { it -> (it as com.google.fhir.model.r4.Boolean).value!! }),
+      (FhirPathSystemType.BOOLEAN to { it -> (it as dev.ohs.fhir.model.r4.Boolean).value!! }),
     FhirR4PrimitiveType.String to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4.String).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.String).value!! }),
     FhirR4PrimitiveType.Uri to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4.Uri).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Uri).value!! }),
     FhirR4PrimitiveType.Code to
       (FhirPathSystemType.STRING to
         { it ->
           // A code in the Kotlin FHIR library is represented either as an Enumeration if it is
           // bound to a value set, or a Code if it is not.
           when (it) {
-            is com.google.fhir.model.r4.Enumeration<*> -> it.value.toString()
-            is com.google.fhir.model.r4.Code -> it.value!!
+            is dev.ohs.fhir.model.r4.Enumeration<*> -> it.value.toString()
+            is dev.ohs.fhir.model.r4.Code -> it.value!!
             else -> error("Unknown code type")
           }
         }),
     FhirR4PrimitiveType.Oid to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4.Oid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Oid).value!! }),
     FhirR4PrimitiveType.Id to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4.Id).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Id).value!! }),
     FhirR4PrimitiveType.Uuid to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4.Uuid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Uuid).value!! }),
     FhirR4PrimitiveType.Markdown to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4.Markdown).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Markdown).value!! }),
     FhirR4PrimitiveType.Base64Binary to
-      (FhirPathSystemType.STRING to
-        { it ->
-          (it as com.google.fhir.model.r4.Base64Binary).value!!
-        }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Base64Binary).value!! }),
     FhirR4PrimitiveType.Integer to
-      (FhirPathSystemType.INTEGER to { it -> (it as com.google.fhir.model.r4.Integer).value!! }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.Integer).value!! }),
     FhirR4PrimitiveType.UnsignedInt to
-      (FhirPathSystemType.INTEGER to
-        { it ->
-          (it as com.google.fhir.model.r4.UnsignedInt).value!!
-        }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.UnsignedInt).value!! }),
     FhirR4PrimitiveType.PositiveInt to
-      (FhirPathSystemType.INTEGER to
-        { it ->
-          (it as com.google.fhir.model.r4.PositiveInt).value!!
-        }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.PositiveInt).value!! }),
     FhirR4PrimitiveType.Decimal to
-      (FhirPathSystemType.DECIMAL to { it -> (it as com.google.fhir.model.r4.Decimal).value!! }),
+      (FhirPathSystemType.DECIMAL to { it -> (it as dev.ohs.fhir.model.r4.Decimal).value!! }),
     FhirR4PrimitiveType.Date to
       (FhirPathSystemType.DATE to
         { it ->
-          FhirPathDate.fromFhirR4Date((it as com.google.fhir.model.r4.Date).value!!)
+          FhirPathDate.fromFhirR4Date((it as dev.ohs.fhir.model.r4.Date).value!!)
         }),
     FhirR4PrimitiveType.DateTime to
       (FhirPathSystemType.DATETIME to
         { it ->
-          FhirPathDateTime.fromFhirR4DateTime((it as com.google.fhir.model.r4.DateTime).value!!)
+          FhirPathDateTime.fromFhirR4DateTime((it as dev.ohs.fhir.model.r4.DateTime).value!!)
         }),
     FhirR4PrimitiveType.Time to
       (FhirPathSystemType.TIME to
         { it ->
-          FhirPathTime.fromLocalTime((it as com.google.fhir.model.r4.Time).value!!)
+          FhirPathTime.fromLocalTime((it as dev.ohs.fhir.model.r4.Time).value!!)
         }),
 
     // FHIR R4 complex types
     FhirR4ComplexType.Quantity to
       (FhirPathSystemType.QUANTITY to
         {
-          (it as com.google.fhir.model.r4.Quantity).let {
+          (it as dev.ohs.fhir.model.r4.Quantity).let {
             val pair = (it.value!!.value!! to it.code!!.value!!)
             FhirPathQuantity(value = pair.first, unit = pair.second)
           }
@@ -123,70 +114,61 @@ internal val fhirR4BTypeToFhirPathType =
   mapOf<FhirType, Pair<FhirPathSystemType, (element: Any) -> Any>>(
     // FHIR R4B primitive types
     FhirR4BPrimitiveType.Boolean to
-      (FhirPathSystemType.BOOLEAN to { it -> (it as com.google.fhir.model.r4b.Boolean).value!! }),
+      (FhirPathSystemType.BOOLEAN to { it -> (it as dev.ohs.fhir.model.r4b.Boolean).value!! }),
     FhirR4BPrimitiveType.String to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4b.String).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.String).value!! }),
     FhirR4BPrimitiveType.Uri to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4b.Uri).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.Uri).value!! }),
     FhirR4BPrimitiveType.Code to
       (FhirPathSystemType.STRING to
         { it ->
           // A code in the Kotlin FHIR library is represented either as an Enumeration if it is
           // bound to a value set, or a Code if it is not.
           when (it) {
-            is com.google.fhir.model.r4b.Enumeration<*> -> it.value.toString()
-            is com.google.fhir.model.r4b.Code -> it.value!!
+            is dev.ohs.fhir.model.r4b.Enumeration<*> -> it.value.toString()
+            is dev.ohs.fhir.model.r4b.Code -> it.value!!
             else -> error("Unknown code type")
           }
         }),
     FhirR4BPrimitiveType.Oid to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4b.Oid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.Oid).value!! }),
     FhirR4BPrimitiveType.Id to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4b.Id).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.Id).value!! }),
     FhirR4BPrimitiveType.Uuid to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4b.Uuid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.Uuid).value!! }),
     FhirR4BPrimitiveType.Markdown to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r4b.Markdown).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.Markdown).value!! }),
     FhirR4BPrimitiveType.Base64Binary to
-      (FhirPathSystemType.STRING to
-        { it ->
-          (it as com.google.fhir.model.r4b.Base64Binary).value!!
-        }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4b.Base64Binary).value!! }),
     FhirR4BPrimitiveType.Integer to
-      (FhirPathSystemType.INTEGER to { it -> (it as com.google.fhir.model.r4b.Integer).value!! }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4b.Integer).value!! }),
     FhirR4BPrimitiveType.UnsignedInt to
-      (FhirPathSystemType.INTEGER to
-        { it ->
-          (it as com.google.fhir.model.r4b.UnsignedInt).value!!
-        }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4b.UnsignedInt).value!! }),
     FhirR4BPrimitiveType.PositiveInt to
-      (FhirPathSystemType.INTEGER to
-        { it ->
-          (it as com.google.fhir.model.r4b.PositiveInt).value!!
-        }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4b.PositiveInt).value!! }),
     FhirR4BPrimitiveType.Decimal to
-      (FhirPathSystemType.DECIMAL to { it -> (it as com.google.fhir.model.r4b.Decimal).value!! }),
+      (FhirPathSystemType.DECIMAL to { it -> (it as dev.ohs.fhir.model.r4b.Decimal).value!! }),
     FhirR4BPrimitiveType.Date to
       (FhirPathSystemType.DATE to
         { it ->
-          FhirPathDate.fromFhirR4BDate((it as com.google.fhir.model.r4b.Date).value!!)
+          FhirPathDate.fromFhirR4BDate((it as dev.ohs.fhir.model.r4b.Date).value!!)
         }),
     FhirR4BPrimitiveType.DateTime to
       (FhirPathSystemType.DATETIME to
         { it ->
-          FhirPathDateTime.fromFhirR4BDateTime((it as com.google.fhir.model.r4b.DateTime).value!!)
+          FhirPathDateTime.fromFhirR4BDateTime((it as dev.ohs.fhir.model.r4b.DateTime).value!!)
         }),
     FhirR4BPrimitiveType.Time to
       (FhirPathSystemType.TIME to
         { it ->
-          FhirPathTime.fromLocalTime((it as com.google.fhir.model.r4b.Time).value!!)
+          FhirPathTime.fromLocalTime((it as dev.ohs.fhir.model.r4b.Time).value!!)
         }),
 
     // FHIR R4B complex types
     FhirR4BComplexType.Quantity to
       (FhirPathSystemType.QUANTITY to
         {
-          (it as com.google.fhir.model.r4b.Quantity).let {
+          (it as dev.ohs.fhir.model.r4b.Quantity).let {
             val pair = (it.value!!.value!! to it.code!!.value!!)
             FhirPathQuantity(value = pair.first, unit = pair.second)
           }
@@ -203,70 +185,61 @@ internal val fhirR5TypeToFhirPathType =
   mapOf<FhirType, Pair<FhirPathSystemType, (element: Any) -> Any>>(
     // FHIR R5 primitive types
     FhirR5PrimitiveType.Boolean to
-      (FhirPathSystemType.BOOLEAN to { it -> (it as com.google.fhir.model.r5.Boolean).value!! }),
+      (FhirPathSystemType.BOOLEAN to { it -> (it as dev.ohs.fhir.model.r5.Boolean).value!! }),
     FhirR5PrimitiveType.String to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r5.String).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.String).value!! }),
     FhirR5PrimitiveType.Uri to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r5.Uri).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.Uri).value!! }),
     FhirR5PrimitiveType.Code to
       (FhirPathSystemType.STRING to
         { it ->
           // A code in the Kotlin FHIR library is represented either as an Enumeration if it is
           // bound to a value set, or a Code if it is not.
           when (it) {
-            is com.google.fhir.model.r5.Enumeration<*> -> it.value.toString()
-            is com.google.fhir.model.r5.Code -> it.value!!
+            is dev.ohs.fhir.model.r5.Enumeration<*> -> it.value.toString()
+            is dev.ohs.fhir.model.r5.Code -> it.value!!
             else -> error("Unknown code type")
           }
         }),
     FhirR5PrimitiveType.Oid to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r5.Oid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.Oid).value!! }),
     FhirR5PrimitiveType.Id to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r5.Id).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.Id).value!! }),
     FhirR5PrimitiveType.Uuid to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r5.Uuid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.Uuid).value!! }),
     FhirR5PrimitiveType.Markdown to
-      (FhirPathSystemType.STRING to { it -> (it as com.google.fhir.model.r5.Markdown).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.Markdown).value!! }),
     FhirR5PrimitiveType.Base64Binary to
-      (FhirPathSystemType.STRING to
-        { it ->
-          (it as com.google.fhir.model.r5.Base64Binary).value!!
-        }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r5.Base64Binary).value!! }),
     FhirR5PrimitiveType.Integer to
-      (FhirPathSystemType.INTEGER to { it -> (it as com.google.fhir.model.r5.Integer).value!! }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r5.Integer).value!! }),
     FhirR5PrimitiveType.UnsignedInt to
-      (FhirPathSystemType.INTEGER to
-        { it ->
-          (it as com.google.fhir.model.r5.UnsignedInt).value!!
-        }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r5.UnsignedInt).value!! }),
     FhirR5PrimitiveType.PositiveInt to
-      (FhirPathSystemType.INTEGER to
-        { it ->
-          (it as com.google.fhir.model.r5.PositiveInt).value!!
-        }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r5.PositiveInt).value!! }),
     FhirR5PrimitiveType.Decimal to
-      (FhirPathSystemType.DECIMAL to { it -> (it as com.google.fhir.model.r5.Decimal).value!! }),
+      (FhirPathSystemType.DECIMAL to { it -> (it as dev.ohs.fhir.model.r5.Decimal).value!! }),
     FhirR5PrimitiveType.Date to
       (FhirPathSystemType.DATE to
         { it ->
-          FhirPathDate.fromFhirR5Date((it as com.google.fhir.model.r5.Date).value!!)
+          FhirPathDate.fromFhirR5Date((it as dev.ohs.fhir.model.r5.Date).value!!)
         }),
     FhirR5PrimitiveType.DateTime to
       (FhirPathSystemType.DATETIME to
         { it ->
-          FhirPathDateTime.fromFhirR5DateTime((it as com.google.fhir.model.r5.DateTime).value!!)
+          FhirPathDateTime.fromFhirR5DateTime((it as dev.ohs.fhir.model.r5.DateTime).value!!)
         }),
     FhirR5PrimitiveType.Time to
       (FhirPathSystemType.TIME to
         { it ->
-          FhirPathTime.fromLocalTime((it as com.google.fhir.model.r5.Time).value!!)
+          FhirPathTime.fromLocalTime((it as dev.ohs.fhir.model.r5.Time).value!!)
         }),
 
     // FHIR R5 complex types
     FhirR5ComplexType.Quantity to
       (FhirPathSystemType.QUANTITY to
         {
-          (it as com.google.fhir.model.r5.Quantity).let {
+          (it as dev.ohs.fhir.model.r5.Quantity).let {
             val pair = (it.value!!.value!! to it.code!!.value!!)
             FhirPathQuantity(value = pair.first, unit = pair.second)
           }
@@ -313,7 +286,7 @@ internal val fhirPathTypeToFhirPathType =
  * Converts the object to its equivalent FHIRPath system type if one exists, or returns the object
  * itself, otherwise.
  *
- * For example, an object of type `com.google.fhir.model.r4.String` will be converted to a
+ * For example, an object of type `dev.ohs.fhir.model.r4.String` will be converted to a
  * Kotlin.String (the internal representation of FHIRPath system type System.String).
  */
 internal fun Any.toFhirPathType(fhirPathTypeResolver: FhirPathTypeResolver): Any {

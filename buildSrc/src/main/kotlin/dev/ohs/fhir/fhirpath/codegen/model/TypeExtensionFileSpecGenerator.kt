@@ -16,14 +16,14 @@
 
 package dev.ohs.fhir.fhirpath.codegen.model
 
-import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition
-import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition.Kind
-import dev.ohs.fhir.fhirpath.codegen.model.schema.capitalized
-import com.google.fhir.model.r4.terminologies.ResourceType
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition.Kind
+import dev.ohs.fhir.fhirpath.codegen.model.schema.capitalized
+import dev.ohs.fhir.model.r4.terminologies.ResourceType
 
 object TypeExtensionFileSpecGenerator {
   fun generate(

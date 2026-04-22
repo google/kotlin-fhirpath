@@ -16,12 +16,12 @@
 
 package dev.ohs.fhir.fhirpath
 
-import dev.ohs.fhir.fhirpath.types.FhirPathDate
-import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
-import com.google.fhir.model.r4.FhirR4Json
-import com.google.fhir.model.r4.Resource
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import dev.ohs.fhir.fhirpath.types.FhirPathDate
+import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.model.r4.FhirR4Json
+import dev.ohs.fhir.model.r4.Resource
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.test.Enabled
@@ -171,7 +171,7 @@ private fun assertEquals(expected: Output, actual: Any) {
         is String -> {
           assertEquals(expected.value, actual)
         }
-        is com.google.fhir.model.r4.String -> {
+        is dev.ohs.fhir.model.r4.String -> {
           assertEquals(expected.value, actual.value)
         }
       }
@@ -191,9 +191,7 @@ private fun assertEquals(expected: Output, actual: Any) {
     "Quantity" ->
       assertEquals(
         expected.value,
-        (actual as com.google.fhir.model.r4.Quantity).let {
-          "${it.value!!.value} ${it.code!!.value}"
-        },
+        (actual as dev.ohs.fhir.model.r4.Quantity).let { "${it.value!!.value} ${it.code!!.value}" },
       )
     else -> throw AssertionError("Unknown output type: ${expected.type}")
   }

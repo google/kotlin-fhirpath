@@ -85,15 +85,15 @@ data class FhirPathDate(val year: Int, val month: Int? = null, val day: Int? = n
       return FhirPathDate(year, month, day)
     }
 
-    fun fromFhirR4Date(fhirDate: com.google.fhir.model.r4.FhirDate): FhirPathDate {
+    fun fromFhirR4Date(fhirDate: dev.ohs.fhir.model.r4.FhirDate): FhirPathDate {
       return fromString(fhirDate.toString())
     }
 
-    fun fromFhirR4BDate(fhirDate: com.google.fhir.model.r4b.FhirDate): FhirPathDate {
+    fun fromFhirR4BDate(fhirDate: dev.ohs.fhir.model.r4b.FhirDate): FhirPathDate {
       return fromString(fhirDate.toString())
     }
 
-    fun fromFhirR5Date(fhirDate: com.google.fhir.model.r5.FhirDate): FhirPathDate {
+    fun fromFhirR5Date(fhirDate: dev.ohs.fhir.model.r5.FhirDate): FhirPathDate {
       return fromString(fhirDate.toString())
     }
   }
