@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package dev.ohs.fhir.fhirpath.codegen.model
 
-import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition
-import dev.ohs.fhir.fhirpath.codegen.model.schema.capitalized
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.asTypeName
+import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition
+import dev.ohs.fhir.fhirpath.codegen.model.schema.capitalized
 
 object SealedInterfaceExtensionFileSpecGenerator {
   fun generate(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package dev.ohs.fhir.fhirpath.codegen.ucum
 
-import dev.ohs.fhir.fhirpath.codegen.ucum.schema.Root
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import dev.ohs.fhir.fhirpath.codegen.ucum.schema.Root
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
