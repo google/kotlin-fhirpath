@@ -15,6 +15,11 @@ plugins {
     alias(libs.plugins.maven.publish)
 }
 
+
+val mavenGroupId: String by project
+val mavenArtifactId: String by project
+val mavenVersion: String by project
+val androidNamespace: String by project
 val fhirVersions = mapOf(
     "r4" to "third_party/hl7.fhir.r4.core/package",
     "r4b" to "third_party/hl7.fhir.r4b.core/package",
@@ -143,7 +148,7 @@ kotlin {
 }
 
 android {
-    namespace = project.property("androidNamespace") as String
+    namespace = androidNamespace
     compileSdk = 35
     defaultConfig {
         minSdk = 24
@@ -164,11 +169,10 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     dependsOn(generateKotlinGrammarSource)
 }
 
-version = "1.0.0-beta01"
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
-    coordinates(project.property("mavenGroupId") as String, project.property("mavenArtifactId") as String, version.toString())
+    coordinates(mavenGroupId, mavenArtifactId, mavenVersion)
 
     pom {
         name = "Kotlin FHIRPath"
