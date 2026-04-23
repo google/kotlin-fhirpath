@@ -15,8 +15,6 @@ Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/
 [FHIRPath](https://hl7.org/fhirpath/N1/) on
 [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
 
-**Warning:** The library is in alpha and subject to change. Use at your own risk.
-
 ## Key features
 
 * Strict conformation to the FHIRPath specification, with predictable and

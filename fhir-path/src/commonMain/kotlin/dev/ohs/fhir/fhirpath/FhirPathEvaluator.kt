@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package dev.ohs.fhir.fhirpath
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.functions.invoke
 import dev.ohs.fhir.fhirpath.functions.union
 import dev.ohs.fhir.fhirpath.model.FhirModelNavigator
@@ -42,8 +44,6 @@ import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -56,8 +56,8 @@ import kotlin.time.Instant
  * `fhirpath.g4` file with a preceding line comment noting the name of the rule. The order of the
  * "visit*" functions should be kept in sync with the order of the rules in the `fhirpath.g4` file.
  *
- * @param initialContext The starting dev.ohs.fhir.fhirpath.codegen.collection of FHIR resources
- *   for the expression.
+ * @param initialContext The starting dev.ohs.fhir.fhirpath.codegen.collection of FHIR resources for
+ *   the expression.
  */
 internal class FhirPathEvaluator(
   val fhirPathTypeResolver: FhirPathTypeResolver,
@@ -503,7 +503,12 @@ internal class FhirPathEvaluator(
               finalResults.add(result)
               queue.addLast(result)
             } else {
-              if (finalResults.none { it.toFhirPathType(fhirPathTypeResolver) == result.toFhirPathType(fhirPathTypeResolver) }) {
+              if (
+                finalResults.none {
+                  it.toFhirPathType(fhirPathTypeResolver) ==
+                    result.toFhirPathType(fhirPathTypeResolver)
+                }
+              ) {
                 finalResults.add(result)
               }
             }

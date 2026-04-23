@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package dev.ohs.fhir.fhirpath
 import java.io.File
 
 actual fun loadFile(file: String): String {
-    return File("${System.getProperty("projectRootDir")}/${file}").readText()
+  return File("${System.getProperty("projectRootDir")}/${file}").readText()
 }
 
 actual fun listJsonFiles(dir: String): Map<String, String> {
-    return File("${System.getProperty("projectRootDir")}/${dir}")
-        .listFiles()!!
-        .asSequence()
-        .filter { it.name.endsWith(".json") }
-        .map { it.name to it.readText() }
-        .toMap()
+  return File("${System.getProperty("projectRootDir")}/${dir}")
+    .listFiles()!!
+    .asSequence()
+    .filter { it.name.endsWith(".json") }
+    .map { it.name to it.readText() }
+    .toMap()
 }

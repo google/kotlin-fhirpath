@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package dev.ohs.fhir.fhirpath.operators
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.fhirpath.asComparableOperands
 import dev.ohs.fhir.fhirpath.toEqualCanonicalized
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
@@ -23,7 +24,6 @@ import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 internal fun compare(left: Any, right: Any, fhirPathTypeResolver: FhirPathTypeResolver): Int? {
   val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands(fhirPathTypeResolver)

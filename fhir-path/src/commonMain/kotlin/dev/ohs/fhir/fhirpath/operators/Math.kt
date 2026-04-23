@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Google LLC
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package dev.ohs.fhir.fhirpath.operators
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.div
 import dev.ohs.fhir.fhirpath.formatUcumUnit
 import dev.ohs.fhir.fhirpath.parseUcumUnit
@@ -27,10 +31,6 @@ import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.DecimalMode
-import com.ionspin.kotlin.bignum.decimal.RoundingMode
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.DateTimeUnit
