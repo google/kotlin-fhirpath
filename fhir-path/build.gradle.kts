@@ -8,14 +8,12 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.antlr.kotlin)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.kotest)
-    `maven-publish`
+    alias(libs.plugins.maven.publish)
 }
-
-group = "dev.ohs.fhir"
-version = "1.0.0-beta01"
 
 val fhirVersions = mapOf(
     "r4" to "third_party/hl7.fhir.r4.core/package",
@@ -129,7 +127,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotest.assertions.core)
-            implementation(libs.kotest.framework.datatest)
+            
             implementation(libs.kotest.framework.engine)
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.serialization.json)
@@ -145,7 +143,7 @@ kotlin {
 }
 
 android {
-    namespace = "dev.ohs.fhir.fhirpath"
+    namespace = project.property("androidNamespace") as String
     compileSdk = 35
     defaultConfig {
         minSdk = 24
@@ -166,44 +164,36 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     dependsOn(generateKotlinGrammarSource)
 }
 
-// publishing prep
-val localRepo: Directory = project.layout.buildDirectory.get().dir("repo")
+version = "1.0.0-beta01"
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates(project.property("mavenGroupId") as String, project.property("mavenArtifactId") as String, version.toString())
 
-publishing {
-    repositories {
-        maven {
-            url = localRepo.asFile.toURI()
-        }
-    }
-    publications {
-        withType<MavenPublication> {
-            pom {
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
+    pom {
+        name = "Kotlin FHIRPath"
+        description = "A Kotlin Multiplatform library for FHIRPath"
+        inceptionYear = "2025"
+        url = "https://github.com/ohs-foundation/kotlin-fhirpath"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         }
+        developers {
+            developer {
+                id = "ohs-foundation"
+                name = "Open Heath Stack Foundation"
+                url = "https://ohs.dev/"
+            }
+        }
+        scm {
+            url = "https://github.com/ohs-foundation/kotlin-fhirpath/"
+            connection = "scm:git:git://github.com/ohs-foundation/kotlin-fhirpath.git"
+            developerConnection = "scm:git:ssh://git@github.com/ohs-foundation/kotlin-fhirpath.git"
+        }
     }
 }
-val deleteRepoTask = tasks.register<Delete>("deleteLocalRepo") {
-    description =
-        "Deletes the local repository to get rid of stale artifacts before local publishing"
-    this.delete(localRepo)
-}
-tasks.named("publishAllPublicationsToMavenRepository").configure {
-    dependsOn(deleteRepoTask)
-}
-tasks.register("zipRepo", Zip::class) {
-    description = "Create a zip of the maven repository"
-    this.destinationDirectory.set(project.layout.buildDirectory.dir("repoZip"))
-    archiveBaseName.set("kotlin-fhirpath")
 
-    // Hint to gradle that the repo files are produced by the publish task. This establishes a
-    // dependency from the zipRepo task to the publish task.
-    this.from(tasks.named("publish").map { _ ->
-        localRepo
-    })
-}
