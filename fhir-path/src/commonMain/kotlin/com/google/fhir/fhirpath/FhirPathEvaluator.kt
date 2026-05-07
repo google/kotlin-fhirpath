@@ -70,8 +70,8 @@ internal class FhirPathEvaluator(
   private val thisStack = ArrayDeque<Any>()
   private val totalStack = ArrayDeque<Collection<Any>>()
   private val variables = mutableMapOf<String, Any?>()
-  private val _traces = mutableMapOf<String, MutableList<TraceEntry>>()
-  val traces: Map<String, List<TraceEntry>> get() = _traces
+  var traces: Map<String, List<TraceEntry>> = emptyMap()
+    private set
   @OptIn(ExperimentalTime::class) private var now: Instant = Clock.System.now()
 
   @OptIn(ExperimentalTime::class)
@@ -81,7 +81,7 @@ internal class FhirPathEvaluator(
     thisStack.clear()
     totalStack.clear()
     this.variables.clear()
-    _traces.clear()
+    traces = emptyMap()
 
     if (context != null) {
       resource = context
@@ -550,7 +550,7 @@ internal class FhirPathEvaluator(
         val entries = readableValues.mapIndexed { i, value ->
           TraceEntry(value = value, path = "$basePath[$i]")
         }
-        _traces.getOrPut(name) { mutableListOf() }.addAll(entries)
+        traces = traces + (name to (traces[name].orEmpty() + entries))
 
         println("trace[$name]: ${entries.map { "${it.path}: ${it.value}" }}")
 
