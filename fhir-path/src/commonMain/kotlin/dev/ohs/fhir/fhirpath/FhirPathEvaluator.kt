@@ -59,6 +59,8 @@ import kotlin.time.Instant
  * @param initialContext The starting dev.ohs.fhir.fhirpath.codegen.collection of FHIR resources for
  *   the expression.
  */
+data class TraceEntry(val value: Any, val path: String)
+
 internal class FhirPathEvaluator(
   val fhirPathTypeResolver: FhirPathTypeResolver,
   val fhirModelNavigator: FhirModelNavigator,
@@ -68,6 +70,8 @@ internal class FhirPathEvaluator(
   private val thisStack = ArrayDeque<Any>()
   private val totalStack = ArrayDeque<Collection<Any>>()
   private val variables = mutableMapOf<String, Any?>()
+  var traces: Map<String, List<TraceEntry>> = emptyMap()
+    private set
   @OptIn(ExperimentalTime::class) private var now: Instant = Clock.System.now()
 
   @OptIn(ExperimentalTime::class)
@@ -77,6 +81,7 @@ internal class FhirPathEvaluator(
     thisStack.clear()
     totalStack.clear()
     this.variables.clear()
+    traces = emptyMap()
 
     if (context != null) {
       resource = context
@@ -520,10 +525,40 @@ internal class FhirPathEvaluator(
       "trace" -> {
         // See
         // [specification](https://hl7.org/fhirpath/N1/#tracename-string-projection-expression-collection).
-        val name = visit(functionNode.paramList()!!.expression()[0])
-        val projection = functionNode.paramList()!!.expression().getOrNull(1)?.let { visit(it) }
-        // TODO: implement this for multiplatform.
-        println("$name $projection")
+
+        // Logger label
+        val name = visit(functionNode.paramList()!!.expression()[0]).single() as String
+
+        // If projection is provided, evaluate it for each item in context; otherwise log context
+        val projectionExpr = functionNode.paramList()!!.expression().getOrNull(1)
+        val logValue =
+          if (projectionExpr != null) {
+            context.flatMap { item ->
+              thisStack.addLast(item)
+              contextStack.addLast(listOf(item))
+              val result = visit(projectionExpr)
+              contextStack.removeLast()
+              thisStack.removeLast()
+              result
+            }
+          } else {
+            context
+          }
+
+        // Convert to readable values for logging (e.g., FHIR String -> Kotlin String)
+        val readableValues = logValue.map { it.toFhirPathType(fhirPathTypeResolver) }
+
+        val parentExpr =
+          (ctx.getParent() as? fhirpathParser.InvocationExpressionContext)?.expression()?.text
+        val resourceType = contextStack.first().singleOrNull()?.let { it::class.simpleName } ?: ""
+        val basePath = if (parentExpr != null) "$resourceType.$parentExpr" else resourceType
+        val entries = readableValues.mapIndexed { i, value ->
+          TraceEntry(value = value, path = "$basePath[$i]")
+        }
+        traces = traces + (name to (traces[name].orEmpty() + entries))
+
+        println("trace[$name]: ${entries.map { "${it.path}: ${it.value}" }}")
+
         context
       }
       "is" -> {

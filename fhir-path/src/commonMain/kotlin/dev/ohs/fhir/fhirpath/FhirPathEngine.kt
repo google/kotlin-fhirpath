@@ -38,6 +38,8 @@ internal constructor(
 ) {
   private val evaluator = FhirPathEvaluator(fhirPathTypeResolver, fhirModelNavigator)
 
+  val traces: Map<String, List<TraceEntry>> get() = evaluator.traces
+
   /**
    * Evaluates a FHIRPath expression against a single FHIR resource.
    *
