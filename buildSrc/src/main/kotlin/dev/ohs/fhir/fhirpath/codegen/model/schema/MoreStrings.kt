@@ -1,5 +1,5 @@
 /*
- * Copyright $YEAR Open Health Stack Foundation
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,3 +14,7 @@
  * limitations under the License.
  */
 
+package dev.ohs.fhir.fhirpath.codegen.model.schema
+
+/** Converts the firs character of a string to uppercase */
+fun String.capitalized() = this.replaceFirstChar(Char::uppercaseChar)

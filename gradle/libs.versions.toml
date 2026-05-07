@@ -1,29 +1,33 @@
 [versions]
-agp = "8.10.0"
-antlr-kotlin = "1.0.0"
-kotest = "5.9.1"
-kotlin = "2.2.0"
-kotlin-fhir = "1.0.0-beta01"
+agp = "8.13.0"
+antlr-kotlin = "1.0.10"
+kotest = "6.1.11"
+kotlin = "2.3.20"
+kotlin-fhir = "1.0.0-beta03"
 kotlinx-serialization-json = "1.8.1"
-xmlutil = "0.91.2"
+ksp = "2.3.6"
+maven-publish = "0.36.0"
 spotless = "7.0.1"
+xmlutil = "0.91.2"
 
 [libraries]
 antlr-kotlin-runtime = { module = "com.strumenta:antlr-kotlin-runtime", version.ref = "antlr-kotlin" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
-kotest-framework-datatest = { module = "io.kotest:kotest-framework-datatest", version.ref = "kotest" }
 kotest-framework-engine = {module = "io.kotest:kotest-framework-engine", version.ref = "kotest"}
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
-kotlin-fhir = { module = "com.google.fhir:fhir-model", version.ref = "kotlin-fhir" }
+kotlin-fhir = { module = "dev.ohs.fhir:fhir-model", version.ref = "kotlin-fhir" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 antlr-kotlin = { id = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin" }
-kotest = { id = "io.kotest.multiplatform", version.ref = "kotest" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

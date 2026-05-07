@@ -1,5 +1,5 @@
 /*
- * Copyright $YEAR Open Health Stack Foundation
+ * Copyright 2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,3 +14,16 @@
  * limitations under the License.
  */
 
+package dev.ohs.fhir.fhirpath.types
+
+import dev.ohs.fhir.model.r5.terminologies.ResourceType
+
+internal sealed interface FhirR5Type : FhirType {
+  abstract override val typeName: String
+  override val fhirVersion: FhirVersion
+    get() = FhirVersion.R5
+}
+
+internal data class FhirR5ResourceType(val resourceType: ResourceType) : FhirR5Type {
+  override val typeName: String = resourceType.getCode()
+}

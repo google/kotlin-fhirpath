@@ -1,21 +1,19 @@
 # Kotlin FHIRPath
 
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-android%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-android&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-android)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-iosarm64%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-iosarm64&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-iosarm64)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-iossimulatorarm64%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-iossimulatorarm64&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-iossimulatorarm64)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-iosx64%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-iosx64&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-iosx64)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-js%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-js&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-js)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-jvm%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-jvm&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-jvm)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-wasm-js%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-wasm-js&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-wasm-js)
-[![Release](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fdl.google.com%2Fdl%2Fandroid%2Fmaven2%2Fcom%2Fgoogle%2Ffhir%2Ffhir-path-wasm-wasi%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Flatest&label=fhir-path-wasm-wasi&color=yellow)](https://maven.google.com/web/index.html?#com.google.fhir:fhir-path-wasm-wasi)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path?color=yellow&label=fhir-path)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-jvm?color=yellow&label=jvm)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-jvm)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-wasm-js?color=yellow&label=wasm-js)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-wasm-js)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-wasm-wasi?color=yellow&label=wasm-wasi)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-wasm-wasi)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-js?color=yellow&label=js)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-js)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-android?color=yellow&label=android)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-android)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-iosx64?color=yellow&label=ios-x64)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-iosx64)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-iosarm64?color=yellow&label=ios-arm64)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-iosarm64)
+[![Release](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-iossimulatorarm64?color=yellow&label=ios-simulator)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-iossimulatorarm64)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/overview.html)'s
 [FHIRPath](https://hl7.org/fhirpath/N1/) on
 [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
-
-**Warning:** The library is in alpha and subject to change. Use at your own risk.
 
 ## Key features
 
@@ -47,9 +45,9 @@ lexer, parser and visitor directly from the formal FHIRPath grammar. This automa
 correctness, improves maintainability, and significantly reduces development time.
 
 The
-[FHIRPath Evaluator](fhirpath/src/commonMain/kotlin/com/google/fhir/fhirpath/FhirPathEvaluator.kt)
+[FHIRPath Evaluator](fhirpath/src/commonMain/kotlin/dev.ohs.fhir/fhirpath/FhirPathEvaluator.kt)
 implements the visitor class generated by ANTLR, evaluating FHIRPath expressions by traversing the
-in-memory data model from the [Kotlin FHIR](https://github.com/google/kotlin-fhir) library.
+in-memory data model from the [Kotlin FHIR](https://github.com/ohs-foundation/kotlin-fhir) library.
 
 A key requirement for FHIRPath evaluation is the capability to access data elements by name. To
 achieve this with cross-platform compatibility (avoiding reflection), a codegen embedded in
@@ -58,7 +56,7 @@ achieve this with cross-platform compatibility (avoiding reflection), a codegen 
 ```mermaid
 graph LR
     A[formal FHIRPath grammar] -- ANTLR Kotlin --> B(lexer, parser, visitor)
-    C(Kotlin FHIR data model<br>com.google.fhir:fhir-model)
+    C(Kotlin FHIR data model<br>dev.ohs.fhir:fhir-model)
     subgraph buildSrc
         direction LRTB
         D[FHIR spec<br>in JSON] -- kotlinx.serialization --> E(instances of<br>StructureDefinition<br>Kotlin data class<br>)
@@ -216,17 +214,19 @@ and proposals should be linked in the table above.
 
 ### Adding the library dependency to your project
 
-To use Kotlin FHIRPath, add it to the dependencies in your project. To do that, first make sure to
-include the [Google Maven](https://maven.google.com/) repository in the `build.gradle.kts` file in
+To use Kotlin FHIRPath, add it to the dependencies in your project. To do that, first make sure to include the `mavenCentral()`[^1] repository in the `build.gradle.kts` file in
 your project root.
 
 ```
 // build.gradle.kts
 repositories {
-    // Other repositories such as mavenCentral() and gradlePluginPortal()
-    google()
+    // Other repositories such as gradlePluginPortal() and google()
+    mavenCentral()
 }
 ```
+
+[^1]: Early versions of this library (up to `1.0.0-beta01`) were published under the group ID
+`com.google.fhir` on [Google Maven](https://maven.google.com/web/index.html?q=fhir-path).
 
 Next, follow the instructions for your specific project type.
 
@@ -241,7 +241,7 @@ the `kotlin` block of the module's `build.gradle.kts` file (e.g., `composeApp/bu
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.google.fhir:fhir-path:1.0.0-alpha02")
+            implementation("dev.ohs.fhir:fhir-path:1.0.0-beta02")
         }
     }
 }
@@ -255,7 +255,7 @@ For Android projects, add the dependency to the `dependency` block in the module
 ```
 // e.g., app/build.gradle.kts
 dependencies {
-    implementation("com.google.fhir:fhir-path:1.0.0-alpha02")
+    implementation("dev.ohs.fhir:fhir-path:1.0.0-beta02")
 }
 ```
 
@@ -265,8 +265,8 @@ To evaluate a FHIRPath expression, create a `FhirPathEngine` for the correct FHI
 `evaluateExpression` function:
 
 ```
-import com.google.fhir.fhirpath.FhirPathEngine
-import com.google.fhir.model.r4.FhirR4Json
+import dev.ohs.fhir.fhirpath.FhirPathEngine
+import dev.ohs.fhir.model.r4.FhirR4Json
 
 val patientExampleJson = ... // Load "patient-example.json"
 val patient = FhirR4Json().decodeFromString(patientExampleJson)
@@ -285,7 +285,7 @@ To generate the lexer, parser, and visitor locally using ANTLR Kotlin:
 ```
 
 The generated code will be placed in `fhir-path/build/generated` under package
-`com.google.fhir.fhirpath.parsers`.
+`dev.ohs.fhir.fhirpath.parsers`.
 
 ### Model extensions
 
@@ -298,7 +298,7 @@ To run the model extension codegen in `buildSrc` locally:
 ```
 
 The generated code will be located in `fhir-path/build/generated` under packages
-`com.google.fhir.model.<FHIR_VERSION>.ext` and `com.google.fhir.fhirpath`.
+`dev.ohs.fhir.model.<FHIR_VERSION>.ext` and `dev.ohs.fhir.fhirpath`.
 
 ### UCUM helpers
 
@@ -309,7 +309,7 @@ To run the UCUM helper codegen in `buildSrc` locally:
 ```
 
 The generated code will be located in `fhir-path/build/generated` under package
-`com.google.fhir.fhirpath.ucum`.
+`dev.ohs.fhir.fhirpath.ucum`.
 
 ### Dependencies
 
@@ -331,22 +331,58 @@ The number of passing test cases is displayed on a badge at the top of this page
 
 ### Publishing
 
-To create a maven repository from the generated FHIR model, run:
+For a comprehensive understanding of publishing KMP libraries to Maven Central, see the
+[Kotlin Multiplatform Publishing Guide](https://kotlinlang.org/docs/multiplatform-publish-lib.html)
+and the
+[Maven Central Publishing Guide](https://central.sonatype.org/publish/publish-portal-guide/).
 
+> **Note:** The project has already been set up to be released to Maven using the
+> [`gradle-maven-publish-plugin`](https://github.com/vanniktech/gradle-maven-publish-plugin). The
+> following sections outline the additional setup required for a developer to publish to Maven Local
+> and Maven Central.
+
+#### Maven Local
+
+To publish artifacts to your local Maven repository (`~/.m2/repository`) for local development and
+testing, run:
+
+```bash
+./gradlew :fhir-path:publishToMavenLocal
 ```
-./gradlew :fhir-path:publish
+
+#### Maven Central
+
+To publish a new release to Maven Central, first set up your GPG signing key and repository
+credentials to Gradle following the aforementioned official guides.
+
+**Best Practice**: Store these sensitive details in your **Global Gradle Properties** file at
+`~/.gradle/gradle.properties` (User Home directory). This ensures they are available to all your
+projects but are never accidentally committed to the Git repository.
+
+Your `~/.gradle/gradle.properties` should contain:
+
+```properties
+# Maven Central Credentials
+mavenCentralUsername=YOUR_USERNAME
+mavenCentralPassword=YOUR_PASSWORD
+
+# GPG Key Details
+signing.keyId=YOUR_KEY_ID
+signing.password=YOUR_KEY_PASSWORD
+signing.secretKeyRingFile=/path/to/secring.gpg
 ```
 
-This will create a maven repository in the `fhir-path/build/repo` directory with artifacts for all
-supported platforms.
+You can verify your signing setup by running:
 
-To zip the repository, run:
-
-```
-./gradlew :fhir-path:zipRepo
+```bash
+./gradlew :fhir-path:checkSigningConfiguration
 ```
 
-This will generate a `.zip` file in the `fhir-path/build/repoZip` directory.
+To publish to Maven Central, run:
+
+```bash
+./gradlew :fhir-path:publishToMavenCentral
+```
 
 ### Third Party
 
@@ -372,8 +408,3 @@ repositories for code generation and testing purposes:
   [FHIR R5](https://hl7.org/fhir/R5/) for code generation
 - [`ucum`](third_party/ucum/): content from the [UCUM](https://github.com/ucum-org/ucum) repo
 
-## Disclaimer
-
-This is not an officially supported Google product. This project is not
-eligible for the [Google Open Source Software Vulnerability Rewards
-Program](https://bughunters.google.com/open-source-security).

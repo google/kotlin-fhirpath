@@ -1,5 +1,5 @@
 /*
- * Copyright $YEAR Open Health Stack Foundation
+ * Copyright 2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,3 +14,8 @@
  * limitations under the License.
  */
 
+package dev.ohs.fhir.fhirpath.types
+
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+
+data class FhirPathQuantity(val value: BigDecimal? = null, val unit: String? = null)

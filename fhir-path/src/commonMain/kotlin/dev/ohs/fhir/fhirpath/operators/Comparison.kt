@@ -1,0 +1,58 @@
+/*
+ * Copyright 2025-2026 Open Health Stack Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package dev.ohs.fhir.fhirpath.operators
+
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import dev.ohs.fhir.fhirpath.asComparableOperands
+import dev.ohs.fhir.fhirpath.toEqualCanonicalized
+import dev.ohs.fhir.fhirpath.types.FhirPathDate
+import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
+import dev.ohs.fhir.fhirpath.types.FhirPathTime
+import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
+
+internal fun compare(left: Any, right: Any, fhirPathTypeResolver: FhirPathTypeResolver): Int? {
+  val (leftFhirPath, rightFhirPath) = (left to right).asComparableOperands(fhirPathTypeResolver)
+
+  return when {
+    leftFhirPath is String && rightFhirPath is String -> {
+      leftFhirPath.compareTo(rightFhirPath)
+    }
+    leftFhirPath is Int && rightFhirPath is Int -> {
+      leftFhirPath.compareTo(rightFhirPath)
+    }
+    leftFhirPath is Long && rightFhirPath is Long -> {
+      leftFhirPath.compareTo(rightFhirPath)
+    }
+    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+      leftFhirPath.compareTo(rightFhirPath)
+    }
+    leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {
+      with(leftFhirPath.toEqualCanonicalized() to rightFhirPath.toEqualCanonicalized()) {
+        if (first.unit!! != second.unit!!) return null
+        return first.value?.compareTo(second.value!!)
+      }
+    }
+    leftFhirPath is FhirPathDate && rightFhirPath is FhirPathDate ->
+      leftFhirPath.compareTo(rightFhirPath)
+    leftFhirPath is FhirPathDateTime && rightFhirPath is FhirPathDateTime ->
+      leftFhirPath.compareTo(rightFhirPath)
+    leftFhirPath is FhirPathTime && rightFhirPath is FhirPathTime ->
+      leftFhirPath.compareTo(rightFhirPath)
+    else -> error("Cannot compare $leftFhirPath and $rightFhirPath")
+  }
+}

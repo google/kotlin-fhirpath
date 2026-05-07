@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     dependencies {
-        implementation("com.google.fhir:fhir-model:1.0.0-alpha02")
+        implementation("dev.ohs.fhir:fhir-model:1.0.0-beta03")
         implementation("com.squareup:kotlinpoet:2.0.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
         implementation("io.github.pdvrieze.xmlutil:core:0.91.2")
