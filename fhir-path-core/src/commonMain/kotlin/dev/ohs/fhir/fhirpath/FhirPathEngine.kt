@@ -25,6 +25,13 @@ import org.antlr.v4.kotlinruntime.CharStreams
 import org.antlr.v4.kotlinruntime.CommonTokenStream
 import org.antlr.v4.kotlinruntime.Token
 
+/**
+ * Upper bound on the distinct expressions cached per engine. Overflow drops the whole cache instead
+ * of evicting single entries, since a caller that exceeds this is not the fixed expression set the
+ * cache targets and bounding memory matters more than its hit rate.
+ */
+private const val MAX_CACHED_EXPRESSIONS = 1_000
+
 class FhirPathEngine(
   private val fhirPathTypeResolver: FhirPathTypeResolver,
   val fhirModelNavigator: FhirModelNavigator,
@@ -34,7 +41,6 @@ class FhirPathEngine(
     private set
 
   // Parse trees are immutable and reused across resources, so cache them by expression string.
-  // Unbounded cache, sized by the caller's distinct expressions (a fixed search-parameter set here).
   private val parsedExpressionCache = HashMap<String, fhirpathParser.ExpressionContext>()
 
   /**
@@ -50,7 +56,12 @@ class FhirPathEngine(
     base: Any?,
     variables: Map<String, Any?> = emptyMap(),
   ): Collection<Any> {
-    val parsedExpression = parsedExpressionCache.getOrPut(expression) { parseExpression(expression) }
+    val parsedExpression =
+      parsedExpressionCache[expression]
+        ?: parseExpression(expression).also {
+          if (parsedExpressionCache.size >= MAX_CACHED_EXPRESSIONS) parsedExpressionCache.clear()
+          parsedExpressionCache[expression] = it
+        }
 
     // Create a new evaluator per invocation for thread safety.
     val evaluator =
