@@ -109,6 +109,13 @@ internal fun Collection<Any>.toInteger(
 
   return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is Int -> listOf(value)
+    is Long -> {
+      if (value in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()) {
+        listOf(value.toInt())
+      } else {
+        emptyList()
+      }
+    }
     is String -> {
       value.toIntOrNull()?.let { listOf(it) } ?: emptyList()
     }
@@ -258,6 +265,7 @@ internal fun Collection<Any>.toDecimal(
   return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is FhirPathDecimal -> listOf(value)
     is Int -> listOf(value.toFhirPathDecimal())
+    is Long -> listOf(value.toFhirPathDecimal())
     is Boolean -> listOf(if (value) FhirPathDecimal.ONE else FhirPathDecimal.ZERO)
     is String -> {
       value.toDoubleOrNull()?.let { listOf(it.toFhirPathDecimal()) } ?: emptyList()

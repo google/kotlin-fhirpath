@@ -67,6 +67,8 @@ fun BigDecimal.toPlainStringPreservingDecimalPlaces(): String {
   return toPlainStringWithMinDecimalPlaces(decimalPlaces)
 }
 
+private val DECIMAL_REGEX = Regex("""^[+-]?\d+(\.\d+)?$""")
+
 /**
  * Parses a string representation of a decimal number into a [BigDecimal] while preserving its
  * decimal places.
@@ -76,7 +78,9 @@ fun BigDecimal.toPlainStringPreservingDecimalPlaces(): String {
  * - "120" will be parsed with 0 decimal places.
  *
  * This is crucial for FHIRPath precision and boundary calculations where trailing zeros in decimals
- * carry significant semantic meaning.
+ * carry significant semantic meaning. The underlying ionspin library's `BigDecimal.parseString()`
+ * normalizes numbers and strips trailing zeros (so `"1.500"` becomes `1.5`, losing scale). It also
+ * accepts scientific notation (e.g. `"1e5"`), which is not part of FHIRPath decimal syntax.
  */
 fun String.toBigDecimalPreservingScale(): BigDecimal {
   val decimalIndex = indexOf('.')
@@ -89,6 +93,28 @@ fun String.toBigDecimalPreservingScale(): BigDecimal {
   val significandDigits = significand.abs().toString().length
   val exponent = significandDigits - 1 - decimalPlaces
   return BigDecimal.fromBigIntegerWithExponent(significand, exponent.toLong())
+}
+
+/**
+ * Parses a string representation of a decimal number into a [BigDecimal] while preserving its
+ * decimal places, or returns `null` if the string is not a valid FHIRPath decimal representation.
+ *
+ * This validates against valid decimal string format (`^[+-]?\d+(\.\d+)?$`) before parsing to
+ * reject malformed strings (e.g., multiple dots, trailing dots, scientific notation).
+ *
+ * Note: The underlying ionspin library's `BigDecimal.parseString()` normalizes numbers and strips
+ * trailing zeros (so `"1.500"` becomes `1.5`, losing scale). It also accepts scientific notation
+ * (e.g., `"1e5"`), which is not part of FHIRPath decimal syntax.
+ */
+fun String.toBigDecimalOrNullPreservingScale(): BigDecimal? {
+  if (!DECIMAL_REGEX.matches(this)) {
+    return null
+  }
+  return try {
+    toBigDecimalPreservingScale()
+  } catch (_: Exception) {
+    null
+  }
 }
 
 /**
