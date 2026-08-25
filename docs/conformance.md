@@ -42,14 +42,14 @@ This section documents the library's conformance against Sections 5, 6, 7, 9, an
 This section documents all [special variables](https://hl7.org/fhirpath/STU3/en/#special-variables)
 and built-in functions defined across [sec. 5](https://hl7.org/fhirpath/STU3/en/#functions).
 
-| Variable        | Specification                                                 | Code                                                                                                         | Status | Notes |
-|:----------------|:--------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|:-------|:------|
-| `$this`         | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |       |
-| `$index`        | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |       |
-| `$total`        | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |       |
-| `%context`      | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |       |
-| `%resource`     | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |       |
-| `%rootResource` | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) |                                                                                                              | ❌      |       |
+| Variable        | Specification                                                 | Code                                                                                                         | Status | Notes                                                 |
+|:----------------|:--------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|:-------|:------------------------------------------------------|
+| `$this`         | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |                                                       |
+| `$index`        | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |                                                       |
+| `$total`        | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |                                                       |
+| `%context`      | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |                                                       |
+| `%resource`     | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |                                                       |
+| `%rootResource` | [sec. 5](https://hl7.org/fhirpath/STU3/en/#special-variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ⚠️     | Always resolves to `%resource` in this implementation |
 
 | Function                                                                                                                             | Specification                                                                                                                                          | Code                                                                                                                       | Status | Notes                                                                                                                         |
 |:-------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|:-------|:------------------------------------------------------------------------------------------------------------------------------|
@@ -257,10 +257,10 @@ This section documents the library's conformance against Sections 2.1.9.1.4 - 2.
 This table documents special resource context variables defined in
 [sec. 2.1.9.1.4](https://hl7.org/fhir/R5/fhirpath.html#variables).
 
-| Variable        | Specification                                                     | Code                                                                                                         | Status | Notes |
-|:----------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|:-------|:------|
-| `%resource`     | [sec. 2.1.9.1.4](https://hl7.org/fhir/R5/fhirpath.html#variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |       |
-| `%rootResource` | [sec. 2.1.9.1.4](https://hl7.org/fhir/R5/fhirpath.html#variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ❌      |       |
+| Variable        | Specification                                                     | Code                                                                                                         | Status | Notes                                                 |
+|:----------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|:-------|:------------------------------------------------------|
+| `%resource`     | [sec. 2.1.9.1.4](https://hl7.org/fhir/R5/fhirpath.html#variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ✅      |                                                       |
+| `%rootResource` | [sec. 2.1.9.1.4](https://hl7.org/fhir/R5/fhirpath.html#variables) | [`FhirPathEvaluator.kt`](../fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/FhirPathEvaluator.kt) | ⚠️     | Always resolves to `%resource` in this implementation |
 
 #### Additional functions
 

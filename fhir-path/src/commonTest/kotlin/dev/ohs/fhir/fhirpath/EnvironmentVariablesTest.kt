@@ -147,6 +147,33 @@ class EnvironmentVariablesTest {
     assertEquals(listOf("p1"), result.toList())
   }
 
+  // %rootResource
+
+  @Test
+  fun `rootResource returns empty collection when base is null`() {
+    val result = fhirPathEngine.evaluateExpression(expression = "%rootResource", base = null)
+    assertEquals(emptyList<Any>(), result.toList())
+  }
+
+  @Test
+  fun `rootResource returns base resource`() {
+    val patient = Patient(id = "p1")
+    val result = fhirPathEngine.evaluateExpression(expression = "%rootResource.id", base = patient)
+    assertEquals(listOf("p1"), result.toList())
+  }
+
+  @Test
+  fun `rootResource returns base resource within nested lambda scopes`() {
+    val patient =
+      Patient(id = "p1", name = listOf(HumanName(family = FhirString(value = "Smith"))))
+    val result =
+      fhirPathEngine.evaluateExpression(
+        expression = "Patient.name.where(family = 'Smith').select(%rootResource.id)",
+        base = patient,
+      )
+    assertEquals(listOf("p1"), result.toList())
+  }
+
   // %sct
 
   @Test

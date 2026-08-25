@@ -337,6 +337,7 @@ internal class FhirPathEvaluator(
     return when {
       name == "context" -> context?.let { listOf(it) } ?: emptyList()
       name == "resource" -> resource?.let { listOf(it) } ?: emptyList()
+      name == "rootResource" -> resource?.let { listOf(it) } ?: emptyList()
       name == "sct" -> listOf("http://snomed.info/sct")
       name == "loinc" -> listOf("http://loinc.org")
       name == "ucum" -> listOf("http://unitsofmeasure.org")
