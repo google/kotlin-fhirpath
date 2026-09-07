@@ -20,6 +20,7 @@ import dev.ohs.fhir.fhirpath.model.FhirModelNavigator
 import dev.ohs.fhir.fhirpath.parsers.fhirpathLexer
 import dev.ohs.fhir.fhirpath.parsers.fhirpathParser
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
+import kotlin.concurrent.Volatile
 import org.antlr.v4.kotlinruntime.BailErrorStrategy
 import org.antlr.v4.kotlinruntime.CharStreams
 import org.antlr.v4.kotlinruntime.CommonTokenStream
@@ -42,7 +43,9 @@ class FhirPathEngine(
     private set
 
   // Parse trees are immutable and reused across resources, so cache them by expression string.
-  private val parsedExpressionCache = HashMap<String, fhirpathParser.ExpressionContext>()
+  // The map is replaced rather than mutated, so a concurrent reader always sees a whole snapshot
+  // and a write lost to a race costs only a re-parse.
+  @Volatile private var parsedExpressionCache = emptyMap<String, fhirpathParser.ExpressionContext>()
 
   /**
    * Evaluates a FHIRPath expression against a single FHIR resource.
@@ -61,8 +64,10 @@ class FhirPathEngine(
       if (cacheParsedExpressions) {
         parsedExpressionCache[expression]
           ?: parseExpression(expression).also {
-            if (parsedExpressionCache.size >= MAX_CACHED_EXPRESSIONS) parsedExpressionCache.clear()
-            parsedExpressionCache[expression] = it
+            val current = parsedExpressionCache
+            parsedExpressionCache =
+              if (current.size >= MAX_CACHED_EXPRESSIONS) mapOf(expression to it)
+              else current + (expression to it)
           }
       } else parseExpression(expression)
 
