@@ -36,6 +36,7 @@ class FhirPathEngine(
   private val fhirPathTypeResolver: FhirPathTypeResolver,
   val fhirModelNavigator: FhirModelNavigator,
   val strictMode: Boolean = false,
+  val cacheParsedExpressions: Boolean = false,
 ) {
   var traces: Map<String, List<TraceEntry>> = emptyMap()
     private set
@@ -57,11 +58,13 @@ class FhirPathEngine(
     variables: Map<String, Any?> = emptyMap(),
   ): Collection<Any> {
     val parsedExpression =
-      parsedExpressionCache[expression]
-        ?: parseExpression(expression).also {
-          if (parsedExpressionCache.size >= MAX_CACHED_EXPRESSIONS) parsedExpressionCache.clear()
-          parsedExpressionCache[expression] = it
-        }
+      if (cacheParsedExpressions) {
+        parsedExpressionCache[expression]
+          ?: parseExpression(expression).also {
+            if (parsedExpressionCache.size >= MAX_CACHED_EXPRESSIONS) parsedExpressionCache.clear()
+            parsedExpressionCache[expression] = it
+          }
+      } else parseExpression(expression)
 
     // Create a new evaluator per invocation for thread safety.
     val evaluator =
