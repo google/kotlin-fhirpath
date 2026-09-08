@@ -16,63 +16,35 @@
 
 package dev.ohs.fhir.fhirpath
 
-import dev.ohs.fhir.model.r4.Resource
+import dev.ohs.fhir.model.r4.Decimal
+import dev.ohs.fhir.model.r4.FhirDecimal
+import dev.ohs.fhir.model.r4.Quantity
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.serialization.json.Json
 
 private val fhirPathEngine = FhirPathEngine.forR4()
-
-private val observation: Resource =
-  Json { ignoreUnknownKeys = true }
-    .decodeFromString(
-      """{"resourceType": "Observation", "status": "final", "code": {"text": "weight"},
-         "valueQuantity": {"value": 80, "unit": "kg", "system": "http://unitsofmeasure.org",
-         "code": "kg"}}"""
-    )
-
-private val unitlessObservation: Resource =
-  Json { ignoreUnknownKeys = true }
-    .decodeFromString(
-      """{"resourceType": "Observation", "status": "final", "code": {"text": "score"},
-         "valueQuantity": {"value": 5}}"""
-    )
 
 class ComparableTest {
 
   @Test
-  fun `mass units are comparable`() {
+  fun `empty input returns empty`() {
     assertEquals(
-      listOf(true),
-      fhirPathEngine.evaluateExpression("(1 'kg').comparable(1 '[lb_av]')", null).toList(),
+      emptyList(),
+      fhirPathEngine.evaluateExpression("{}.comparable(1 'kg')", null).toList(),
     )
   }
 
   @Test
-  fun `identical unknown units are comparable`() {
+  fun `quantity without a code returns empty`() {
+    val quantity = Quantity(value = Decimal(value = FhirDecimal.fromString("5")))
     assertEquals(
-      listOf(true),
-      fhirPathEngine.evaluateExpression("(1 '[s]').comparable(1 '[s]')", null).toList(),
+      emptyList(),
+      fhirPathEngine.evaluateExpression("comparable(1 'kg')", quantity).toList(),
     )
   }
 
   @Test
-  fun `navigated quantity element works as input`() {
-    assertEquals(
-      listOf(true),
-      fhirPathEngine.evaluateExpression("value.comparable(1 'g')", observation).toList(),
-    )
-    assertEquals(
-      listOf(false),
-      fhirPathEngine.evaluateExpression("value.comparable(1 's')", observation).toList(),
-    )
-  }
-
-  @Test
-  fun `calendar year is not comparable to the UCUM year`() {
-    // Matches the comparison behavior in the published spec: `1 year > 1 'a'` is empty because
-    // calendar durations above seconds are not comparable to definite durations
-    // (https://hl7.org/fhirpath/N1/#time-valued-quantities).
+  fun `calendar duration comparable to UCUM duration returns false`() {
     assertEquals(
       listOf(false),
       fhirPathEngine.evaluateExpression("(1 year).comparable(1 'a')", null).toList(),
@@ -80,22 +52,26 @@ class ComparableTest {
   }
 
   @Test
-  fun `fhir quantity without a code returns empty`() {
-    // A FHIR Quantity without a code cannot be converted to a FHIRPath Quantity, so the input is
-    // not a single Quantity and the result is empty, per the specification's input rule.
+  fun `quantities with different dimensions return false`() {
     assertEquals(
-      emptyList(),
-      fhirPathEngine
-        .evaluateExpression("valueQuantity.comparable(1 'kg')", unitlessObservation)
-        .toList(),
+      listOf(false),
+      fhirPathEngine.evaluateExpression("(1 'kg').comparable(1 's')", null).toList(),
     )
   }
 
   @Test
-  fun `empty input returns empty`() {
+  fun `quantities with same dimension return true`() {
     assertEquals(
-      emptyList(),
-      fhirPathEngine.evaluateExpression("{}.comparable(1 'kg')", null).toList(),
+      listOf(true),
+      fhirPathEngine.evaluateExpression("(1 'kg').comparable(1 'g')", null).toList(),
+    )
+  }
+
+  @Test
+  fun `identical unknown units comparable returns true`() {
+    assertEquals(
+      listOf(true),
+      fhirPathEngine.evaluateExpression("(1 '[s]').comparable(1 '[s]')", null).toList(),
     )
   }
 }

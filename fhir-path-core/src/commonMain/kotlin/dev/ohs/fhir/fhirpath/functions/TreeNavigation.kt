@@ -21,7 +21,7 @@ import dev.ohs.fhir.fhirpath.model.FhirModelNavigator
 /**
  * Returns all immediate child nodes from each item in the input collection.
  *
- * See [specification](https://hl7.org/fhirpath/N1/#tree-navigation).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#tree-navigation).
  */
 internal fun Collection<Any>.children(fhirModelNavigator: FhirModelNavigator): Collection<Any> {
   return flatMap { item -> fhirModelNavigator.getAllChildren(item) }
@@ -33,7 +33,7 @@ internal fun Collection<Any>.children(fhirModelNavigator: FhirModelNavigator): C
  * Excludes the nodes in the input collection itself (only descendants, not the starting node). This
  * is a shorthand for `repeat(children())`.
  *
- * See [specification](https://hl7.org/fhirpath/N1/#tree-navigation).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#tree-navigation).
  */
 internal fun Collection<Any>.descendants(fhirModelNavigator: FhirModelNavigator): Collection<Any> =
   children(fhirModelNavigator).let { children ->

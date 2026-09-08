@@ -29,7 +29,7 @@ import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 import kotlinx.datetime.LocalTime
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#toquantityunit-string-quantity).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#toquantityunit--string--quantity).
  *
  * NB: The regular expression is slightly modified from the original in order for it to work in
  * Kotlin.
@@ -37,7 +37,7 @@ import kotlinx.datetime.LocalTime
 private val QUANTITY_REGEX =
   """(?<value>[+-]?\d+(\.\d+)?)\s*('(?<unit>[^']+)'|(?<time>[a-zA-Z]+))?""".toRegex()
 
-/** See [specification](https://hl7.org/fhirpath/N1/#toquantityunit-string-quantity). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#toquantityunit--string--quantity). */
 const val DEFAULT_UNIT = "'1'"
 
 private val SINGULAR_CALENDAR_DURATION_LIST =
@@ -46,7 +46,7 @@ private val PLURAL_CALENDAR_DURATION_LIST =
   listOf("years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds")
 private val CALENDAR_DURATION_LIST = SINGULAR_CALENDAR_DURATION_LIST + PLURAL_CALENDAR_DURATION_LIST
 
-/** See [specification](https://hl7.org/fhirpath/N1/#toboolean-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#toboolean--boolean). */
 internal fun Collection<Any>.toBoolean(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -88,7 +88,7 @@ internal fun Collection<Any>.toBoolean(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstoboolean-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#convertstoboolean--boolean). */
 internal fun Collection<Any>.convertsToBoolean(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -99,7 +99,7 @@ internal fun Collection<Any>.convertsToBoolean(
   return listOf(toBoolean(fhirPathTypeResolver).isNotEmpty())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#tointeger-integer). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#tointeger--integer). */
 internal fun Collection<Any>.toInteger(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Int> {
@@ -117,7 +117,7 @@ internal fun Collection<Any>.toInteger(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstointeger-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#convertstointeger--boolean). */
 internal fun Collection<Any>.convertsToInteger(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -128,7 +128,35 @@ internal fun Collection<Any>.convertsToInteger(
   return listOf(toInteger(fhirPathTypeResolver).isNotEmpty())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#todate-date). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#tolong--long). */
+internal fun Collection<Any>.toLong(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Long> {
+  check(size <= 1) { "toLong() cannot be called on a collection with more than 1 item" }
+
+  if (isEmpty()) return emptyList()
+
+  return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
+    is Long -> listOf(value)
+    is Int -> listOf(value.toLong())
+    is String -> {
+      value.toLongOrNull()?.let { listOf(it) } ?: emptyList()
+    }
+    is Boolean -> if (value) listOf(1L) else listOf(0L)
+    else -> emptyList()
+  }
+}
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#convertstolong--boolean). */
+internal fun Collection<Any>.convertsToLong(
+  fhirPathTypeResolver: FhirPathTypeResolver
+): Collection<Boolean> {
+  check(size <= 1) { "convertsToLong() cannot be called on a collection with more than 1 item" }
+
+  if (isEmpty()) return emptyList()
+
+  return listOf(toLong(fhirPathTypeResolver).isNotEmpty())
+}
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#todateformat--string--date). */
 internal fun Collection<Any>.toDate(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<FhirPathDate> {
@@ -152,7 +180,7 @@ internal fun Collection<Any>.toDate(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstodate-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#convertstodateformat--string--boolean). */
 internal fun Collection<Any>.convertsToDate(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -174,7 +202,7 @@ internal fun Collection<Any>.convertsToDate(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#todatetime-datetime). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#todatetimeformat--string--datetime). */
 internal fun Collection<Any>.toDateTime(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<FhirPathDateTime> {
@@ -195,7 +223,9 @@ internal fun Collection<Any>.toDateTime(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstodatetime-boolean). */
+/**
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#convertstodatetimeformat--string--boolean).
+ */
 internal fun Collection<Any>.convertsToDateTime(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -217,7 +247,7 @@ internal fun Collection<Any>.convertsToDateTime(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#todecimal-decimal). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#todecimal--decimal). */
 internal fun Collection<Any>.toDecimal(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<FhirPathDecimal> {
@@ -236,7 +266,7 @@ internal fun Collection<Any>.toDecimal(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstodecimal-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#convertstodecimal--boolean). */
 internal fun Collection<Any>.convertsToDecimal(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -247,7 +277,7 @@ internal fun Collection<Any>.convertsToDecimal(
   return listOf(toDecimal(fhirPathTypeResolver).isNotEmpty())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#toquantityunit-string-quantity). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#toquantityunit--string--quantity). */
 internal fun Collection<Any>.toQuantity(
   targetUnit: String?,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -314,7 +344,9 @@ internal fun Collection<Any>.toQuantity(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstoquantityunit-string-boolean). */
+/**
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#convertstoquantityunit--string--boolean).
+ */
 internal fun Collection<Any>.convertsToQuantity(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {
@@ -325,7 +357,7 @@ internal fun Collection<Any>.convertsToQuantity(
   return listOf(toQuantity(targetUnit = null, fhirPathTypeResolver).isNotEmpty())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#tostring-string). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#tostring--string). */
 internal fun Collection<Any>.toStringFun(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<String> {
@@ -350,7 +382,7 @@ internal fun Collection<Any>.toStringFun(
 }
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#convertstostring-string).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#convertstostring--boolean).
  *
  * NB: The URL is inconsistent with other functions due to a function signature error in the
  * documentation.
@@ -381,7 +413,7 @@ internal fun Collection<Any>.convertsToString(
   return listOf(isConvertible)
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#totime-time). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#totime--time). */
 internal fun Collection<Any>.toTime(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<FhirPathTime> {
@@ -402,7 +434,7 @@ internal fun Collection<Any>.toTime(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#convertstotime-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#convertstotime--boolean). */
 internal fun Collection<Any>.convertsToTime(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> {

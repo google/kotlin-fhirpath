@@ -16,72 +16,122 @@
 
 package dev.ohs.fhir.fhirpath
 
-import dev.ohs.fhir.model.r4.Resource
+import dev.ohs.fhir.model.r4.CodeableConcept
+import dev.ohs.fhir.model.r4.DateTime
+import dev.ohs.fhir.model.r4.Enumeration
+import dev.ohs.fhir.model.r4.Extension
+import dev.ohs.fhir.model.r4.Quantity
+import dev.ohs.fhir.model.r4.String as FhirString
+import dev.ohs.fhir.model.r4.Task
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.serialization.json.Json
 
 private val fhirPathEngine = FhirPathEngine.forR4()
 
-private val observation: Resource =
-  Json { ignoreUnknownKeys = true }
-    .decodeFromString(
-      """{"resourceType": "Observation", "status": "final", "code": {"text": "w"},
-         "valueQuantity": {"value": 80, "unit": "kg", "system": "http://unitsofmeasure.org",
-         "code": "kg"},
-         "_status": {"extension": [{"url": "https://example.org/x", "valueString": "e"}]},
-         "_issued": {"id": "no-value", "extension": [{"url": "https://example.org/x",
-         "valueString": "e"}]}}"""
-    )
+private val task =
+  Task(
+    status = Enumeration(value = Task.TaskStatus.Completed),
+    intent =
+      Enumeration(
+        id = "no-value",
+        extension =
+          listOf(
+            Extension(
+              url = "https://example.org/x",
+              value = Extension.Value.String(FhirString(value = "e")),
+            )
+          ),
+        value = null,
+      ),
+    code = CodeableConcept(text = FhirString(value = "w")),
+    authoredOn =
+      DateTime(
+        id = "no-value",
+        extension =
+          listOf(
+            Extension(
+              url = "https://example.org/x",
+              value = Extension.Value.String(FhirString(value = "e")),
+            )
+          ),
+        value = null,
+      ),
+    input =
+      listOf(
+        Task.Input(
+          type = CodeableConcept(text = FhirString(value = "w")),
+          value = Task.Input.Value.Quantity(Quantity()),
+        )
+      ),
+  )
 
 class HasValueTest {
 
   @Test
-  fun `primitive with a value returns true`() {
+  fun `empty collection returns empty`() {
+    assertEquals(emptyList(), fhirPathEngine.evaluateExpression("{}.hasValue()", task).toList())
+  }
+
+  @Test
+  fun `system literal returns empty`() {
+    assertEquals(
+      emptyList(),
+      fhirPathEngine.evaluateExpression("'hello'.hasValue()", task).toList(),
+    )
+  }
+
+  @Test
+  fun `complex type without value property returns empty`() {
+    assertEquals(emptyList(), fhirPathEngine.evaluateExpression("code.hasValue()", task).toList())
+  }
+
+  @Test
+  fun `complex type with value property returns empty`() {
+    // hasValue() only applies to FHIR primitives; complex types like Quantity return empty even if
+    // they have a value property.
+    assertEquals(
+      emptyList(),
+      fhirPathEngine.evaluateExpression("input.value.hasValue()", task).toList(),
+    )
+  }
+
+  @Test
+  fun `primitive without value returns false`() {
+    assertEquals(
+      listOf(false),
+      fhirPathEngine.evaluateExpression("authoredOn.hasValue()", task).toList(),
+    )
+  }
+
+  @Test
+  fun `enumeration without value returns false`() {
+    assertEquals(
+      listOf(false),
+      fhirPathEngine.evaluateExpression("intent.hasValue()", task).toList(),
+    )
+  }
+
+  @Test
+  fun `primitive with value returns true`() {
     assertEquals(
       listOf(true),
-      fhirPathEngine.evaluateExpression("status.hasValue()", observation).toList(),
+      fhirPathEngine.evaluateExpression("code.text.hasValue()", task).toList(),
     )
   }
 
   @Test
-  fun `complex type is not a primitive even though it has a value property`() {
-    // Quantity has a `value` property, but hasValue() only applies to FHIR primitives.
+  fun `enumeration with value returns true`() {
     assertEquals(
-      listOf(false),
-      fhirPathEngine.evaluateExpression("value.hasValue()", observation).toList(),
+      listOf(true),
+      fhirPathEngine.evaluateExpression("status.hasValue()", task).toList(),
     )
   }
 
   @Test
-  fun `primitive without a value returns false`() {
-    // `issued` exists only through `_issued`: an element carrying an id and an extension but no
-    // value. The count check proves the element is present, so the false is not from empty input.
+  fun `collection with multiple items returns empty`() {
     assertEquals(
-      listOf(1),
-      fhirPathEngine.evaluateExpression("issued.count()", observation).toList(),
-    )
-    assertEquals(
-      listOf(false),
-      fhirPathEngine.evaluateExpression("issued.hasValue()", observation).toList(),
-    )
-  }
-
-  @Test
-  fun `multi-item input returns false`() {
-    // Two copies of a primitive that alone returns true, so the false can only come from the
-    // item count. combine() because the union operator would deduplicate them back to one.
-    assertEquals(
-      listOf(false),
-      fhirPathEngine.evaluateExpression("status.combine(status).hasValue()", observation).toList(),
-    )
-  }
-
-  @Test
-  fun `empty input returns false`() {
-    assertEquals(
-      listOf(false),
-      fhirPathEngine.evaluateExpression("{}.hasValue()", observation).toList(),
+      emptyList(),
+      fhirPathEngine.evaluateExpression("status.combine(status).hasValue()", task).toList(),
     )
   }
 }

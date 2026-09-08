@@ -17,11 +17,13 @@
 package dev.ohs.fhir.fhirpath.codegen.model
 
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.LIST
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.asTypeName
 import dev.ohs.fhir.fhirpath.codegen.model.schema.StructureDefinition
 import dev.ohs.fhir.fhirpath.codegen.model.schema.capitalized
@@ -32,7 +34,55 @@ object ComplexTypeExtensionFileSpecGenerator {
     modelExtensionPackageName: String,
     structureDefinitions: List<StructureDefinition>,
   ): FileSpec {
+    val enumerationClass = ClassName(modelPackageName, "Enumeration").parameterizedBy(STAR)
+
     return FileSpec.builder(modelExtensionPackageName, "MoreComplexTypes")
+      .addFunction(
+        FunSpec.builder("getProperty")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(enumerationClass)
+          .returns(Any::class.asTypeName().copy(nullable = true))
+          .addParameter(name = "name", type = String::class)
+          .beginControlFlow("return when(name)")
+          .addStatement("%S -> this.id", "id")
+          .addStatement("%S -> this.extension", "extension")
+          .addStatement("%S -> this.value", "value")
+          .addStatement("else -> error(\"\$name is not a valid property name\")")
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
+        FunSpec.builder("hasProperty")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(enumerationClass)
+          .returns(Boolean::class)
+          .addParameter(name = "name", type = String::class)
+          .beginControlFlow("return when(name)")
+          .addStatement("%S -> true", "id")
+          .addStatement("%S -> true", "extension")
+          .addStatement("%S -> true", "value")
+          .addStatement("else -> false")
+          .endControlFlow()
+          .build()
+      )
+      .addFunction(
+        FunSpec.builder("getAllChildren")
+          .addModifiers(KModifier.INTERNAL)
+          .receiver(enumerationClass)
+          .returns(LIST.parameterizedBy(Any::class.asTypeName()))
+          .addCode(
+            CodeBlock.builder()
+              .add("return buildList {\n")
+              .indent()
+              .add("this@getAllChildren.id?.let { add(it) }\n")
+              .add("addAll(this@getAllChildren.extension)\n")
+              .add("this@getAllChildren.value?.let { add(it) }\n")
+              .unindent()
+              .add("}\n")
+              .build()
+          )
+          .build()
+      )
       .addFunction(
         FunSpec.builder("getProperty")
           .addModifiers(KModifier.INTERNAL)
@@ -47,6 +97,7 @@ object ComplexTypeExtensionFileSpecGenerator {
                 ClassName(modelPackageName, structureDefinition.name.capitalized()),
               )
             }
+            addStatement("is %T -> getProperty(name)", enumerationClass)
             addStatement("else -> null")
           }
           .endControlFlow()
@@ -66,6 +117,7 @@ object ComplexTypeExtensionFileSpecGenerator {
                 ClassName(modelPackageName, structureDefinition.name.capitalized()),
               )
             }
+            addStatement("is %T -> hasProperty(name)", enumerationClass)
             addStatement("else -> false")
           }
           .endControlFlow()
@@ -84,6 +136,7 @@ object ComplexTypeExtensionFileSpecGenerator {
                 ClassName(modelPackageName, structureDefinition.name.capitalized()),
               )
             }
+            addStatement("is %T -> getAllChildren()", enumerationClass)
             addStatement("else -> emptyList()")
           }
           .endControlFlow()

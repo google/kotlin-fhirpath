@@ -40,8 +40,8 @@ package dev.ohs.fhir.fhirpath.types
  * (e.g. `System.String`). In our implementation, FHIR types are preserved as long as possible to
  * retain metadata (`id`, `extension`), but unwrapped to system types when needed for calculations.
  *
- * See [FHIRPath Specification](https://hl7.org/fhirpath/N1/#types-and-reflection) and
- * [FHIR Types in FHIRPath](https://fhir.hl7.org/fhir/fhirpath.html#types).
+ * See [FHIRPath Specification](https://hl7.org/fhirpath/STU3/en/#types-and-reflection) and
+ * [FHIR Types in FHIRPath](https://hl7.org/fhir/R5/fhirpath.html#types).
  */
 interface FhirPathType {
   val namespace: String
@@ -110,11 +110,7 @@ interface FhirType : FhirPathType {
   abstract override val typeName: String
 }
 
-/**
- * Marker for FHIR primitive types (e.g. `string`, `code`, `boolean`). Primitives are Elements whose
- * actual value lives in a `value` property, which may be absent when the element only carries an
- * `id` or `extension`; `hasValue()` relies on this distinction.
- */
+/** FHIR primitive types (e.g. `string`, `code`, `boolean`). Used by `hasValue()`. */
 interface FhirPrimitiveType : FhirType
 
 enum class FhirPathSystemType(override val typeName: String) : FhirPathType {

@@ -94,17 +94,6 @@ configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
 }
 
 
-// Ensure Kotlin compilation tasks depend on code generation
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    dependsOn(generateUcumHelpers)
-    dependsOn(generateKotlinGrammarSource)
-}
-
-// Ensure Jar packaging tasks depend on code generation
-tasks.withType<org.gradle.jvm.tasks.Jar>().configureEach {
-    dependsOn(generateUcumHelpers)
-    dependsOn(generateKotlinGrammarSource)
-}
 
 mavenPublishing {
     publishToMavenCentral()

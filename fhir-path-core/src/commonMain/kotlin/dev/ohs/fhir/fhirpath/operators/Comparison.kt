@@ -18,6 +18,7 @@ package dev.ohs.fhir.fhirpath.operators
 
 import dev.ohs.fhir.fhirpath.asComparableOperands
 import dev.ohs.fhir.fhirpath.toEqualCanonicalized
+import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
 import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
@@ -55,4 +56,32 @@ internal fun compare(left: Any, right: Any, fhirPathTypeResolver: FhirPathTypeRe
       leftFhirPath.compareTo(rightFhirPath)
     else -> error("Cannot compare $leftFhirPath and $rightFhirPath")
   }
+}
+
+/**
+ * Returns whether the two singleton quantities have comparable units, i.e. whether their units
+ * canonicalize to the same UCUM base unit (e.g. `cm` and `[in_i]` are both lengths, so they are
+ * comparable; `cm` and `s` are not). A quantity with an unknown unit is only comparable to a
+ * quantity with the same unit.
+ *
+ * This function checks whether equality, not the equivalence, can be determined. For example, `(1
+ * year) ~ (1 'a')` is true, but `(1 year).comparable(1 'a')` is false, since `(1 year) = (1 'a')`
+ * is empty.
+ *
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#comparableother--quantity--boolean).
+ */
+internal fun Collection<Any>.comparable(
+  params: List<Any>,
+  fhirPathTypeResolver: FhirPathTypeResolver,
+): Collection<Boolean> {
+  check(size <= 1) { "comparable() cannot be called on a collection with more than 1 item" }
+  val left =
+    singleOrNull()?.toFhirPathType(fhirPathTypeResolver) as? FhirPathQuantity ?: return emptyList()
+  val right =
+    params.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) as? FhirPathQuantity
+      ?: return emptyList()
+
+  val leftUnit = left.toEqualCanonicalized().unit ?: return listOf(false)
+  val rightUnit = right.toEqualCanonicalized().unit ?: return listOf(false)
+  return listOf(leftUnit == rightUnit)
 }

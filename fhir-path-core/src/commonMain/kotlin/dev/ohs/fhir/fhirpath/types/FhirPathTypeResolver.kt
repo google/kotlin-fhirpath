@@ -36,7 +36,7 @@ abstract class FhirPathTypeResolver {
     }
 
     // Unqualified type names are resolved as FHIR types first and then FHIRPath system types, as
-    // specified in https://hl7.org/fhirpath/#models.
+    // specified in https://hl7.org/fhirpath/STU3/en/#models.
     try {
       return resolveFhirTypeFromString(name)
     } catch (_: Exception) {}
@@ -59,9 +59,6 @@ abstract class FhirPathTypeResolver {
   protected abstract fun resolveFhirTypeFromString(name: String): FhirType
 
   protected abstract fun resolveFhirTypeFromObject(value: Any): FhirType?
-
-  /** Converts the value to a string if possible, otherwise returns null. */
-  abstract fun convertToString(value: Any): String?
 
   /** Converts the value to its equivalent FHIRPath system type if one exists. */
   abstract fun toFhirPathType(value: Any): Any

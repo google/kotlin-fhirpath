@@ -20,7 +20,7 @@ import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 
-/** See [specification](https://hl7.org/fhirpath/N1/#istype-type-specifier). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#istype--type-specifier). */
 internal fun Collection<Any>.`is`(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -33,7 +33,9 @@ internal fun Collection<Any>.`is`(
   return listOf(type != null && type.isSubtypeOf(targetType))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#oftypetype-type-specifier-collection). */
+/**
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#oftypetype--type-specifier--collection).
+ */
 internal fun Collection<Any>.ofType(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -45,7 +47,7 @@ internal fun Collection<Any>.ofType(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#astype-type-specifier). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#astype--type-specifier). */
 internal fun Collection<Any>.`as`(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,

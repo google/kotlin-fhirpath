@@ -25,8 +25,8 @@ private val fhirPathEngine = FhirPathEngine.forR4()
 /**
  * Tests for FHIRPath environment variables.
  *
- * See https://hl7.org/fhirpath/#environment-variables and
- * https://fhir.hl7.org/fhir/fhirpath.html#vars
+ * See https://hl7.org/fhirpath/STU3/en/#environment-variables and
+ * https://hl7.org/fhir/R5/fhirpath.html#vars
  */
 class EnvironmentVariablesTest {
 

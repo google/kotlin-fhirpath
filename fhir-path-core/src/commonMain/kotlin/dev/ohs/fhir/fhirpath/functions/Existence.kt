@@ -19,24 +19,24 @@ package dev.ohs.fhir.fhirpath.functions
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 
-/** See [specification](https://hl7.org/fhirpath/N1/#empty-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#empty--boolean). */
 internal fun Collection<Any>.empty(): Collection<Boolean> = listOf(isEmpty())
 
 // exists() and all() are implemented as higher-order functions in FhirPathEvaluator.kt
 
-/** See [specification](https://hl7.org/fhirpath/N1/#alltrue-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#alltrue--boolean). */
 internal fun Collection<Boolean>.allTrue(): Collection<Boolean> = listOf(all { it })
 
-/** See [specification](https://hl7.org/fhirpath/N1/#anytrue-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#anytrue--boolean). */
 internal fun Collection<Boolean>.anyTrue(): Collection<Boolean> = listOf(any { it })
 
-/** See [specification](https://hl7.org/fhirpath/N1/#allfalse-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#allfalse--boolean). */
 internal fun Collection<Boolean>.allFalse(): Collection<Boolean> = listOf(all { !it })
 
-/** See [specification](https://hl7.org/fhirpath/N1/#anyfalse-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#anyfalse--boolean). */
 internal fun Collection<Boolean>.anyFalse(): Collection<Boolean> = listOf(any { !it })
 
-/** See [specification](https://hl7.org/fhirpath/N1/#subsetofother-collection-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#subsetofother--collection--boolean). */
 internal fun Collection<Any>.subsetOf(
   params: Collection<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -45,7 +45,7 @@ internal fun Collection<Any>.subsetOf(
   return listOf(paramsConverted.containsAll(map { it.toFhirPathType(fhirPathTypeResolver) }))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#supersetofother-collection-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#supersetofother--collection--boolean). */
 internal fun Collection<Any>.supersetOf(
   params: Collection<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -54,15 +54,15 @@ internal fun Collection<Any>.supersetOf(
   return listOf(thisConverted.containsAll(params.map { it.toFhirPathType(fhirPathTypeResolver) }))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#count-integer). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#count--integer). */
 internal fun Collection<Any>.count(): Collection<Int> = listOf(size)
 
-/** See [specification](https://hl7.org/fhirpath/N1/#distinct-collection). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#distinct--collection). */
 // Use Kotlin's distinct()
 // internal fun Collection<Any>.distinct(): Collection<Any>
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#distinct-collection).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#distinct--collection).
  *
  * Duplicates are detected on the converted FHIRPath values, but the original items are kept and the
  * first occurrence of each value wins. The specification does not prescribe which duplicate to
@@ -74,7 +74,7 @@ internal fun Collection<Any>.distinctFun(
   return distinctBy { it.toFhirPathType(fhirPathTypeResolver) }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#isdistinct-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#isdistinct--boolean). */
 internal fun Collection<Any>.isDistinct(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Boolean> = listOf(count() == distinctFun(fhirPathTypeResolver).count())

@@ -14,13 +14,4 @@ val generateR4BHelpers = tasks.register<FhirModelHelperGenerationTask>("generate
     finalizedBy(rootProject.tasks.named("spotlessApply"))
 }
 
-// Ensure Kotlin compilation tasks depend on code generation
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-    dependsOn(generateR4BHelpers)
-}
-
-// Ensure Jar packaging tasks depend on code generation
-tasks.withType<org.gradle.jvm.tasks.Jar>().configureEach {
-    dependsOn(generateR4BHelpers)
-}
 

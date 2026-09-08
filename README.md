@@ -1,6 +1,7 @@
 # Kotlin FHIRPath
 
 [![tests](https://github.com/ohs-foundation/kotlin-fhirpath/actions/workflows/run-tests.yml/badge.svg)](https://github.com/ohs-foundation/kotlin-fhirpath/actions/workflows/run-tests.yml)
+[![codegen](https://github.com/ohs-foundation/kotlin-fhirpath/actions/workflows/verify-codegen.yml/badge.svg)](https://github.com/ohs-foundation/kotlin-fhirpath/actions/workflows/verify-codegen.yml)
 [![fhir-path-core](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-core?color=yellow&label=fhir-path-core)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-core)
 [![FHIR R4](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-r4?color=green&label=fhir-path-r4)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-r4)
 [![FHIR R4B](https://img.shields.io/maven-central/v/dev.ohs.fhir/fhir-path-r4b?color=orange&label=fhir-path-r4b)](https://central.sonatype.com/artifact/dev.ohs.fhir/fhir-path-r4b)
@@ -9,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/overview.html)'s
-[FHIRPath](https://hl7.org/fhirpath/N1/) on
+[FHIRPath](https://hl7.org/fhirpath/STU3/en/) on
 [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
 
 ## Key features
@@ -24,16 +25,28 @@ Kotlin FHIRPath is an implementation of [HL7® FHIR®](https://www.hl7.org/fhir/
 * Tested against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) to
   guarantee correctness
 
-## FHIRPath version support
+## Conformance
 
-The implementation is based on the [FHIRPath Normative Release](https://hl7.org/fhirpath/N1/).
-However, we also incorporate some of the latest features and clarifications from the
-[Continuous Build](https://build.fhir.org/ig/HL7/FHIRPath/) wherever feasible. Please note the
-experimental nature of the sections marked as STU (Standard for Trial Use) in the Continuous Build.
+For the full conformance analysis, see the [conformance](docs/conformance.md) doc.
 
-## FHIR version support
+### FHIRPath specification
 
-The library supports FHIR R4, R4B and R5. Support will be added for future FHIR versions.
+The library implements [FHIRPath Specification v3.0.0](https://hl7.org/fhirpath/STU3/en/).
+
+See [FHIRPath specification conformance](docs/conformance.md#fhirpath-specification) for
+feature-by-feature implementation status.
+
+### FHIRPath in FHIR specification
+
+Our core expression evaluator (`fhir-path-core`) is model-agnostic and evaluates expressions
+against FHIR R4, R4B, and R5 resources. Support for future FHIR versions will be added.
+
+For using FHIRPath with FHIR resources, including accessing choice elements, referencing FHIR types,
+and FHIR-specific variables and functions, we implement the
+[FHIRPath](https://hl7.org/fhir/R5/fhirpath.html) section in FHIR R5.
+
+See [FHIRPath in FHIR specification conformance](docs/conformance.md#fhirpath-in-fhir-specification)
+for domain-specific implementation details.
 
 ## Supported platforms
 
@@ -141,7 +154,7 @@ graph LR
 The following table lists the chosen internal types for the FHIRPath primitive types.
 
 | FHIRPath type <img src="images/fhir.png" alt="kotlin" style="height: 1em"/> | Internal type <img src="images/kotlin.png" alt="kotlin" style="height: 1em"/> |
-|-----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+|:----------------------------------------------------------------------------|:------------------------------------------------------------------------------|
 | Boolean                                                                     | kotlin.Boolean                                                                |
 | String                                                                      | kotlin.String                                                                 |
 | Integer                                                                     | kotlin.Int                                                                    |
@@ -181,9 +194,9 @@ especially around the handling of timezones and date time values with different 
 
 The FHIRPath specification allows implementations to provide a default timezone offset for date time
 values that do not have one. See the relevant sections on
-[equality](https://hl7.org/fhirpath/N1/#datetime-equality),
-[equivalence](https://hl7.org/fhirpath/N1/#datetime-equivalence), and
-[comparison](https://hl7.org/fhirpath/N1/#comparison).
+[equality](https://hl7.org/fhirpath/STU3/en/#datetime-equality),
+[equivalence](https://hl7.org/fhirpath/STU3/en/#datetime-equivalence), and
+[comparison](https://hl7.org/fhirpath/STU3/en/#comparison).
 
 To prioritize safety and correctness, when comparing date time values without a timezone offset with
 date time values with a timezone offset, this implementation **does not assume a default timezone
@@ -243,10 +256,10 @@ This library supports the following precision values for date/time types:
   places, or `9` for millisecond precision).
 
 These values are returned by the
-[`precision()`](https://build.fhir.org/ig/HL7/FHIRPath/en/#precision--integer) function. They are
+[`precision()`](https://hl7.org/fhirpath/STU3/en/#precision--integer) function. They are
 also accepted as inputs to functions that take an optional precision parameter, such as
-[`lowBoundary()`](https://build.fhir.org/ig/HL7/FHIRPath/en/#lowboundaryprecision-integer-decimal-date-datetime-time)
-or [`highBoundary()`](https://build.fhir.org/ig/HL7/FHIRPath/en/#highboundaryprecision-integer-decimal-date-datetime-time).
+[`lowBoundary()`](https://hl7.org/fhirpath/STU3/en/#lowboundaryprecision-integer-decimal--date--datetime--time)
+or [`highBoundary()`](https://hl7.org/fhirpath/STU3/en/#highboundaryprecision-integer-decimal--date--datetime--time).
 When a `precision` parameter $N$ is supplied, `lowBoundary(N)` and `highBoundary(N)` compute the lowest
 or highest boundary value of the input's uncertainty interval, rounding and formatting the result to $N$
 decimal places (for Decimals) or to the target date/time precision $N$.
@@ -255,59 +268,20 @@ Any other values are invalid precision values and will throw an error if passed 
 
 > [!NOTE]
 > The FHIRPath specification treats second and sub-second precisions as a single `SECOND` precision
-> for [equality](https://hl7.org/fhirpath/N1/#datetime-equality) (`=`, `!=`),
-> [equivalence](https://hl7.org/fhirpath/N1/#datetime-equivalence) (`~`, `!~`), and
-> [comparison](https://hl7.org/fhirpath/N1/#comparison) (`<`, `<=`, `>`, `>=`), using decimal
+> for [equality](https://hl7.org/fhirpath/STU3/en/#datetime-equality) (`=`, `!=`),
+> [equivalence](https://hl7.org/fhirpath/STU3/en/#datetime-equivalence) (`~`, `!~`), and
+> [comparison](https://hl7.org/fhirpath/STU3/en/#comparison) (`<`, `<=`, `>`, `>=`), using decimal
 > comparison semantics for fractional seconds.
 
 ### Error handling
 
 Whilst this library does not perform compile-time type checking discussed in the
-[specification](https://hl7.org/fhirpath/N1/#type-safety-and-strict-evaluation), it supports two
+[specification](https://hl7.org/fhirpath/STU3/en/#type-safety-and-strict-evaluation), it supports two
 run-time property access modes:
 
 * **Lenient mode (default):** Returns an empty collection (`{}`) when accessing an undefined
   property.
 * **Strict mode:** Throws an `IllegalStateException` when accessing an undefined property.
-
-## Conformance
-
-Test failures against the official [FHIR test cases](https://github.com/FHIR/fhir-test-cases) are
-documented in the table below.
-
-|             Test case              |     Root cause     | STU |                  Tracking issue / PR                   |                                                                                                  Note                                                                                                  |
-|------------------------------------|--------------------|-----|--------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `testPolymorphismAsB`              | Test               |     | To be raised                                           | No error should be thrown according to [specification](https://hl7.org/fhirpath/#as-type-specifier).                                                                                                   |
-| `testDateTimeGreaterThanDate1`     | Implementation     |     |                                                        | Comparison of two date time values, one with a timezone offset one without; see [Date time values without timezone offset](#date-time-values-without-timezone-offset)                                  |
-| `testQuantity4`                    | Test               |     | [PR](https://github.com/FHIR/fhir-test-cases/pull/243) |                                                                                                                                                                                                        |
-| `testSubSetOf3`                    | Specification/Test |     |                                                        | The test resource is invalid and missing (https://github.com/FHIR/fhir-test-cases/issues/247); the scope of "$this" is unclear (https://jira.hl7.org/browse/FHIR-44601)                                |
-| `testIif11`                        | Implementation     |     |                                                        | https://jira.hl7.org/browse/FHIR-44774; https://jira.hl7.org/browse/FHIR-44601                                                                                                                         |
-| `testNow1`                         | Specification/Test |     |                                                        | As `testDateTimeGreaterThanDate1`.                                                                                                                                                                     |
-| `testSort8`                        | Specification/Test |     |                                                        | Test uses `-$this` for descending string sort, but spec uses `asc`/`desc`, https://github.com/FHIR/fhir-test-cases/issues/253.                                                                         |
-| `testSort10`                       | Specification/Test |     |                                                        | Test uses `-` prefix for descending sort, but spec uses `asc`/`desc`, https://github.com/FHIR/fhir-test-cases/issues/253.                                                                              |
-| `testPlusDate13`                   | Specification/Test |     |                                                        | https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/Definite.20durations.20above.20seconds.20in.20date.20time.20arithmetic/with/564095766                                                      |
-| `testPlusDate15`                   | Specification/Test |     |                                                        | As above.                                                                                                                                                                                              |
-| `testPlusDate18`                   | Implementation     |     |                                                        | To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.                                                                      |
-| `testPlusDate19`                   | Implementation     |     |                                                        | To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.                                                                      |
-| `testPlusDate20`                   | Implementation     |     |                                                        | To be fixed together with `testPlusDate13`, `testPlusDate15`, `testPlusDate21`, `testPlusDate22` for a consistent implementation.                                                                      |
-| `testPlusDate21`                   | Specification/Test |     |                                                        | As `testPlusDate13`.                                                                                                                                                                                   |
-| `testPlusDate22`                   | Specification/Test |     |                                                        | As `testPlusDate13`.                                                                                                                                                                                   |
-| `testMinus5`                       | Specification/Test |     |                                                        | As `testPlusDate13`.                                                                                                                                                                                   |
-| `testDollarOrderNotAllowed`        | Implementation     |     |                                                        | Ordered function validation not implemented. Test expects error when using `skip()` on unordered collection (`children()`), but engine does not track collection ordering.                             |
-| `testPolymorphicsB`                | Test               |     |                                                        | Test case expects output in lenient mode for invalid property navigation.                                                                                                                              |
-| `testType22`                       | Implementation     |     |                                                        | `is` with an unknown `System` type should evaluate to false, but the type resolver throws.                                                                                                             |
-| `testConformsTo*`                  | Implementation     |     |                                                        | Function `conformsTo` is not implemented.                                                                                                                                                              |
-| `LowBoundaryDateTimeMillisecond1`  | Specification/Test |     |                                                        | Diverges from FHIRPath specification. See [Discussion](https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/lowBoundary.20and.20highBoundary.20with.20incomplete.20date.20time/with/611113639). |
-| `HighBoundaryDateTimeMillisecond1` | Specification/Test |     | As above.                                              | As above.                                                                                                                                                                                              |
-| `HighBoundaryDateTimeMillisecond3` | Specification/Test |     | As above.                                              | As above.                                                                                                                                                                                              |
-| `testIndex`                        | Implementation     |     |                                                        | `$index` is not implemented.                                                                                                                                                                           |
-| `testPeriodInvariantNew`           | Implementation     |     |                                                        | Function `lowBoundary` and function `highBoundary` are not implemented.                                                                                                                                |
-| `testContainedId`                  | Implementation     |     |                                                        |                                                                                                                                                                                                        |
-
-The root cause column documents if the test failure is caused by implementation issues in this
-repository, if the test cases themselves are problematic, or it is believed that the specification
-itself is ambiguous or inconsistent. For issues in the test cases and the specification, discussions
-and proposals should be linked in the table above.
 
 ## User Guide
 
@@ -406,40 +380,29 @@ strictEngine.evaluateExpression("name.given1", patient) // Throws IllegalStateEx
 
 ## Developer Guide
 
-### ANTLR
+### Code Generation
 
-To generate the lexer, parser, and visitor locally using ANTLR Kotlin:
+This project tracks generated source code in version control under `src/commonMain/kotlin/...` to eliminate unnecessary build-time codegen overhead during routine builds:
+* **[ANTLR parser](fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/parsers)**: Generated from the formal [FHIRPath grammar](third_party/fhirpath-2.0.0).
+* **[UCUM helpers](fhir-path-core/src/commonMain/kotlin/dev/ohs/fhir/fhirpath/ucum)**: Generated from [ucum-essence.xml](third_party/ucum/ucum-essence.xml).
+* **Model extensions** ([R4](fhir-path-r4/src/commonMain/kotlin/dev/ohs/fhir/model/r4/ext), [R4B](fhir-path-r4b/src/commonMain/kotlin/dev/ohs/fhir/model/r4b/ext), and [R5](fhir-path-r5/src/commonMain/kotlin/dev/ohs/fhir/model/r5/ext)): Generated from FHIR StructureDefinitions.
 
-```shell
-./gradlew :fhir-path-core:generateKotlinGrammarSource
-```
-
-The generated code will be placed in `fhir-path-core/build/generated/grammar` under package
-`dev.ohs.fhir.fhirpath.parsers`.
-
-### UCUM helpers
-
-To generate UCUM helpers:
+To regenerate all sources across all modules at once:
 
 ```shell
-./gradlew :fhir-path-core:generateUcumHelpers
+./gradlew generateSources
 ```
 
-The generated code will be located in `fhir-path-core/build/generated/ucum` under package
-`dev.ohs.fhir.fhirpath.ucum`.
-
-### Model extensions
-
-To generate FHIR version specific model extensions:
+To verify that committed generated code matches generator output (as run in CI):
 
 ```shell
-./gradlew :fhir-path-r4:generateR4Helpers
-./gradlew :fhir-path-r4b:generateR4BHelpers
-./gradlew :fhir-path-r5:generateR5Helpers
+./gradlew verifyCodegen
 ```
 
-The generated code will be located in `fhir-path-<version>/build/generated` under packages
-`dev.ohs.fhir.model.<FHIR_VERSION>.ext` and `dev.ohs.fhir.fhirpath`.
+You can also run individual generation tasks locally:
+* `./gradlew :fhir-path-core:generateKotlinGrammarSource`
+* `./gradlew :fhir-path-core:generateUcumHelpers`
+* `./gradlew :fhir-path-r4:generateR4Helpers` (similarly for `:fhir-path-r4b:generateR4BHelpers` and `:fhir-path-r5:generateR5Helpers`)
 
 ### Tests
 
@@ -448,9 +411,10 @@ This project distinguishes between two types of tests:
 * **Spec-based tests**: Driven by
   [FhirPathEngineTest.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/FhirPathEngineTest.kt),
   these load the official [test cases](https://github.com/FHIR/fhir-test-cases) from
-  [third_party/fhir-test-cases/](third_party/fhir-test-cases/). As they require local file access,
-  they only run on **JVM** and **Android** targets. On other platform targets, file loading is
-  stubbed out.
+  [third_party/fhir-test-cases/](third_party/fhir-test-cases/). As they require local file access, they only run on **JVM**
+  and **Android** targets. On other platform targets, file loading is stubbed out. See
+  [Test Conformance](docs/conformance.md#test-conformance) for an analysis of known test suite
+  divergences.
 * **Unit tests**: Located in
   [fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/),
   these verify specific, platform-agnostic behaviors and run across all targets:
@@ -561,8 +525,8 @@ related repositories for code generation and testing purposes:
     The XML and JSON resource files in the fhir-test-cases repository are inconsistent; we use XML
     files converted to JSON.
 - [`fhirpath-2.0.0`](third_party/fhirpath-2.0.0/): the formal
-  [antlr grammar](https://hl7.org/fhirpath/N1/grammar.html) from the FHIRPath Normative Release
-  [N1 (v2.0.0)](https://hl7.org/fhirpath/N1/) including
+  [antlr grammar](https://hl7.org/fhirpath/STU3/en/) from the FHIRPath Normative Release
+  [N1 (v2.0.0)](https://hl7.org/fhirpath/STU3/en/) including
 - [`hl7.fhir.r4.core`](third_party/hl7.fhir.r4.core/): content from
   [FHIR R4](https://hl7.org/fhir/R4/) for code generation
 - [`hl7.fhir.r4b.core`](third_party/hl7.fhir.r4b.core/): content from

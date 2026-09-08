@@ -19,7 +19,7 @@ package dev.ohs.fhir.fhirpath.functions
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 
-/** See [specification](https://hl7.org/fhirpath/N1/#single-collection). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#single--any). */
 internal fun Collection<Any>.singleFun(): Collection<Any> =
   if (isEmpty()) {
     emptyList()
@@ -27,7 +27,7 @@ internal fun Collection<Any>.singleFun(): Collection<Any> =
     listOf(this.single())
   }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#first-collection). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#first--any). */
 internal fun Collection<Any>.firstFun(): Collection<Any> =
   if (isEmpty()) {
     emptyList()
@@ -35,7 +35,7 @@ internal fun Collection<Any>.firstFun(): Collection<Any> =
     listOf(this.first())
   }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#last-collection). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#last--any). */
 internal fun Collection<Any>.lastFun(): Collection<Any> =
   if (isEmpty()) {
     emptyList()
@@ -44,7 +44,7 @@ internal fun Collection<Any>.lastFun(): Collection<Any> =
   }
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#intersectother-collection-collection).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#intersectother-collection--collection).
  *
  * The specification requires duplicates to be eliminated from the result (unlike [exclude], which
  * keeps them). Original items are preserved; conversion to FHIRPath types is only used for
@@ -60,7 +60,7 @@ internal fun Collection<Any>.intersectFun(
 }
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#excludeother-collection-collection).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#excludeother-collection--collection).
  *
  * Unlike [intersectFun], the specification does not eliminate duplicates here. Original items are
  * preserved; conversion to FHIRPath types is only used for comparison.

@@ -21,7 +21,7 @@ import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 import dev.ohs.fhir.fhirpath.types.SimpleTypeInfo
 import dev.ohs.fhir.fhirpath.types.TypeInfo
 
-/** See [specification](http://build.fhir.org/ig/HL7/FHIRPath/en/#type--collection). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#type--collection). */
 internal fun Collection<Any>.type(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<TypeInfo> = mapNotNull { item ->

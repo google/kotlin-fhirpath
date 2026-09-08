@@ -38,58 +38,60 @@ fun FhirPathDecimal.Companion.fromFhirR4Decimal(
 }
 
 private val fhirR4TypeToFhirPathType =
-  mapOf<FhirType, Pair<FhirPathSystemType, (element: Any) -> Any>>(
+  mapOf<FhirType, Pair<FhirPathSystemType, (element: Any) -> Any?>>(
     // FHIR R4 primitive types
     FhirR4PrimitiveType.Boolean to
-      (FhirPathSystemType.BOOLEAN to { it -> (it as dev.ohs.fhir.model.r4.Boolean).value!! }),
+      (FhirPathSystemType.BOOLEAN to { it -> (it as dev.ohs.fhir.model.r4.Boolean).value }),
     FhirR4PrimitiveType.String to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.String).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.String).value }),
     FhirR4PrimitiveType.Uri to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Uri).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Uri).value }),
     FhirR4PrimitiveType.Code to
       (FhirPathSystemType.STRING to
         { it ->
           when (it) {
-            is Enumeration<*> -> it.value.toString()
-            is dev.ohs.fhir.model.r4.Code -> it.value!!
+            is Enumeration<*> -> it.value?.toString()
+            is dev.ohs.fhir.model.r4.Code -> it.value
             else -> error("Unknown code type")
           }
         }),
     FhirR4PrimitiveType.Oid to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Oid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Oid).value }),
     FhirR4PrimitiveType.Id to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Id).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Id).value }),
     FhirR4PrimitiveType.Uuid to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Uuid).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Uuid).value }),
     FhirR4PrimitiveType.Markdown to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Markdown).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Markdown).value }),
     FhirR4PrimitiveType.Base64Binary to
-      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Base64Binary).value!! }),
+      (FhirPathSystemType.STRING to { it -> (it as dev.ohs.fhir.model.r4.Base64Binary).value }),
     FhirR4PrimitiveType.Integer to
-      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.Integer).value!! }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.Integer).value }),
     FhirR4PrimitiveType.UnsignedInt to
-      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.UnsignedInt).value!! }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.UnsignedInt).value }),
     FhirR4PrimitiveType.PositiveInt to
-      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.PositiveInt).value!! }),
+      (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r4.PositiveInt).value }),
     FhirR4PrimitiveType.Decimal to
       (FhirPathSystemType.DECIMAL to
         { it ->
-          FhirPathDecimal.fromFhirR4Decimal((it as dev.ohs.fhir.model.r4.Decimal).value!!)
+          (it as dev.ohs.fhir.model.r4.Decimal).value?.let { FhirPathDecimal.fromFhirR4Decimal(it) }
         }),
     FhirR4PrimitiveType.Date to
       (FhirPathSystemType.DATE to
         { it ->
-          FhirPathDate.fromFhirR4Date((it as dev.ohs.fhir.model.r4.Date).value!!)
+          (it as dev.ohs.fhir.model.r4.Date).value?.let { FhirPathDate.fromFhirR4Date(it) }
         }),
     FhirR4PrimitiveType.DateTime to
       (FhirPathSystemType.DATETIME to
         { it ->
-          FhirPathDateTime.fromFhirR4DateTime((it as dev.ohs.fhir.model.r4.DateTime).value!!)
+          (it as dev.ohs.fhir.model.r4.DateTime).value?.let {
+            FhirPathDateTime.fromFhirR4DateTime(it)
+          }
         }),
     FhirR4PrimitiveType.Time to
       (FhirPathSystemType.TIME to
         { it ->
-          FhirPathTime.fromLocalTime((it as dev.ohs.fhir.model.r4.Time).value!!)
+          (it as dev.ohs.fhir.model.r4.Time).value?.let { FhirPathTime.fromLocalTime(it) }
         }),
 
     // FHIR R4 complex types
@@ -97,8 +99,10 @@ private val fhirR4TypeToFhirPathType =
       (FhirPathSystemType.QUANTITY to
         {
           (it as dev.ohs.fhir.model.r4.Quantity).let {
-            val pair = (FhirPathDecimal.fromFhirR4Decimal(it.value!!.value!!) to it.code!!.value!!)
-            FhirPathQuantity(value = pair.first, unit = pair.second)
+            val value =
+              it.value?.value?.let { FhirPathDecimal.fromFhirR4Decimal(it) } ?: return@let null
+            val unit = it.code?.value ?: it.unit?.value ?: return@let null
+            FhirPathQuantity(value = value, unit = unit)
           }
         }),
   )
@@ -127,17 +131,10 @@ object FhirR4TypeResolver : FhirPathTypeResolver() {
     return null
   }
 
-  override fun convertToString(value: Any): String? =
-    when (value) {
-      is dev.ohs.fhir.model.r4.String -> value.value
-      is Enumeration<*> -> value.toString()
-      else -> null
-    }
-
   override fun toFhirPathType(value: Any): Any {
     resolveFhirTypeFromObject(value)?.let { fhirType ->
       fhirR4TypeToFhirPathType[fhirType]?.let { (_, transform) ->
-        return transform(value)
+        return transform(value) ?: value
       }
     }
     return value

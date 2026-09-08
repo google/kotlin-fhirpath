@@ -33,7 +33,7 @@ import kotlin.math.pow
  * cannot be treated as equal to a fixed UCUM duration. Use [toEquivalentCanonicalized] when that
  * approximation is acceptable.
  *
- * See [FHIRPath, Time-valued quantities](https://hl7.org/fhirpath/N1/#time-valued-quantities).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#time-valued-quantities).
  */
 fun FhirPathQuantity.toEqualCanonicalized(): FhirPathQuantity =
   toEqualUcumDefiniteDuration().stripUcumPrefix().toCanonicalizedUcumUnit()
@@ -46,7 +46,7 @@ fun FhirPathQuantity.toEqualCanonicalized(): FhirPathQuantity =
  * Same as [toEqualCanonicalized], but also converts `year` (to `'a'`) and `month` (to `'mo'`) using
  * UCUM's nominal lengths. Equivalence tolerates that approximation, whereas equality does not.
  *
- * See [FHIRPath, Time-valued quantities](https://hl7.org/fhirpath/N1/#time-valued-quantities).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#time-valued-quantities).
  */
 fun FhirPathQuantity.toEquivalentCanonicalized(): FhirPathQuantity =
   toEquivalentUcumDefiniteDuration().stripUcumPrefix().toCanonicalizedUcumUnit()
@@ -73,7 +73,7 @@ internal fun isValidUcumUnit(unit: String): Boolean {
  * Converts a FHIRPath calendar duration to the equal UCUM definite unit if there is one. Returns
  * the original quantity, otherwise.
  *
- * See [specification](https://hl7.org/fhirpath/N1/#time-valued-quantities).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#time-valued-quantities).
  *
  * N.B. The equality relationship is maintained for up to `weeks` following discussions with Bryn
  * Rhodes. This change has not yet been made in the latest version of the specification.
@@ -103,7 +103,7 @@ private fun FhirPathQuantity.toEqualUcumDefiniteDuration(): FhirPathQuantity {
  * Converts a FHIRPath calendar duration to the equivalent UCUM definite unit if there is one.
  * Returns the original quantity, otherwise.
  *
- * See [specification](https://hl7.org/fhirpath/N1/#time-valued-quantities).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#time-valued-quantities).
  */
 private fun FhirPathQuantity.toEquivalentUcumDefiniteDuration(): FhirPathQuantity {
   val calendarDurationCode = unit ?: return this

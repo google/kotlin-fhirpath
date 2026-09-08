@@ -28,7 +28,7 @@ import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-/** See [specification](https://hl7.org/fhirpath/N1/#abs-integer-decimal-quantity). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#abs--integer--long--decimal--quantity). */
 internal fun Collection<Any>.abs(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "abs() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
@@ -41,20 +41,20 @@ internal fun Collection<Any>.abs(fhirPathTypeResolver: FhirPathTypeResolver): Co
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#ceiling-integer) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#ceiling--integer--quantity). */
 internal fun Collection<Any>.ceiling(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "ceiling() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int,
-    Long -> listOf(value)
+    is Long -> listOf(value)
     is FhirPathDecimal ->
       listOf(value.ceil().intValue()) // TODO: handle the case where the value needs to be a Long
     else -> error("ceiling() can only be applied to numbers")
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#exp-decimal) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#exp--decimal). */
 internal fun Collection<Any>.exp(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "exp() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
@@ -66,20 +66,20 @@ internal fun Collection<Any>.exp(fhirPathTypeResolver: FhirPathTypeResolver): Co
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#floor-integer) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#floor--integer--quantity). */
 internal fun Collection<Any>.floor(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "floor() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int,
-    Long -> listOf(value)
+    is Long -> listOf(value)
     is FhirPathDecimal ->
       listOf(value.floor().intValue()) // TODO: handle the case where the value needs to be a Long
     else -> error("floor() can only be applied to numbers")
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#ln-decimal) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#ln--decimal). */
 internal fun Collection<Any>.ln(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "ln() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
@@ -91,7 +91,7 @@ internal fun Collection<Any>.ln(fhirPathTypeResolver: FhirPathTypeResolver): Col
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#logbase-decimal-decimal) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#logbase--decimal--decimal). */
 internal fun Collection<Any>.log(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -119,7 +119,7 @@ internal fun Collection<Any>.log(
 }
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#powerexponent-integer-decimal-integer-decimal)
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#powerexponent--integer--decimal--decimal)
  */
 internal fun Collection<Any>.power(
   params: List<Any>,
@@ -157,7 +157,10 @@ internal fun Collection<Any>.power(
   return listOf(result.toFhirPathDecimal())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#roundprecision-integer-decimal) */
+/**
+ * See
+ * [specification](https://hl7.org/fhirpath/STU3/en/#roundprecision--integer--decimal--quantity).
+ */
 internal fun Collection<Any>.round(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -175,7 +178,7 @@ internal fun Collection<Any>.round(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#sqrt-decimal) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#sqrt--decimal). */
 internal fun Collection<Any>.sqrt(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "sqrt() cannot be called on a collection with more than 1 item" }
   val valueDouble =
@@ -192,13 +195,13 @@ internal fun Collection<Any>.sqrt(fhirPathTypeResolver: FhirPathTypeResolver): C
   return listOf(sqrt.toFhirPathDecimal())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#truncate-integer) */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#truncate--integer--quantity). */
 internal fun Collection<Any>.truncate(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "truncate() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
     is Int,
-    Long -> listOf(value)
+    is Long -> listOf(value)
     is FhirPathDecimal -> listOf(value.intValue(exactRequired = false))
     else -> error("truncate() can only be applied to numbers")
   }

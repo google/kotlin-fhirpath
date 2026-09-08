@@ -20,12 +20,7 @@ import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#unionother-collection).
- *
- * NB: The URL is inconsistent with other functions due to a function signature error in the
- * documentation.
- *
- * TODO: Correct URL once https://jira.hl7.org/browse/FHIR-52050 is addressed.
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#unionother--collection--collection).
  *
  * Duplicates are detected on the converted FHIRPath values, but the original items are kept and the
  * first occurrence of each value wins. The surviving representation therefore depends on operand
@@ -40,7 +35,10 @@ internal fun Collection<Any>.union(
   return (this + other).distinctBy { it.toFhirPathType(fhirPathTypeResolver) }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#combineother-collection-collection). */
+/**
+ * See
+ * [specification](https://hl7.org/fhirpath/STU3/en/#combineother--collection-preserveorder--boolean--collection).
+ */
 internal fun Collection<Any>.combine(other: Collection<Any>): Collection<Any> {
   return this + other
 }

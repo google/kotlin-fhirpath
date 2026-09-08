@@ -16,7 +16,7 @@
 
 package dev.ohs.fhir.fhirpath.operators
 
-/** See [specification](https://hl7.org/fhirpath/N1/#and). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#and). */
 internal fun and(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   check(left.size <= 1 && right.size <= 1) {
     "and() cannot be called on a collection with more than 1 item"
@@ -30,7 +30,7 @@ internal fun and(left: Collection<Any>, right: Collection<Any>): Collection<Any>
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#or). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#or). */
 internal fun or(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   check(left.size <= 1 && right.size <= 1) {
     "and() cannot be called on a collection with more than 1 item"
@@ -44,7 +44,7 @@ internal fun or(left: Collection<Any>, right: Collection<Any>): Collection<Any> 
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#not-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#not--boolean). */
 internal fun Collection<Any>.not(): Collection<Any> {
   check(size <= 1) { "not() cannot be called on a collection with more than 1 item" }
   val singletonBoolean = evaluateToBoolean()
@@ -52,7 +52,7 @@ internal fun Collection<Any>.not(): Collection<Any> {
   return listOf(!singletonBoolean)
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#xor). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#xor). */
 internal fun xor(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   check(left.size <= 1 && right.size <= 1) {
     "and() cannot be called on a collection with more than 1 item"
@@ -66,7 +66,7 @@ internal fun xor(left: Collection<Any>, right: Collection<Any>): Collection<Any>
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#implies). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#implies). */
 internal fun implies(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   check(left.size <= 1 && right.size <= 1) {
     "and() cannot be called on a collection with more than 1 item"
@@ -80,7 +80,7 @@ internal fun implies(left: Collection<Any>, right: Collection<Any>): Collection<
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#singleton-evaluation-of-collections). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#singleton-evaluation-of-collections). */
 private fun Collection<Any>.evaluateToBoolean(): Boolean? {
   check(size <= 1) {
     "Singleton boolean evaluation cannot be applied to collections with more than 1 item"

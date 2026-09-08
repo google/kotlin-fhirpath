@@ -30,10 +30,8 @@ class FhirPathEngine(
   val fhirModelNavigator: FhirModelNavigator,
   val strictMode: Boolean = false,
 ) {
-  private val evaluator = FhirPathEvaluator(fhirPathTypeResolver, fhirModelNavigator, strictMode)
-
-  val traces: Map<String, List<TraceEntry>>
-    get() = evaluator.traces
+  var traces: Map<String, List<TraceEntry>> = emptyMap()
+    private set
 
   /**
    * Evaluates a FHIRPath expression against a single FHIR resource.
@@ -41,7 +39,7 @@ class FhirPathEngine(
    * @param expression The FHIRPath string to evaluate (e.g., "Patient.name.given").
    * @param base The initial FHIR resource or element to run the expression against.
    * @param variables Environment variables accessible via %name syntax in the expression.
-   * @return @return A collection of elements as the result of the evaluation.
+   * @return A collection of elements as the result of the evaluation.
    */
   fun evaluateExpression(
     expression: String,
@@ -66,7 +64,15 @@ class FhirPathEngine(
       )
     }
 
-    evaluator.initialize(context = base, variables = variables)
+    // Create a new evaluator per invocation for thread safety.
+    val evaluator =
+      FhirPathEvaluator(
+        fhirPathTypeResolver = fhirPathTypeResolver,
+        fhirModelNavigator = fhirModelNavigator,
+        strictMode = strictMode,
+        context = base,
+        variables = variables,
+      )
 
     // Convert the items in the result collection from FHIR types to FHIRPath types if it has not
     // occurred in FHIRPath evaluation. Without this conversion, `Patient.name.given` would return
@@ -76,6 +82,7 @@ class FhirPathEngine(
     // the evaluation in order to preserve data elements such as `id` and `extension` in case they
     // are needed.
     val result = evaluator.visit(parsedExpression).map { it.toFhirPathType(fhirPathTypeResolver) }
+    traces = evaluator.traces
     return result
   }
 

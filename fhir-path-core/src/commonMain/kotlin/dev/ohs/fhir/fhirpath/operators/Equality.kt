@@ -30,7 +30,7 @@ import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#equals).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#-equals).
  *
  * The FHIRPath specification states every pair of items must be equal for two collections to be
  * equal. However, it does not explicitly state how to account for item comparison results that are
@@ -68,7 +68,7 @@ internal fun equal(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#equivalent). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#-equivalent). */
 internal fun equivalent(
   left: Collection<Any>,
   right: Collection<Any>,
@@ -93,7 +93,7 @@ internal fun equivalent(
   return true
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#equals). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#-equals). */
 private fun itemsEqual(
   left: Any,
   right: Any,
@@ -143,7 +143,7 @@ private fun itemsEqual(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#equivalent). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#-equivalent). */
 private fun itemsEquivalent(
   left: Any,
   right: Any,
@@ -203,7 +203,7 @@ private fun itemsEquivalent(
   }
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#string-equivalence). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#string-equivalence). */
 private fun String.normalize() = lowercase().replace(Regex("\\s+"), " ").trim()
 
 /**

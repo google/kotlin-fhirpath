@@ -24,7 +24,6 @@ import dev.ohs.fhir.fhirpath.coerceToType
 import dev.ohs.fhir.fhirpath.createSecondBigDecimal
 import dev.ohs.fhir.fhirpath.decimalPlaces
 import dev.ohs.fhir.fhirpath.toBigDecimalPreservingScale
-import dev.ohs.fhir.fhirpath.toEqualCanonicalized
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.toPlainStringWithMinDecimalPlaces
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
@@ -45,7 +44,7 @@ import kotlinx.datetime.offsetAt
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
-/** See [specification](https://hl7.org/fhirpath/N1/#now-datetime). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#now--datetime). */
 @OptIn(ExperimentalTime::class)
 internal fun now(now: Instant): Collection<FhirPathDateTime> {
   val systemTimeZone = TimeZone.currentSystemDefault()
@@ -64,7 +63,7 @@ internal fun now(now: Instant): Collection<FhirPathDateTime> {
   )
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#timeofday-time). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#timeofday--time). */
 @OptIn(ExperimentalTime::class)
 internal fun timeOfDay(now: Instant): Collection<Any> {
   val systemTimeZone = TimeZone.currentSystemDefault()
@@ -78,12 +77,18 @@ internal fun timeOfDay(now: Instant): Collection<Any> {
   )
 }
 
-/** See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#today--date). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#today--date). */
 @OptIn(ExperimentalTime::class)
 internal fun today(now: Instant): Collection<FhirPathDate> {
   val systemTimeZone = TimeZone.currentSystemDefault()
   val localDateTime = now.toLocalDateTime(systemTimeZone)
-  return listOf(FhirPathDate.fromString(localDateTime.date.toString()))
+  return listOf(
+    FhirPathDate(
+      year = localDateTime.year,
+      month = localDateTime.month.number,
+      day = localDateTime.day,
+    )
+  )
 }
 
 /**
@@ -95,7 +100,7 @@ internal fun today(now: Instant): Collection<FhirPathDate> {
  * Date/DateTime/Time).
  *
  * See
- * [specification](https://build.fhir.org/ig/HL7/FHIRPath/#lowboundaryprecision-integer-decimal-date-datetime-time).
+ * [specification](https://hl7.org/fhirpath/STU3/en/#lowboundaryprecision-integer-decimal--date--datetime--time).
  */
 internal fun Collection<Any>.lowBoundary(
   params: List<Any>,
@@ -140,15 +145,7 @@ internal fun Collection<Any>.lowBoundary(
               if (targetPrecision >= FhirPathDateTime.Precision.MINUTE) value.minute ?: 0 else null,
             second =
               if (targetPrecision >= FhirPathDateTime.Precision.SECOND) {
-                val sec = value.second ?: 0.toBigDecimal()
-                val truncated =
-                  sec.roundToDigitPositionAfterDecimalPoint(
-                    targetScale.toLong(),
-                    RoundingMode.TOWARDS_ZERO,
-                  )
-                truncated
-                  .toPlainStringWithMinDecimalPlaces(targetScale.toLong())
-                  .toBigDecimalPreservingScale()
+                value.second?.let { truncateSecond(it, targetScale) } ?: 0.toBigDecimal()
               } else null,
             utcOffset = value.utcOffset,
           )
@@ -166,15 +163,7 @@ internal fun Collection<Any>.lowBoundary(
             if (targetPrecision >= FhirPathTime.Precision.MINUTE) value.minute ?: 0 else null,
           second =
             if (targetPrecision >= FhirPathTime.Precision.SECOND) {
-              val sec = value.second ?: 0.toBigDecimal()
-              val truncated =
-                sec.roundToDigitPositionAfterDecimalPoint(
-                  targetScale.toLong(),
-                  RoundingMode.TOWARDS_ZERO,
-                )
-              truncated
-                .toPlainStringWithMinDecimalPlaces(targetScale.toLong())
-                .toBigDecimalPreservingScale()
+              value.second?.let { truncateSecond(it, targetScale) } ?: 0.toBigDecimal()
             } else null,
         )
       )
@@ -197,7 +186,7 @@ internal fun Collection<Any>.lowBoundary(
  * Date/DateTime/Time).
  *
  * See
- * [specification](https://build.fhir.org/ig/HL7/FHIRPath/#highboundaryprecision-integer-decimal-date-datetime-time).
+ * [specification](https://hl7.org/fhirpath/STU3/en/#highboundaryprecision-integer-decimal--date--datetime--time).
  */
 internal fun Collection<Any>.highBoundary(
   params: List<Any>,
@@ -256,20 +245,8 @@ internal fun Collection<Any>.highBoundary(
               else null,
             second =
               if (targetPrecision >= FhirPathDateTime.Precision.SECOND) {
-                if (value.second != null) {
-                  val truncated =
-                    value.second.roundToDigitPositionAfterDecimalPoint(
-                      targetScale.toLong(),
-                      RoundingMode.TOWARDS_ZERO,
-                    )
-                  truncated
-                    .toPlainStringWithMinDecimalPlaces(targetScale.toLong())
-                    .toBigDecimalPreservingScale()
-                } else {
-                  val defaultSecStr =
-                    if (targetScale == 0) "59" else "59." + "9".repeat(targetScale)
-                  defaultSecStr.toBigDecimalPreservingScale()
-                }
+                value.second?.let { truncateSecond(it, targetScale) }
+                  ?: maxSecondAtScale(targetScale)
               } else null,
             utcOffset = value.utcOffset,
           )
@@ -287,19 +264,7 @@ internal fun Collection<Any>.highBoundary(
             if (targetPrecision >= FhirPathTime.Precision.MINUTE) value.minute ?: 59 else null,
           second =
             if (targetPrecision >= FhirPathTime.Precision.SECOND) {
-              if (value.second != null) {
-                val truncated =
-                  value.second.roundToDigitPositionAfterDecimalPoint(
-                    targetScale.toLong(),
-                    RoundingMode.TOWARDS_ZERO,
-                  )
-                truncated
-                  .toPlainStringWithMinDecimalPlaces(targetScale.toLong())
-                  .toBigDecimalPreservingScale()
-              } else {
-                val defaultSecStr = if (targetScale == 0) "59" else "59." + "9".repeat(targetScale)
-                defaultSecStr.toBigDecimalPreservingScale()
-              }
+              value.second?.let { truncateSecond(it, targetScale) } ?: maxSecondAtScale(targetScale)
             } else null,
         )
       )
@@ -313,7 +278,7 @@ internal fun Collection<Any>.highBoundary(
   }
 }
 
-/** See [specification](https://build.fhir.org/ig/HL7/FHIRPath/#precision--integer). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#precision--integer). */
 internal fun Collection<Any>.precision(
   fhirPathTypeResolver: FhirPathTypeResolver
 ): Collection<Any> {
@@ -332,6 +297,107 @@ internal fun Collection<Any>.precision(
     }
   return listOf(precisionValue)
 }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#yearof-integer). */
+internal fun Collection<Any>.yearOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("yearOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDate -> it.year
+      is FhirPathDateTime -> it.year
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#monthof-integer). */
+internal fun Collection<Any>.monthOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("monthOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDate -> it.month
+      is FhirPathDateTime -> it.month
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#dayof-integer). */
+internal fun Collection<Any>.dayOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("dayOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDate -> it.day
+      is FhirPathDateTime -> it.day
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#hourof-integer). */
+internal fun Collection<Any>.hourOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("hourOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDateTime -> it.hour
+      is FhirPathTime -> it.hour
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#minuteof-integer). */
+internal fun Collection<Any>.minuteOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("minuteOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDateTime -> it.minute
+      is FhirPathTime -> it.minute
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#secondof-integer). */
+internal fun Collection<Any>.secondOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("secondOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDateTime -> it.second?.toBigInteger()?.intValue()
+      is FhirPathTime -> it.second?.toBigInteger()?.intValue()
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#millisecondof-integer). */
+internal fun Collection<Any>.millisecondOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("millisecondOf", fhirPathTypeResolver) {
+    when (it) {
+        is FhirPathDateTime -> it.second
+        is FhirPathTime -> it.second
+        else -> null
+      }
+      ?.takeIf { it.decimalPlaces > 0 }
+      ?.let { sec -> (sec * BigDecimal.fromInt(1000)).toBigInteger().intValue() % 1000 }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#timezoneoffsetof-decimal). */
+internal fun Collection<Any>.timezoneOffsetOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("timezoneOffsetOf", fhirPathTypeResolver) {
+    (it as? FhirPathDateTime)?.utcOffset?.let { offset ->
+      FhirPathDecimal.fromInt(offset.totalSeconds) / FhirPathDecimal.fromInt(3600)
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#dateof-date). */
+internal fun Collection<Any>.dateOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("dateOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathDate -> it
+      is FhirPathDateTime -> FhirPathDate(year = it.year, month = it.month, day = it.day)
+      else -> null
+    }
+  }
+
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#timeof-time). */
+internal fun Collection<Any>.timeOf(fhirPathTypeResolver: FhirPathTypeResolver) =
+  extractComponent("timeOf", fhirPathTypeResolver) {
+    when (it) {
+      is FhirPathTime -> it
+      is FhirPathDateTime ->
+        it.hour?.let { h -> FhirPathTime(hour = h, minute = it.minute, second = it.second) }
+      else -> null
+    }
+  }
 
 /** Get the last day of the given month in the given year. */
 private fun lastDayOfMonth(year: Int, month: Int): Int =
@@ -460,29 +526,50 @@ private fun computeDecimalHighBoundary(decimal: FhirPathDecimal, precision: Int?
 }
 
 /**
- * Returns whether the two singleton quantities have comparable units, i.e. whether their units
- * canonicalize to the same UCUM base unit (e.g. `cm` and `[in_i]` are both lengths, so they are
- * comparable; `cm` and `s` are not). A quantity with an unknown unit is only comparable to a
- * quantity with the same unit.
+ * Helper function for singleton date/time component extraction functions (`yearOf()`, `secondOf()`,
+ * etc.).
  *
- * The comparison uses equal semantics ([toEqualCanonicalized]), not equivalence: per the
- * specification, returning true "indicates that a result from equality or comparison functions will
- * succeed, and not return empty" (https://build.fhir.org/ig/HL7/FHIRPath/#fn-comparable). For
- * example, a calendar `year` is equivalent (`~`) to `1 'a'` but not comparable to it, since `1 year
- * = 1 'a'` is empty (https://hl7.org/fhirpath/N1/#time-valued-quantities).
+ * Validates that the input collection contains at most one item, resolves it to its FHIRPath system
+ * type, applies the component [extractor], and returns a singleton collection (or empty collection
+ * if the component is absent or type is unsupported).
  */
-internal fun Collection<Any>.comparable(
-  params: List<Any>,
+private inline fun <reified T : Any> Collection<Any>.extractComponent(
+  name: String,
   fhirPathTypeResolver: FhirPathTypeResolver,
-): Collection<Boolean> {
-  check(size <= 1) { "comparable() cannot be called on a collection with more than 1 item" }
-  val left =
-    singleOrNull()?.toFhirPathType(fhirPathTypeResolver) as? FhirPathQuantity ?: return emptyList()
-  val right =
-    params.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) as? FhirPathQuantity
-      ?: return emptyList()
+  extractor: (Any) -> T?,
+): Collection<T> {
+  check(size <= 1) { "$name() cannot be called on a collection with more than 1 item" }
+  val value = singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
+  return extractor(value)?.let { listOf(it) } ?: emptyList()
+}
 
-  val leftUnit = left.toEqualCanonicalized().unit ?: return listOf(false)
-  val rightUnit = right.toEqualCanonicalized().unit ?: return listOf(false)
-  return listOf(leftUnit == rightUnit)
+/**
+ * Truncates an existing second value towards zero to the requested [targetScale] (number of decimal
+ * digits after the decimal point), while preserving trailing zeros at that scale.
+ *
+ * Examples:
+ * - Truncating `45.123456` to scale `0` (whole seconds) returns `45`.
+ * - Truncating `45.123456` to scale `3` (milliseconds) returns `45.123`.
+ * - Truncating `45.1` to scale `3` (milliseconds) returns `45.100`.
+ */
+private fun truncateSecond(second: BigDecimal, targetScale: Int): BigDecimal {
+  val truncated =
+    second.roundToDigitPositionAfterDecimalPoint(targetScale.toLong(), RoundingMode.TOWARDS_ZERO)
+  return truncated
+    .toPlainStringWithMinDecimalPlaces(targetScale.toLong())
+    .toBigDecimalPreservingScale()
+}
+
+/**
+ * Returns the maximum possible second value at [targetScale] decimal digits to fill the remainder
+ * of a minute interval when calculating the highest boundary (`highBoundary`).
+ *
+ * Examples:
+ * - For scale `0` (whole seconds), returns `59`.
+ * - For scale `1` (tenths of a second), returns `59.9`.
+ * - For scale `3` (milliseconds), returns `59.999`.
+ */
+private fun maxSecondAtScale(targetScale: Int): BigDecimal {
+  val defaultSecStr = if (targetScale == 0) "59" else "59." + "9".repeat(targetScale)
+  return defaultSecStr.toBigDecimalPreservingScale()
 }

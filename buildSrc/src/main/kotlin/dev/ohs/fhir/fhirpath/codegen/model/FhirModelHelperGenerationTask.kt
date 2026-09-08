@@ -84,6 +84,7 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
           // Filter out files like StructureDefinition-hdlcholesterol.json
           it.baseDefinition?.endsWith(it.type) == true
         }
+        .sortedBy { it.name }
         .toList()
 
     val fhirVersion = this.fhirVersion.get()

@@ -21,26 +21,26 @@ import kotlin.Any
 
 public enum class FhirR4PrimitiveType(override val typeName: kotlin.String) :
   FhirR4Type, FhirPrimitiveType {
-  Oid("oid"),
-  Uri("uri"),
-  Id("id"),
-  Time("time"),
   Base64Binary("base64Binary"),
-  String("string"),
-  Markdown("markdown"),
-  DateTime("dateTime"),
   Boolean("boolean"),
-  PositiveInt("positiveInt"),
-  Uuid("uuid"),
-  Code("code"),
-  Integer("integer"),
-  Xhtml("xhtml"),
-  Date("date"),
-  Url("url"),
-  Instant("instant"),
-  Decimal("decimal"),
   Canonical("canonical"),
-  UnsignedInt("unsignedInt");
+  Code("code"),
+  Date("date"),
+  DateTime("dateTime"),
+  Decimal("decimal"),
+  Id("id"),
+  Instant("instant"),
+  Integer("integer"),
+  Markdown("markdown"),
+  Oid("oid"),
+  PositiveInt("positiveInt"),
+  String("string"),
+  Time("time"),
+  UnsignedInt("unsignedInt"),
+  Uri("uri"),
+  Url("url"),
+  Uuid("uuid"),
+  Xhtml("xhtml");
 
   public companion object {
     public fun fromString(`value`: kotlin.String): FhirR4PrimitiveType? =
@@ -48,26 +48,26 @@ public enum class FhirR4PrimitiveType(override val typeName: kotlin.String) :
 
     public fun fromObject(`value`: Any): FhirR4PrimitiveType? =
       when (value) {
-        is dev.ohs.fhir.model.r4.Oid -> Oid
-        is dev.ohs.fhir.model.r4.Uuid -> Uuid
-        is dev.ohs.fhir.model.r4.Url -> Url
-        is dev.ohs.fhir.model.r4.Canonical -> Canonical
-        is dev.ohs.fhir.model.r4.Uri -> Uri
-        is dev.ohs.fhir.model.r4.Id -> Id
-        is dev.ohs.fhir.model.r4.Time -> Time
         is dev.ohs.fhir.model.r4.Base64Binary -> Base64Binary
-        is dev.ohs.fhir.model.r4.Markdown -> Markdown
-        is dev.ohs.fhir.model.r4.Code -> Code
-        is dev.ohs.fhir.model.r4.String -> String
-        is dev.ohs.fhir.model.r4.DateTime -> DateTime
         is dev.ohs.fhir.model.r4.Boolean -> Boolean
+        is dev.ohs.fhir.model.r4.Canonical -> Canonical
+        is dev.ohs.fhir.model.r4.Code -> Code
+        is dev.ohs.fhir.model.r4.Date -> Date
+        is dev.ohs.fhir.model.r4.DateTime -> DateTime
+        is dev.ohs.fhir.model.r4.Decimal -> Decimal
+        is dev.ohs.fhir.model.r4.Id -> Id
+        is dev.ohs.fhir.model.r4.Instant -> Instant
         is dev.ohs.fhir.model.r4.PositiveInt -> PositiveInt
         is dev.ohs.fhir.model.r4.UnsignedInt -> UnsignedInt
         is dev.ohs.fhir.model.r4.Integer -> Integer
+        is dev.ohs.fhir.model.r4.Markdown -> Markdown
+        is dev.ohs.fhir.model.r4.Oid -> Oid
+        is dev.ohs.fhir.model.r4.String -> String
+        is dev.ohs.fhir.model.r4.Time -> Time
+        is dev.ohs.fhir.model.r4.Url -> Url
+        is dev.ohs.fhir.model.r4.Uuid -> Uuid
+        is dev.ohs.fhir.model.r4.Uri -> Uri
         is dev.ohs.fhir.model.r4.Xhtml -> Xhtml
-        is dev.ohs.fhir.model.r4.Date -> Date
-        is dev.ohs.fhir.model.r4.Instant -> Instant
-        is dev.ohs.fhir.model.r4.Decimal -> Decimal
         is Enumeration<*> -> Code
         else -> null
       }

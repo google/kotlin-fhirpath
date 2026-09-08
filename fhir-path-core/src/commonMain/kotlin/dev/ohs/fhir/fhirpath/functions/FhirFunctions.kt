@@ -26,7 +26,7 @@ import dev.ohs.fhir.fhirpath.types.FhirPrimitiveType
  * `extension(url)` is a shorthand for `extension.where(url = url)`. It works on any element
  * carrying extensions, including primitives (e.g. `Patient.birthDate.extension(...)`).
  *
- * See [specification](https://hl7.org/fhir/fhirpath.html#functions).
+ * See [specification](https://hl7.org/fhir/R5/fhirpath.html#functions).
  */
 internal fun Collection<Any>.extension(
   params: List<Any>,
@@ -46,25 +46,18 @@ internal fun Collection<Any>.extension(
 /**
  * Returns whether the input is a single FHIR primitive that has an actual value, as opposed to only
  * carrying an `id` or `extension` (e.g. a `_given` element with an extension but no value). Returns
- * false for an empty input, for non-primitives (including complex types with a `value` property
- * such as `Quantity`), and for FHIRPath literals, which are System values rather than FHIR
- * primitives.
+ * an empty list if the input collection is not a single FHIR primitive.
  *
- * See [specification](https://hl7.org/fhir/fhirpath.html#functions).
+ * See [specification](https://hl7.org/fhir/R5/fhirpath.html#functions).
  */
 internal fun Collection<Any>.hasValue(
   fhirPathTypeResolver: FhirPathTypeResolver,
   fhirModelNavigator: FhirModelNavigator,
 ): Collection<Boolean> {
-  // Per the specification, the result is true only when the collection "contains a single value
-  // which is a FHIR primitive" with a value; an empty or multi-item collection is simply false.
-  val item = singleOrNull() ?: return listOf(false)
+  // Return an empty collection if the input collection is not a single FHIR primitive
+  val item = singleOrNull() ?: return emptyList()
   if (fhirPathTypeResolver.resolveFromObject(item) !is FhirPrimitiveType) {
-    return listOf(false)
+    return emptyList()
   }
-  // Code-bound elements are `Enumeration` objects, which have no generated property dispatch, so
-  // their value presence is checked through the resolver's string conversion instead.
-  val value =
-    fhirModelNavigator.accessProperty(item, "value") ?: fhirPathTypeResolver.convertToString(item)
-  return listOf(value != null)
+  return listOf(fhirModelNavigator.accessProperty(item, "value") != null)
 }

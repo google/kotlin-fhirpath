@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Open Health Stack Foundation
+ * Copyright 2025-2026 Open Health Stack Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,28 @@
 
 package dev.ohs.fhir.fhirpath
 
-import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 private val fhirPathEngine = FhirPathEngine.forR4()
 
-class ToDateTest {
+class MathTest {
 
   @Test
-  fun `toDate on dateTime returns date portion`() {
-    val result = fhirPathEngine.evaluateExpression("@2025-05-10T14:30:00.000.toDate()", null)
-    assertEquals(listOf(FhirPathDate(2025, 5, 10)), result.toList())
+  fun `ceiling on Long value`() {
+    val result = fhirPathEngine.evaluateExpression("%val.ceiling()", null, mapOf("val" to 100L))
+    assertEquals(listOf(100L), result.toList())
+  }
+
+  @Test
+  fun `floor on Long value`() {
+    val result = fhirPathEngine.evaluateExpression("%val.floor()", null, mapOf("val" to 100L))
+    assertEquals(listOf(100L), result.toList())
+  }
+
+  @Test
+  fun `truncate on Long value`() {
+    val result = fhirPathEngine.evaluateExpression("%val.truncate()", null, mapOf("val" to 100L))
+    assertEquals(listOf(100L), result.toList())
   }
 }

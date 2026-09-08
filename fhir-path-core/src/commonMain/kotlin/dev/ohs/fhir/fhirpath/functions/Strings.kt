@@ -16,6 +16,7 @@
 
 package dev.ohs.fhir.fhirpath.functions
 
+import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 import kotlin.math.min
 
@@ -26,7 +27,7 @@ import kotlin.math.min
  */
 const val SINGLE_LINE_MODE_REGEX_PREFIX = "(?s)"
 
-/** See [specification](https://hl7.org/fhirpath/N1/#indexofsubstring-string-integer). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#indexofsubstring--string--integer). */
 internal fun Collection<Any>.indexOf(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -38,7 +39,8 @@ internal fun Collection<Any>.indexOf(
 }
 
 /**
- * See [specification](https://hl7.org/fhirpath/N1/#substringstart-integer-length-integer-string).
+ * See
+ * [specification](https://hl7.org/fhirpath/STU3/en/#substringstart--integer--length--integer--string).
  */
 internal fun Collection<Any>.substring(
   params: List<Any>,
@@ -61,7 +63,7 @@ internal fun Collection<Any>.substring(
   return listOf(input.substring(start))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#startsprefix-string-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#startswithprefix--string--boolean). */
 internal fun Collection<Any>.startsWith(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -77,7 +79,7 @@ internal fun Collection<Any>.startsWith(
   return listOf(input.startsWith(prefix))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#endssuffix-string-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#endswithsuffix--string--boolean). */
 internal fun Collection<Any>.endsWith(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -93,7 +95,7 @@ internal fun Collection<Any>.endsWith(
   return listOf(input.endsWith(suffix))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#containssubstring-string-boolean). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#containssubstring--string--boolean). */
 internal fun Collection<Any>.strContains(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -109,14 +111,14 @@ internal fun Collection<Any>.strContains(
   return listOf(input.contains(substring))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#upper-string). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#upper--string). */
 internal fun Collection<Any>.upper(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "upper() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString(fhirPathTypeResolver) ?: return emptyList()
   return listOf(input.uppercase())
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#lower-string). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#lower--string). */
 internal fun Collection<Any>.lower(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "lower() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString(fhirPathTypeResolver) ?: return emptyList()
@@ -125,7 +127,7 @@ internal fun Collection<Any>.lower(fhirPathTypeResolver: FhirPathTypeResolver): 
 
 /**
  * See
- * [specification](https://hl7.org/fhirpath/N1/#replacepattern-string-substitution-string-string).
+ * [specification](https://hl7.org/fhirpath/STU3/en/#replacepattern--string-substitution--string--string).
  */
 internal fun Collection<Any>.replace(
   params: List<Any>,
@@ -138,7 +140,10 @@ internal fun Collection<Any>.replace(
   return listOf(input.replace(pattern, substitution))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#matchesregex-string-boolean). */
+/**
+ * See
+ * [specification](https://hl7.org/fhirpath/STU3/en/#matchesregex--string-flags--string--boolean).
+ */
 internal fun Collection<Any>.matches(
   params: List<Any>,
   fhirPathTypeResolver: FhirPathTypeResolver,
@@ -164,7 +169,7 @@ internal fun Collection<Any>.matchesFull(
 
 /**
  * See
- * [specification](https://hl7.org/fhirpath/N1/#replacematchesregex-string-substitution-string-string).
+ * [specification](https://hl7.org/fhirpath/STU3/en/#replacematchesregex--string-substitution-string-flags--string--string).
  */
 internal fun Collection<Any>.replaceMatches(
   params: List<Any>,
@@ -185,14 +190,14 @@ internal fun Collection<Any>.replaceMatches(
   return listOf(input.replace(regex.toSingleLineModeRegex(), substitution))
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#length-integer). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#length--integer). */
 internal fun Collection<Any>.length(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "length() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString(fhirPathTypeResolver) ?: return emptyList()
   return listOf(input.length)
 }
 
-/** See [specification](https://hl7.org/fhirpath/N1/#tochars-collection). */
+/** See [specification](https://hl7.org/fhirpath/STU3/en/#tochars--collection). */
 internal fun Collection<Any>.toChars(fhirPathTypeResolver: FhirPathTypeResolver): Collection<Any> {
   check(size <= 1) { "toChars() cannot be called on a collection with more than 1 item" }
   val input = singleOrNull()?.unwrapString(fhirPathTypeResolver) ?: return emptyList()
@@ -298,10 +303,10 @@ internal fun Collection<Any>.join(
 }
 
 private fun Any.unwrapString(fhirPathTypeResolver: FhirPathTypeResolver): String? {
-  if (this is String) {
-    return this
+  return when (this) {
+    is String -> this
+    else -> toFhirPathType(fhirPathTypeResolver) as? String
   }
-  return fhirPathTypeResolver.convertToString(this)
 }
 
 private fun String.toSingleLineModeRegex(): Regex = "$SINGLE_LINE_MODE_REGEX_PREFIX$this".toRegex()

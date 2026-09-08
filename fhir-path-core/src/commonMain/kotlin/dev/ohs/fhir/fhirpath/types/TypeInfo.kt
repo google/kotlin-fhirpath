@@ -33,7 +33,7 @@ package dev.ohs.fhir.fhirpath.types
  * - [SimpleTypeInfo]: for primitive types (e.g. `System.String`, `FHIR.boolean`)
  * - [ClassInfo]: for complex types and resources (e.g. `FHIR.Patient`, `FHIR.HumanName`)
  *
- * See [specification](http://build.fhir.org/ig/HL7/FHIRPath/en/#structures).
+ * See [specification](https://hl7.org/fhirpath/STU3/en/#structures).
  */
 sealed interface TypeInfo {
   val namespace: String
