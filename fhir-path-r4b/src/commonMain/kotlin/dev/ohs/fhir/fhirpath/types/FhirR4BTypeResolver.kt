@@ -16,7 +16,6 @@
 
 package dev.ohs.fhir.fhirpath.types
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.model.r4b.Enumeration
 import dev.ohs.fhir.model.r4b.Resource
 import dev.ohs.fhir.model.r4b.ext.getFhirType
@@ -32,6 +31,12 @@ fun FhirPathDateTime.Companion.fromFhirR4BDateTime(
   fhirDateTime: dev.ohs.fhir.model.r4b.FhirDateTime
 ): FhirPathDateTime {
   return fromString(fhirDateTime.toString())
+}
+
+fun FhirPathDecimal.Companion.fromFhirR4BDecimal(
+  fhirDecimal: dev.ohs.fhir.model.r4b.FhirDecimal
+): FhirPathDecimal {
+  return fromString(fhirDecimal.toString())
 }
 
 private val fhirR4BTypeToFhirPathType =
@@ -71,7 +76,7 @@ private val fhirR4BTypeToFhirPathType =
     FhirR4BPrimitiveType.Decimal to
       (FhirPathSystemType.DECIMAL to
         { it ->
-          (it as dev.ohs.fhir.model.r4b.Decimal).value!!.toBigDecimal()
+          FhirPathDecimal.fromFhirR4BDecimal((it as dev.ohs.fhir.model.r4b.Decimal).value!!)
         }),
     FhirR4BPrimitiveType.Date to
       (FhirPathSystemType.DATE to
@@ -94,7 +99,7 @@ private val fhirR4BTypeToFhirPathType =
       (FhirPathSystemType.QUANTITY to
         {
           (it as dev.ohs.fhir.model.r4b.Quantity).let {
-            val pair = (it.value!!.value!!.toBigDecimal() to it.code!!.value!!)
+            val pair = (FhirPathDecimal.fromFhirR4BDecimal(it.value!!.value!!) to it.code!!.value!!)
             FhirPathQuantity(value = pair.first, unit = pair.second)
           }
         }),
@@ -140,11 +145,3 @@ object FhirR4BTypeResolver : FhirPathTypeResolver() {
     return value
   }
 }
-
-/**
- * Converts the model's [dev.ohs.fhir.model.r4b.FhirDecimal] wrapper to the engine's [BigDecimal].
- * The wrapper preserves the number's original text and its own BigDecimal is internal to
- * kotlin-fhir, so the string form is the lossless public path.
- */
-private fun dev.ohs.fhir.model.r4b.FhirDecimal.toBigDecimal(): BigDecimal =
-  BigDecimal.parseString(toString())

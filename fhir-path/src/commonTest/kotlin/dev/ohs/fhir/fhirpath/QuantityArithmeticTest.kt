@@ -16,7 +16,7 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.model.r4.Patient
 import kotlin.test.Test
@@ -31,7 +31,7 @@ class QuantityArithmeticTest {
     val result = fhirPathEngine.evaluateExpression("5 'mg' + 3 'mg'", emptyContext)
     assertEquals(1, result.size)
     val quantity = result.single() as FhirPathQuantity
-    assertEquals(8.toBigDecimal(), quantity.value)
+    assertEquals(FhirPathDecimal.fromInt(8), quantity.value)
     assertEquals("'mg'", quantity.unit)
   }
 
@@ -40,7 +40,7 @@ class QuantityArithmeticTest {
     val result = fhirPathEngine.evaluateExpression("1 'kg' + 500 'g'", emptyContext)
     assertEquals(1, result.size)
     val quantity = result.single() as FhirPathQuantity
-    assertEquals("1.5".toBigDecimal(), quantity.value)
+    assertEquals(FhirPathDecimal.fromString("1.5"), quantity.value)
     assertEquals("'kg'", quantity.unit)
   }
 
@@ -49,7 +49,7 @@ class QuantityArithmeticTest {
     val result = fhirPathEngine.evaluateExpression("1 'kg' - 500 'g'", emptyContext)
     assertEquals(1, result.size)
     val quantity = result.single() as FhirPathQuantity
-    assertEquals("0.5".toBigDecimal(), quantity.value)
+    assertEquals(FhirPathDecimal.fromString("0.5"), quantity.value)
     assertEquals("'kg'", quantity.unit)
   }
 

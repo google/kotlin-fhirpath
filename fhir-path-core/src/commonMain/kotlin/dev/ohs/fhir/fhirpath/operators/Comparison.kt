@@ -16,11 +16,11 @@
 
 package dev.ohs.fhir.fhirpath.operators
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.fhirpath.asComparableOperands
 import dev.ohs.fhir.fhirpath.toEqualCanonicalized
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
@@ -38,7 +38,7 @@ internal fun compare(left: Any, right: Any, fhirPathTypeResolver: FhirPathTypeRe
     leftFhirPath is Long && rightFhirPath is Long -> {
       leftFhirPath.compareTo(rightFhirPath)
     }
-    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+    leftFhirPath is FhirPathDecimal && rightFhirPath is FhirPathDecimal -> {
       leftFhirPath.compareTo(rightFhirPath)
     }
     leftFhirPath is FhirPathQuantity && rightFhirPath is FhirPathQuantity -> {

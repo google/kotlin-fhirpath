@@ -24,6 +24,7 @@ import dev.ohs.fhir.fhirpath.toEquivalentCanonicalized
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
@@ -112,7 +113,7 @@ private fun itemsEqual(
     leftFhirPath is Long && rightFhirPath is Long -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+    leftFhirPath is FhirPathDecimal && rightFhirPath is FhirPathDecimal -> {
       leftFhirPath == rightFhirPath
     }
     leftFhirPath is Boolean && rightFhirPath is Boolean -> {
@@ -162,12 +163,18 @@ private fun itemsEquivalent(
     leftFhirPath is Long && rightFhirPath is Long -> {
       leftFhirPath == rightFhirPath
     }
-    leftFhirPath is BigDecimal && rightFhirPath is BigDecimal -> {
+    leftFhirPath is FhirPathDecimal && rightFhirPath is FhirPathDecimal -> {
       // Determine decimal equivalence to the precision of the less precise operand
       val minLastDigitPosition =
-        minOf(leftFhirPath.lastDigitPosition, rightFhirPath.lastDigitPosition)
-      leftFhirPath.roundToDigitPosition(minLastDigitPosition, DECIMAL_MODE.roundingMode) ==
-        rightFhirPath.roundToDigitPosition(minLastDigitPosition, DECIMAL_MODE.roundingMode)
+        minOf(leftFhirPath.bigDecimal.lastDigitPosition, rightFhirPath.bigDecimal.lastDigitPosition)
+      leftFhirPath.bigDecimal.roundToDigitPosition(
+        minLastDigitPosition,
+        DECIMAL_MODE.roundingMode,
+      ) ==
+        rightFhirPath.bigDecimal.roundToDigitPosition(
+          minLastDigitPosition,
+          DECIMAL_MODE.roundingMode,
+        )
     }
     leftFhirPath is Boolean && rightFhirPath is Boolean -> {
       leftFhirPath == rightFhirPath

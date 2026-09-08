@@ -29,6 +29,7 @@ import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.toPlainStringWithMinDecimalPlaces
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathSystemType
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
@@ -107,7 +108,7 @@ internal fun Collection<Any>.lowBoundary(
   val precision = params.singleOrNull() as? Int
 
   return when (value) {
-    is BigDecimal -> computeDecimalLowBoundary(value, precision)
+    is FhirPathDecimal -> computeDecimalLowBoundary(value, precision)
     is FhirPathDate -> {
       val targetPrecision = value.resolvePrecision(precision) ?: return emptyList()
       when (targetPrecision) {
@@ -209,7 +210,7 @@ internal fun Collection<Any>.highBoundary(
   val precision = params.singleOrNull() as? Int
 
   return when (value) {
-    is BigDecimal -> computeDecimalHighBoundary(value, precision)
+    is FhirPathDecimal -> computeDecimalHighBoundary(value, precision)
     is FhirPathDate -> {
       val targetPrecision = value.resolvePrecision(precision) ?: return emptyList()
       when (targetPrecision) {
@@ -323,7 +324,7 @@ internal fun Collection<Any>.precision(
 
   val precisionValue =
     when (value) {
-      is BigDecimal -> value.decimalPlaces.toInt()
+      is FhirPathDecimal -> value.decimalPlaces.toInt()
       is FhirPathDate -> value.integerPrecision
       is FhirPathDateTime -> value.integerPrecision
       is FhirPathTime -> value.integerPrecision
@@ -344,13 +345,13 @@ private fun FhirPathQuantity.applyBoundary(
 ): Collection<Any> {
   val v = value ?: return emptyList()
   val boundedVal =
-    listOf(v).boundaryFn(params, fhirPathTypeResolver).singleOrNull() as? BigDecimal
+    listOf(v).boundaryFn(params, fhirPathTypeResolver).singleOrNull() as? FhirPathDecimal
       ?: return emptyList()
   return listOf(FhirPathQuantity(value = boundedVal, unit = unit))
 }
 
 /**
- * Computes the lower boundary (`lowBoundary(precision)`) for a [BigDecimal] value.
+ * Computes the lower boundary (`lowBoundary(precision)`) for a [FhirPathDecimal] value.
  *
  * In short: Finds the lowest boundary of the input's uncertainty interval, then rounds and formats
  * the answer to `targetPrecision` decimal places.
@@ -374,7 +375,8 @@ private fun FhirPathQuantity.applyBoundary(
  *    `S_target` decimal places. If the result is zero, ensure it is returned as positive zero
  *    (`0.0`) rather than negative zero (`-0.0`).
  */
-private fun computeDecimalLowBoundary(value: BigDecimal, precision: Int?): Collection<Any> {
+private fun computeDecimalLowBoundary(decimal: FhirPathDecimal, precision: Int?): Collection<Any> {
+  val value = decimal.bigDecimal
   // Validate target precision parameter: must be in 0..8 if specified (defaults to 8)
   if (precision != null && precision !in 0..8) return emptyList()
   val targetPrecision = precision ?: 8
@@ -409,14 +411,12 @@ private fun computeDecimalLowBoundary(value: BigDecimal, precision: Int?): Colle
 
   // Format BigDecimal preserving target scale
   return listOf(
-    rounded
-      .toPlainStringWithMinDecimalPlaces(targetPrecision.toLong())
-      .toBigDecimalPreservingScale()
+    FhirPathDecimal.fromString(rounded.toPlainStringWithMinDecimalPlaces(targetPrecision.toLong()))
   )
 }
 
 /**
- * Computes the upper boundary (`highBoundary(precision)`) for a [BigDecimal] value.
+ * Computes the upper boundary (`highBoundary(precision)`) for a [FhirPathDecimal] value.
  *
  * In short: Finds the highest boundary of the input's uncertainty interval, then rounds and formats
  * the answer to `targetPrecision` decimal places.
@@ -435,7 +435,8 @@ private fun computeDecimalLowBoundary(value: BigDecimal, precision: Int?): Colle
  * `exactUpper` is rounded to `S_target` decimal places using `ROUND_HALF_CEILING` for positive
  * numbers and `CEILING` for negative numbers.
  */
-private fun computeDecimalHighBoundary(value: BigDecimal, precision: Int?): Collection<Any> {
+private fun computeDecimalHighBoundary(decimal: FhirPathDecimal, precision: Int?): Collection<Any> {
+  val value = decimal.bigDecimal
   // Validate target precision parameter: must be in 0..8 if specified (defaults to 8)
   if (precision != null && precision !in 0..8) return emptyList()
   val targetPrecision = precision ?: 8
@@ -454,9 +455,7 @@ private fun computeDecimalHighBoundary(value: BigDecimal, precision: Int?): Coll
 
   // Format BigDecimal preserving target scale
   return listOf(
-    rounded
-      .toPlainStringWithMinDecimalPlaces(targetPrecision.toLong())
-      .toBigDecimalPreservingScale()
+    FhirPathDecimal.fromString(rounded.toPlainStringWithMinDecimalPlaces(targetPrecision.toLong()))
   )
 }
 

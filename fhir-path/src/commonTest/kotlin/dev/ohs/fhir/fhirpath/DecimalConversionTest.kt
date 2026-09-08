@@ -16,7 +16,7 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.model.r4.Code
 import dev.ohs.fhir.model.r4.CodeableConcept
@@ -34,7 +34,8 @@ private val fhirPathEngine = FhirPathEngine.forR4()
 /**
  * Regression tests for reading `decimal` values from resources built with kotlin-fhir 1.0.0-rc01+,
  * where `Decimal.value` is a [FhirDecimal] wrapper rather than a plain BigDecimal. Reading such a
- * value used to crash with `NoSuchMethodError`.
+ * value used to crash with `NoSuchMethodError`. The engine converts the wrapper to its own
+ * [FhirPathDecimal] through the wire string, so the decimal places are preserved.
  */
 class DecimalConversionTest {
 
@@ -45,7 +46,7 @@ class DecimalConversionTest {
       value =
         Observation.Value.Quantity(
           Quantity(
-            value = Decimal(value = FhirDecimal.fromString("0.9")),
+            value = Decimal(value = FhirDecimal.fromString("0.90")),
             code = Code(value = "kg"),
           )
         ),
@@ -55,14 +56,15 @@ class DecimalConversionTest {
   fun `quantity with a fhir decimal value evaluates`() {
     val result = fhirPathEngine.evaluateExpression("Observation.value", observation).single()
     val quantity = assertIs<FhirPathQuantity>(result)
-    assertEquals(0, quantity.value!!.compareTo(BigDecimal.parseString("0.9")))
+    assertEquals(FhirPathDecimal.fromString("0.90"), quantity.value)
     assertEquals("kg", quantity.unit)
   }
 
   @Test
   fun `decimal element evaluates to a fhirpath decimal`() {
     val result = fhirPathEngine.evaluateExpression("Observation.value.value", observation).single()
-    val decimal = assertIs<BigDecimal>(result)
-    assertEquals(0, decimal.compareTo(BigDecimal.parseString("0.9")))
+    val decimal = assertIs<FhirPathDecimal>(result)
+    assertEquals("0.90", decimal.toString())
+    assertEquals(2, decimal.decimalPlaces)
   }
 }

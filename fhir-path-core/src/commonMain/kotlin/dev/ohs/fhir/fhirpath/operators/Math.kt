@@ -26,6 +26,7 @@ import dev.ohs.fhir.fhirpath.times
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
@@ -33,6 +34,7 @@ import dev.ohs.fhir.fhirpath.types.div
 import dev.ohs.fhir.fhirpath.types.minus
 import dev.ohs.fhir.fhirpath.types.plus
 import dev.ohs.fhir.fhirpath.types.times
+import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.DateTimeUnit
@@ -70,23 +72,29 @@ internal fun multiplication(
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem * rightItem)
     leftItem is Int && rightItem is Long -> listOf(leftItem * rightItem)
-    leftItem is Int && rightItem is BigDecimal -> listOf(rightItem * leftItem)
-    leftItem is Int && rightItem is FhirPathQuantity -> listOf(rightItem * leftItem.toBigDecimal())
+    leftItem is Int && rightItem is FhirPathDecimal ->
+      listOf(rightItem * leftItem.toFhirPathDecimal())
+    leftItem is Int && rightItem is FhirPathQuantity ->
+      listOf(rightItem * leftItem.toFhirPathDecimal())
     leftItem is Long && rightItem is Int -> listOf(leftItem * rightItem)
     leftItem is Long && rightItem is Long -> listOf(leftItem * rightItem)
-    leftItem is Long && rightItem is BigDecimal -> listOf(rightItem * leftItem)
-    leftItem is Long && rightItem is FhirPathQuantity -> listOf(rightItem * leftItem.toBigDecimal())
-    leftItem is BigDecimal && rightItem is Int -> listOf(leftItem * rightItem)
-    leftItem is BigDecimal && rightItem is Long -> listOf(leftItem * rightItem)
-    leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem * rightItem)
-    leftItem is BigDecimal && rightItem is FhirPathQuantity -> listOf(rightItem * leftItem)
+    leftItem is Long && rightItem is FhirPathDecimal ->
+      listOf(rightItem * leftItem.toFhirPathDecimal())
+    leftItem is Long && rightItem is FhirPathQuantity ->
+      listOf(rightItem * leftItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is Int ->
+      listOf(leftItem * rightItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is Long ->
+      listOf(leftItem * rightItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is FhirPathDecimal -> listOf(leftItem * rightItem)
+    leftItem is FhirPathDecimal && rightItem is FhirPathQuantity -> listOf(rightItem * leftItem)
     leftItem is FhirPathQuantity && rightItem is Int -> {
-      listOf(leftItem * rightItem.toBigDecimal())
+      listOf(leftItem * rightItem.toFhirPathDecimal())
     }
     leftItem is FhirPathQuantity && rightItem is Long -> {
-      listOf(leftItem * rightItem.toBigDecimal())
+      listOf(leftItem * rightItem.toFhirPathDecimal())
     }
-    leftItem is FhirPathQuantity && rightItem is BigDecimal -> {
+    leftItem is FhirPathQuantity && rightItem is FhirPathDecimal -> {
       listOf(leftItem * rightItem)
     }
     leftItem is FhirPathQuantity && rightItem is FhirPathQuantity -> {
@@ -109,23 +117,23 @@ internal fun division(
     return (leftItem / rightItem)?.let { listOf(it) } ?: emptyList()
   }
 
-  val leftBigDecimal =
+  val leftDecimal =
     when (leftItem) {
-      is Int -> leftItem.toBigDecimal()
-      is Long -> leftItem.toBigDecimal()
-      is BigDecimal -> leftItem
+      is Int -> leftItem.toFhirPathDecimal()
+      is Long -> leftItem.toFhirPathDecimal()
+      is FhirPathDecimal -> leftItem
       else -> error("Operand of division must be a number")
     }
-  val rightBigDecimal =
+  val rightDecimal =
     when (rightItem) {
-      is Int -> rightItem.toBigDecimal()
-      is Long -> rightItem.toBigDecimal()
-      is BigDecimal -> rightItem
+      is Int -> rightItem.toFhirPathDecimal()
+      is Long -> rightItem.toFhirPathDecimal()
+      is FhirPathDecimal -> rightItem
       else -> error("Operand of division must be a number")
     }
 
-  if (rightBigDecimal == BigDecimal.ZERO) return emptyList()
-  return listOf(leftBigDecimal.divide(rightBigDecimal, DECIMAL_MODE))
+  if (rightDecimal.isZero()) return emptyList()
+  return listOf(leftDecimal / rightDecimal)
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#addition). */
@@ -141,13 +149,17 @@ internal fun addition(
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem + rightItem)
     leftItem is Int && rightItem is Long -> listOf(leftItem + rightItem)
-    leftItem is Int && rightItem is BigDecimal -> listOf(rightItem + leftItem)
+    leftItem is Int && rightItem is FhirPathDecimal ->
+      listOf(rightItem + leftItem.toFhirPathDecimal())
     leftItem is Long && rightItem is Int -> listOf(leftItem + rightItem)
     leftItem is Long && rightItem is Long -> listOf(leftItem + rightItem)
-    leftItem is Long && rightItem is BigDecimal -> listOf(rightItem + leftItem)
-    leftItem is BigDecimal && rightItem is Int -> listOf(leftItem + rightItem)
-    leftItem is BigDecimal && rightItem is Long -> listOf(leftItem + rightItem)
-    leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem + rightItem)
+    leftItem is Long && rightItem is FhirPathDecimal ->
+      listOf(rightItem + leftItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is Int ->
+      listOf(leftItem + rightItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is Long ->
+      listOf(leftItem + rightItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is FhirPathDecimal -> listOf(leftItem + rightItem)
     leftItem is String && rightItem is String -> listOf(leftItem + rightItem)
     leftItem is FhirPathQuantity && rightItem is FhirPathQuantity ->
       (leftItem + rightItem)?.let { listOf(it) } ?: emptyList()
@@ -169,13 +181,17 @@ internal fun subtraction(
   return when {
     leftItem is Int && rightItem is Int -> listOf(leftItem - rightItem)
     leftItem is Int && rightItem is Long -> listOf(leftItem - rightItem)
-    leftItem is Int && rightItem is BigDecimal -> listOf(-rightItem + leftItem)
+    leftItem is Int && rightItem is FhirPathDecimal ->
+      listOf(leftItem.toFhirPathDecimal() - rightItem)
     leftItem is Long && rightItem is Int -> listOf(leftItem - rightItem)
     leftItem is Long && rightItem is Long -> listOf(leftItem - rightItem)
-    leftItem is Long && rightItem is BigDecimal -> listOf(-rightItem + leftItem)
-    leftItem is BigDecimal && rightItem is Int -> listOf(leftItem - rightItem)
-    leftItem is BigDecimal && rightItem is Long -> listOf(leftItem - rightItem)
-    leftItem is BigDecimal && rightItem is BigDecimal -> listOf(leftItem - rightItem)
+    leftItem is Long && rightItem is FhirPathDecimal ->
+      listOf(leftItem.toFhirPathDecimal() - rightItem)
+    leftItem is FhirPathDecimal && rightItem is Int ->
+      listOf(leftItem - rightItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is Long ->
+      listOf(leftItem - rightItem.toFhirPathDecimal())
+    leftItem is FhirPathDecimal && rightItem is FhirPathDecimal -> listOf(leftItem - rightItem)
     leftItem is FhirPathQuantity && rightItem is FhirPathQuantity ->
       (leftItem - rightItem)?.let { listOf(it) } ?: emptyList()
     leftItem is FhirPathDate && rightItem is FhirPathQuantity -> listOf(leftItem - rightItem)
@@ -187,47 +203,47 @@ internal fun subtraction(
 
 /** See [specification](https://hl7.org/fhirpath/N1/#div). */
 internal fun div(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
-  val leftBigDecimal =
+  val leftDecimal =
     when (val leftItem = left.singleOrNull() ?: return emptyList()) {
-      is Int -> leftItem.toBigDecimal()
-      is Long -> leftItem.toBigDecimal()
-      is BigDecimal -> leftItem
+      is Int -> leftItem.toFhirPathDecimal()
+      is Long -> leftItem.toFhirPathDecimal()
+      is FhirPathDecimal -> leftItem
       else -> error("Operand of div must be a number")
     }
-  val rightBigDecimal =
+  val rightDecimal =
     when (val rightItem = right.singleOrNull() ?: return emptyList()) {
-      is Int -> rightItem.toBigDecimal()
-      is Long -> rightItem.toBigDecimal()
-      is BigDecimal -> rightItem
+      is Int -> rightItem.toFhirPathDecimal()
+      is Long -> rightItem.toFhirPathDecimal()
+      is FhirPathDecimal -> rightItem
       else -> error("Operand of div must be a number")
     }
-  if (rightBigDecimal == BigDecimal.ZERO) return emptyList()
+  if (rightDecimal.isZero()) return emptyList()
 
-  val (quotient, _) = leftBigDecimal divrem rightBigDecimal
+  val (quotient, _) = leftDecimal.divideAndRemainder(rightDecimal)
   return listOf(quotient.intValue())
 }
 
 /** See [specification](https://hl7.org/fhirpath/N1/#mod). */
 internal fun mod(left: Collection<Any>, right: Collection<Any>): Collection<Any> {
   val leftItem = left.singleOrNull() ?: return emptyList()
-  val leftBigDecimal =
+  val leftDecimal =
     when (leftItem) {
-      is Int -> leftItem.toBigDecimal()
-      is Long -> leftItem.toBigDecimal()
-      is BigDecimal -> leftItem
+      is Int -> leftItem.toFhirPathDecimal()
+      is Long -> leftItem.toFhirPathDecimal()
+      is FhirPathDecimal -> leftItem
       else -> error("Operand of mod must be a number")
     }
   val rightItem = right.singleOrNull() ?: return emptyList()
-  val rightBigDecimal =
+  val rightDecimal =
     when (rightItem) {
-      is Int -> rightItem.toBigDecimal()
-      is Long -> rightItem.toBigDecimal()
-      is BigDecimal -> rightItem
+      is Int -> rightItem.toFhirPathDecimal()
+      is Long -> rightItem.toFhirPathDecimal()
+      is FhirPathDecimal -> rightItem
       else -> error("Operand of mod must be a number")
     }
-  if (rightBigDecimal.isZero()) return emptyList()
+  if (rightDecimal.isZero()) return emptyList()
 
-  val (_, remainder) = leftBigDecimal divrem rightBigDecimal
+  val (_, remainder) = leftDecimal.divideAndRemainder(rightDecimal)
   if (leftItem is Int && rightItem is Int) return listOf(remainder.intValue())
   if (
     (leftItem is Long && rightItem is Long) ||
