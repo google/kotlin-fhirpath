@@ -16,23 +16,22 @@
 
 package dev.ohs.fhir.fhirpath.types
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.fhirpath.div
 import dev.ohs.fhir.fhirpath.formatUcumUnit
 import dev.ohs.fhir.fhirpath.parseUcumUnit
 import dev.ohs.fhir.fhirpath.times
 import dev.ohs.fhir.fhirpath.toEqualCanonicalized
 
-data class FhirPathQuantity(val value: BigDecimal? = null, val unit: String? = null)
+data class FhirPathQuantity(val value: FhirPathDecimal? = null, val unit: String? = null)
 
 operator fun FhirPathQuantity.plus(other: FhirPathQuantity): FhirPathQuantity? =
-  addOrSubtract(other, BigDecimal::plus)
+  addOrSubtract(other, FhirPathDecimal::plus)
 
 operator fun FhirPathQuantity.minus(other: FhirPathQuantity): FhirPathQuantity? =
-  addOrSubtract(other, BigDecimal::minus)
+  addOrSubtract(other, FhirPathDecimal::minus)
 
 /** Multiplies a quantity by a numeric multiplier. */
-operator fun FhirPathQuantity.times(multiplier: BigDecimal): FhirPathQuantity {
+operator fun FhirPathQuantity.times(multiplier: FhirPathDecimal): FhirPathQuantity {
   return FhirPathQuantity(value = this.value!! * multiplier, unit = this.unit)
 }
 
@@ -42,13 +41,13 @@ operator fun FhirPathQuantity.times(other: FhirPathQuantity): FhirPathQuantity? 
 
 /** Divides two quantities, combining their UCUM units. Returns `null` if the divisor is zero. */
 operator fun FhirPathQuantity.div(other: FhirPathQuantity): FhirPathQuantity? {
-  if (other.value?.compareTo(BigDecimal.ZERO) == 0) return null
+  if (other.value?.isZero() == true) return null
   return multiplyOrDivide(other, { left, right -> left / right }, { left, right -> left / right })
 }
 
 private fun FhirPathQuantity.addOrSubtract(
   other: FhirPathQuantity,
-  valueOp: (BigDecimal, BigDecimal) -> BigDecimal,
+  valueOp: (FhirPathDecimal, FhirPathDecimal) -> FhirPathDecimal,
 ): FhirPathQuantity? {
   val leftValue = this.value ?: return null
   val rightValue = other.value ?: return null
@@ -63,8 +62,8 @@ private fun FhirPathQuantity.addOrSubtract(
   if (leftCanonicalUnit != rightCanonicalUnit) return null
 
   val unitScaleFactor =
-    FhirPathQuantity(value = BigDecimal.ONE, unit = this.unit).toEqualCanonicalized().value!!
-  if (unitScaleFactor.compareTo(BigDecimal.ZERO) == 0) return null
+    FhirPathQuantity(value = FhirPathDecimal.ONE, unit = this.unit).toEqualCanonicalized().value!!
+  if (unitScaleFactor.isZero()) return null
 
   val resultValue = valueOp(leftCanonical.value!!, rightCanonical.value!!) / unitScaleFactor
   return FhirPathQuantity(value = resultValue, unit = this.unit)
@@ -72,7 +71,7 @@ private fun FhirPathQuantity.addOrSubtract(
 
 private fun FhirPathQuantity.multiplyOrDivide(
   other: FhirPathQuantity,
-  valueOp: (BigDecimal, BigDecimal) -> BigDecimal,
+  valueOp: (FhirPathDecimal, FhirPathDecimal) -> FhirPathDecimal,
   unitOp: (Map<String, Int>, Map<String, Int>) -> Map<String, Int>,
 ): FhirPathQuantity? {
   this.value ?: return null

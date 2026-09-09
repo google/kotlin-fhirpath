@@ -31,6 +31,12 @@ fun FhirPathDateTime.Companion.fromFhirR5DateTime(
   return fromString(fhirDateTime.toString())
 }
 
+fun FhirPathDecimal.Companion.fromFhirR5Decimal(
+  fhirDecimal: dev.ohs.fhir.model.r5.FhirDecimal
+): FhirPathDecimal {
+  return fromString(fhirDecimal.toString())
+}
+
 private val fhirR5TypeToFhirPathType =
   mapOf<FhirType, Pair<FhirPathSystemType, (element: Any) -> Any?>>(
     // FHIR R5 primitive types
@@ -66,7 +72,10 @@ private val fhirR5TypeToFhirPathType =
     FhirR5PrimitiveType.PositiveInt to
       (FhirPathSystemType.INTEGER to { it -> (it as dev.ohs.fhir.model.r5.PositiveInt).value }),
     FhirR5PrimitiveType.Decimal to
-      (FhirPathSystemType.DECIMAL to { it -> (it as dev.ohs.fhir.model.r5.Decimal).value }),
+      (FhirPathSystemType.DECIMAL to
+        { it ->
+          (it as dev.ohs.fhir.model.r5.Decimal).value?.let { FhirPathDecimal.fromFhirR5Decimal(it) }
+        }),
     FhirR5PrimitiveType.Date to
       (FhirPathSystemType.DATE to
         { it ->
@@ -90,7 +99,8 @@ private val fhirR5TypeToFhirPathType =
       (FhirPathSystemType.QUANTITY to
         {
           (it as dev.ohs.fhir.model.r5.Quantity).let {
-            val value = it.value?.value ?: return@let null
+            val value =
+              it.value?.value?.let { FhirPathDecimal.fromFhirR5Decimal(it) } ?: return@let null
             val unit = it.code?.value ?: it.unit?.value ?: return@let null
             FhirPathQuantity(value = value, unit = unit)
           }

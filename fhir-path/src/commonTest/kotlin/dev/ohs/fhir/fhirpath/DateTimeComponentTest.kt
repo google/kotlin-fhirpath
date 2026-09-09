@@ -18,6 +18,7 @@ package dev.ohs.fhir.fhirpath
 
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import io.kotest.core.spec.style.FunSpec
 import kotlin.test.assertEquals
@@ -264,28 +265,28 @@ class DateTimeComponentTest :
 
     test("timezoneOffsetOf() extracts decimal hours for positive offset") {
       assertEquals(
-        listOf(5.5.toBigDecimal()),
+        listOf(FhirPathDecimal.fromString("5.5")),
         engine.evaluateExpression("@2023-05-15T12:00:00+05:30.timezoneOffsetOf()", null),
       )
     }
 
     test("timezoneOffsetOf() extracts decimal hours for negative offset") {
       assertEquals(
-        listOf((-4).toBigDecimal()),
+        listOf(FhirPathDecimal.fromInt(-4)),
         engine.evaluateExpression("@2023-05-15T12:00:00-04:00.timezoneOffsetOf()", null),
       )
     }
 
     test("timezoneOffsetOf() returns zero for UTC Z offset") {
       assertEquals(
-        listOf(0.toBigDecimal()),
+        listOf(FhirPathDecimal.fromInt(0)),
         engine.evaluateExpression("@2023-05-15T12:00:00Z.timezoneOffsetOf()", null),
       )
     }
 
     test("timezoneOffsetOf() extracts 45-minute decimal offset") {
       assertEquals(
-        listOf(8.75.toBigDecimal()),
+        listOf(FhirPathDecimal.fromString("8.75")),
         engine.evaluateExpression("@2012-01-01T12:30:00.000+08:45.timezoneOffsetOf()", null),
       )
     }

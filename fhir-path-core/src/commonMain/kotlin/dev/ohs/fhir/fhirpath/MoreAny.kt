@@ -16,14 +16,14 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.functions.DEFAULT_UNIT
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathSystemType
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
+import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 
 /**
  * Maps a pair of FHIRPath types where the former can be implicitly converted to the latter to a
@@ -37,18 +37,22 @@ internal val fhirPathTypeToFhirPathType =
     FhirPathSystemType.INTEGER to
       FhirPathSystemType.DECIMAL to
       { it ->
-        (it as Int).toBigDecimal()
+        (it as Int).toFhirPathDecimal()
       },
     FhirPathSystemType.INTEGER to
       FhirPathSystemType.QUANTITY to
       { it ->
-        FhirPathQuantity(value = it.toString().toBigDecimal(), unit = DEFAULT_UNIT)
+        FhirPathQuantity(value = (it as Int).toFhirPathDecimal(), unit = DEFAULT_UNIT)
       },
-    FhirPathSystemType.LONG to FhirPathSystemType.DECIMAL to { it -> (it as Long).toBigDecimal() },
+    FhirPathSystemType.LONG to
+      FhirPathSystemType.DECIMAL to
+      { it ->
+        (it as Long).toFhirPathDecimal()
+      },
     FhirPathSystemType.DECIMAL to
       FhirPathSystemType.QUANTITY to
       { it ->
-        FhirPathQuantity(value = it as BigDecimal, unit = DEFAULT_UNIT)
+        FhirPathQuantity(value = it as FhirPathDecimal, unit = DEFAULT_UNIT)
       },
     FhirPathSystemType.DATE to
       FhirPathSystemType.DATETIME to

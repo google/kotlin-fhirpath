@@ -16,12 +16,12 @@
 
 package dev.ohs.fhir.fhirpath.functions
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.operators.DECIMAL_MODE
 import dev.ohs.fhir.fhirpath.toFhirPathType
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
+import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.ln
@@ -35,7 +35,7 @@ internal fun Collection<Any>.abs(fhirPathTypeResolver: FhirPathTypeResolver): Co
   return when (value) {
     is Int -> listOf(abs(value))
     is Long -> listOf(abs(value))
-    is BigDecimal -> listOf(value.abs())
+    is FhirPathDecimal -> listOf(value.abs())
     is FhirPathQuantity -> listOf(value.abs())
     else -> error("abs() can only be applied to numbers")
   }
@@ -48,7 +48,7 @@ internal fun Collection<Any>.ceiling(fhirPathTypeResolver: FhirPathTypeResolver)
   return when (value) {
     is Int,
     is Long -> listOf(value)
-    is BigDecimal ->
+    is FhirPathDecimal ->
       listOf(value.ceil().intValue()) // TODO: handle the case where the value needs to be a Long
     else -> error("ceiling() can only be applied to numbers")
   }
@@ -59,9 +59,9 @@ internal fun Collection<Any>.exp(fhirPathTypeResolver: FhirPathTypeResolver): Co
   check(size <= 1) { "exp() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
-    is Int -> listOf(exp(value.toDouble()).toBigDecimal())
-    is Long -> listOf(exp(value.toDouble()).toBigDecimal())
-    is BigDecimal -> listOf(exp(value.doubleValue()).toBigDecimal())
+    is Int -> listOf(exp(value.toDouble()).toFhirPathDecimal())
+    is Long -> listOf(exp(value.toDouble()).toFhirPathDecimal())
+    is FhirPathDecimal -> listOf(exp(value.doubleValue()).toFhirPathDecimal())
     else -> error("exp() can only be applied to numbers")
   }
 }
@@ -73,7 +73,7 @@ internal fun Collection<Any>.floor(fhirPathTypeResolver: FhirPathTypeResolver): 
   return when (value) {
     is Int,
     is Long -> listOf(value)
-    is BigDecimal ->
+    is FhirPathDecimal ->
       listOf(value.floor().intValue()) // TODO: handle the case where the value needs to be a Long
     else -> error("floor() can only be applied to numbers")
   }
@@ -84,9 +84,9 @@ internal fun Collection<Any>.ln(fhirPathTypeResolver: FhirPathTypeResolver): Col
   check(size <= 1) { "ln() cannot be called on a collection with more than 1 item" }
   val value = this.singleOrNull()?.toFhirPathType(fhirPathTypeResolver) ?: return emptyList()
   return when (value) {
-    is Int -> listOf(ln(value.toDouble()).toBigDecimal())
-    is Long -> listOf(ln(value.toDouble()).toBigDecimal())
-    is BigDecimal -> listOf(ln(value.doubleValue()).toBigDecimal())
+    is Int -> listOf(ln(value.toDouble()).toFhirPathDecimal())
+    is Long -> listOf(ln(value.toDouble()).toFhirPathDecimal())
+    is FhirPathDecimal -> listOf(ln(value.doubleValue()).toFhirPathDecimal())
     else -> error("ln() can only be applied to numbers")
   }
 }
@@ -103,7 +103,7 @@ internal fun Collection<Any>.log(
     ) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
-      is BigDecimal -> value.doubleValue()
+      is FhirPathDecimal -> value.doubleValue()
       else -> error("log() can only be applied to numbers")
     }
   val baseDouble =
@@ -112,10 +112,10 @@ internal fun Collection<Any>.log(
     ) {
       is Int -> param.toDouble()
       is Long -> param.toDouble()
-      is BigDecimal -> param.doubleValue()
+      is FhirPathDecimal -> param.doubleValue()
       else -> error("log() can only be applied to numbers")
     }
-  return listOf((ln(valueDouble) / ln(baseDouble)).toBigDecimal())
+  return listOf((ln(valueDouble) / ln(baseDouble)).toFhirPathDecimal())
 }
 
 /**
@@ -132,14 +132,14 @@ internal fun Collection<Any>.power(
     when (value) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
-      is BigDecimal -> value.doubleValue()
+      is FhirPathDecimal -> value.doubleValue()
       else -> error("power() can only be applied to numbers")
     }
   val exponentDouble =
     when (exponent) {
       is Int -> exponent.toDouble()
       is Long -> exponent.toDouble()
-      is BigDecimal -> exponent.doubleValue()
+      is FhirPathDecimal -> exponent.doubleValue()
       else -> error("power() can only be applied to numbers")
     }
   val result = valueDouble.pow(exponentDouble)
@@ -154,7 +154,7 @@ internal fun Collection<Any>.power(
     // N.B. the specification does not specify what to do if the result is out of range for Integer.
     return listOf(result.toLong())
   }
-  return listOf(result.toBigDecimal())
+  return listOf(result.toFhirPathDecimal())
 }
 
 /**
@@ -171,12 +171,9 @@ internal fun Collection<Any>.round(
     params.singleOrNull()?.toFhirPathType(fhirPathTypeResolver)?.let { it as Int } ?: 0
   check(precision >= 0) { "round() precision must be non-negative" }
   return when (value) {
-    is Int -> listOf(value.toBigDecimal())
-    is Long -> listOf(value.toBigDecimal())
-    is BigDecimal ->
-      listOf(
-        value.roundToDigitPositionAfterDecimalPoint(precision.toLong(), DECIMAL_MODE.roundingMode)
-      )
+    is Int -> listOf(value.toFhirPathDecimal())
+    is Long -> listOf(value.toFhirPathDecimal())
+    is FhirPathDecimal -> listOf(value.round(precision.toLong(), DECIMAL_MODE.roundingMode))
     else -> error("round() can only be applied to numbers")
   }
 }
@@ -190,12 +187,12 @@ internal fun Collection<Any>.sqrt(fhirPathTypeResolver: FhirPathTypeResolver): C
     ) {
       is Int -> value.toDouble()
       is Long -> value.toDouble()
-      is BigDecimal -> value.doubleValue()
+      is FhirPathDecimal -> value.doubleValue()
       else -> error("power() can only be applied to numbers")
     }
   val sqrt = sqrt(valueDouble)
   if (sqrt.isNaN()) return emptyList()
-  return listOf(sqrt.toBigDecimal())
+  return listOf(sqrt.toFhirPathDecimal())
 }
 
 /** See [specification](https://hl7.org/fhirpath/STU3/en/#truncate--integer--quantity). */
@@ -205,7 +202,7 @@ internal fun Collection<Any>.truncate(fhirPathTypeResolver: FhirPathTypeResolver
   return when (value) {
     is Int,
     is Long -> listOf(value)
-    is BigDecimal -> listOf(value.toBigInteger().intValue())
+    is FhirPathDecimal -> listOf(value.intValue(exactRequired = false))
     else -> error("truncate() can only be applied to numbers")
   }
 }

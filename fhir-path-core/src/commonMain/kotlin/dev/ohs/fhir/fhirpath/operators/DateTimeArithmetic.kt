@@ -351,7 +351,8 @@ private class DurationInfo(
 
   companion object {
     fun from(duration: FhirPathQuantity, allowedUnits: Set<String>): DurationInfo {
-      val rawValue = checkNotNull(duration.value) { "Duration quantity must have a value" }
+      val rawValue =
+        checkNotNull(duration.value) { "Duration quantity must have a value" }.asBigDecimal()
       val unquotedUnit = duration.unit?.removeSurrounding("'")?.removeSurrounding("\"") ?: ""
       check(unquotedUnit in allowedUnits) {
         "Unsupported or invalid unit '${duration.unit}' for date/time arithmetic"

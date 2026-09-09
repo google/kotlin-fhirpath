@@ -16,8 +16,8 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import io.kotest.core.spec.style.FunSpec
 import kotlin.test.assertEquals
@@ -45,19 +45,22 @@ class AggregateTest :
     }
 
     test("sum adds decimals") {
-      assertEquals(listOf(3.5.toBigDecimal()), engine.evaluateExpression("(1.0 | 2.5).sum()", null))
+      assertEquals(
+        listOf(FhirPathDecimal.fromString("3.5")),
+        engine.evaluateExpression("(1.0 | 2.5).sum()", null),
+      )
     }
 
     test("sum adds quantities") {
       assertEquals(
-        listOf(FhirPathQuantity(15.toBigDecimal(), "'m'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromInt(15), "'m'")),
         engine.evaluateExpression("(10 'm' | 5 'm').sum()", null),
       )
     }
 
     test("sum adds quantities with compatible units") {
       assertEquals(
-        listOf(FhirPathQuantity(1.5.toBigDecimal(), "'kg'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromString("1.5"), "'kg'")),
         engine.evaluateExpression("(1 'kg' | 500 'g').sum()", null),
       )
     }
@@ -95,14 +98,14 @@ class AggregateTest :
 
     test("min finds smallest quantity") {
       assertEquals(
-        listOf(FhirPathQuantity(5.toBigDecimal(), "'m'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromInt(5), "'m'")),
         engine.evaluateExpression("(10 'm' | 5 'm').min()", null),
       )
     }
 
     test("min finds smallest quantity with compatible units") {
       assertEquals(
-        listOf(FhirPathQuantity(500.toBigDecimal(), "'g'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromInt(500), "'g'")),
         engine.evaluateExpression("(1 'kg' | 500 'g').min()", null),
       )
     }
@@ -140,14 +143,14 @@ class AggregateTest :
 
     test("max finds largest quantity") {
       assertEquals(
-        listOf(FhirPathQuantity(10.toBigDecimal(), "'m'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromInt(10), "'m'")),
         engine.evaluateExpression("(10 'm' | 5 'm').max()", null),
       )
     }
 
     test("max finds largest quantity with compatible units") {
       assertEquals(
-        listOf(FhirPathQuantity(1.toBigDecimal(), "'kg'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromInt(1), "'kg'")),
         engine.evaluateExpression("(1 'kg' | 500 'g').max()", null),
       )
     }
@@ -169,30 +172,36 @@ class AggregateTest :
     }
 
     test("avg averages integers to decimal") {
-      assertEquals(listOf(2.toBigDecimal()), engine.evaluateExpression("(1 | 2 | 3).avg()", null))
+      assertEquals(
+        listOf(FhirPathDecimal.fromInt(2)),
+        engine.evaluateExpression("(1 | 2 | 3).avg()", null),
+      )
     }
 
     test("avg averages decimals") {
       assertEquals(
-        listOf(1.75.toBigDecimal()),
+        listOf(FhirPathDecimal.fromString("1.75")),
         engine.evaluateExpression("(1.0 | 2.5).avg()", null),
       )
     }
 
     test("avg averages mixed integer and decimal") {
-      assertEquals(listOf(1.75.toBigDecimal()), engine.evaluateExpression("(1 | 2.5).avg()", null))
+      assertEquals(
+        listOf(FhirPathDecimal.fromString("1.75")),
+        engine.evaluateExpression("(1 | 2.5).avg()", null),
+      )
     }
 
     test("avg averages quantities") {
       assertEquals(
-        listOf(FhirPathQuantity(15.toBigDecimal(), "'m'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromInt(15), "'m'")),
         engine.evaluateExpression("(10 'm' | 20 'm').avg()", null),
       )
     }
 
     test("avg averages quantities with compatible units") {
       assertEquals(
-        listOf(FhirPathQuantity(0.75.toBigDecimal(), "'kg'")),
+        listOf(FhirPathQuantity(FhirPathDecimal.fromString("0.75"), "'kg'")),
         engine.evaluateExpression("(1 'kg' | 500 'g').avg()", null),
       )
     }

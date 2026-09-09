@@ -16,17 +16,16 @@
 
 package dev.ohs.fhir.fhirpath.functions
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
-import dev.ohs.fhir.fhirpath.operators.DECIMAL_MODE
 import dev.ohs.fhir.fhirpath.operators.compare
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.fhirpath.types.FhirPathTypeResolver
 import dev.ohs.fhir.fhirpath.types.plus
+import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 import kotlin.reflect.KClass
 
 /** See [specification](https://hl7.org/fhirpath/STU3/en/#sum--integer--long--decimal--quantity). */
@@ -38,7 +37,8 @@ internal fun Collection<Any>.sumFun(fhirPathTypeResolver: FhirPathTypeResolver):
     when (val type = converted.singleType("sum")) {
       Int::class -> (converted as Collection<Int>).sum()
       Long::class -> (converted as Collection<Long>).sum()
-      BigDecimal::class -> (converted as Collection<BigDecimal>).reduce(BigDecimal::plus)
+      FhirPathDecimal::class ->
+        (converted as Collection<FhirPathDecimal>).reduce(FhirPathDecimal::plus)
       FhirPathQuantity::class ->
         (converted as Collection<FhirPathQuantity>).reduce { a, b ->
           (a + b) ?: error("Cannot sum quantities with incompatible units: $a and $b")
@@ -68,15 +68,15 @@ internal fun Collection<Any>.avgFun(fhirPathTypeResolver: FhirPathTypeResolver):
   val converted = map { item ->
     when (val type = item.toFhirPathType(fhirPathTypeResolver)) {
       is Int,
-      is Long -> (type as Number).toLong().toBigDecimal()
+      is Long -> (type as Number).toLong().toFhirPathDecimal()
       else -> type
     }
   }
-  val count = size.toBigDecimal()
+  val count = size.toFhirPathDecimal()
   return listOf(
     when (val sum = converted.sumFun(fhirPathTypeResolver).single()) {
-      is BigDecimal -> sum.divide(count, DECIMAL_MODE)
-      is FhirPathQuantity -> sum.copy(value = sum.value?.divide(count, DECIMAL_MODE))
+      is FhirPathDecimal -> sum / count
+      is FhirPathQuantity -> sum.copy(value = sum.value?.div(count))
       else -> error("Unexpected sum type in avg(): $sum")
     }
   )
@@ -90,7 +90,7 @@ private val comparableTypes =
   setOf(
     Int::class,
     Long::class,
-    BigDecimal::class,
+    FhirPathDecimal::class,
     FhirPathQuantity::class,
     FhirPathDate::class,
     FhirPathDateTime::class,

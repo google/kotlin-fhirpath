@@ -16,9 +16,9 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
 import dev.ohs.fhir.fhirpath.types.FhirPathDateTime
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import dev.ohs.fhir.fhirpath.types.FhirPathTime
 import dev.ohs.fhir.model.r4.Resource
@@ -149,7 +149,7 @@ private fun assertEquals(expected: Output, actual: Any) {
     "string" -> assertEquals(expected.value, actual.toStringValue())
     "boolean" -> assertEquals(expected.value, if (actual is Boolean) actual.toString() else "true")
     "integer" -> assertEquals(expected.value, (actual as Int).toString())
-    "decimal" -> assertEquals(expected.value.toBigDecimalPreservingScale(), actual as BigDecimal)
+    "decimal" -> assertEquals(FhirPathDecimal.fromString(expected.value), actual as FhirPathDecimal)
     "Quantity" -> assertEquals(expected.value, actual.toQuantityString())
     else -> throw AssertionError("Unknown type: $type")
   }
@@ -159,7 +159,7 @@ private fun inferType(actual: Any): String =
   when (actual) {
     is Boolean -> "boolean"
     is Int -> "integer"
-    is BigDecimal -> "decimal"
+    is FhirPathDecimal -> "decimal"
     is FhirPathDate -> "date"
     is FhirPathDateTime -> "dateTime"
     is FhirPathTime -> "time"
@@ -182,8 +182,7 @@ private fun Any.toQuantityString(): String =
     is dev.ohs.fhir.model.r4.Quantity -> "${value!!.value} ${code!!.value}"
     is FhirPathQuantity -> {
       val cleanUnit = unit?.trim('\'')
-      val formattedVal = value?.toPlainStringPreservingDecimalPlaces()
-      "$formattedVal '$cleanUnit'"
+      "$value '$cleanUnit'"
     }
     else -> throw AssertionError("Cannot extract Quantity value from: $this")
   }

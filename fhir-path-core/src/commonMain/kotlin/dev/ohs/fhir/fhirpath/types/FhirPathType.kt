@@ -16,8 +16,6 @@
 
 package dev.ohs.fhir.fhirpath.types
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-
 /**
  * Engine-internal representation of a type in the FHIRPath type system.
  *
@@ -146,7 +144,7 @@ enum class FhirPathSystemType(override val typeName: String) : FhirPathType {
         is String -> STRING
         is Int -> INTEGER
         is Long -> LONG
-        is BigDecimal -> DECIMAL
+        is FhirPathDecimal -> DECIMAL
         is FhirPathDate -> DATE
         is FhirPathDateTime -> DATETIME
         is FhirPathTime -> TIME

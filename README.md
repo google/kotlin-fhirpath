@@ -159,7 +159,7 @@ The following table lists the chosen internal types for the FHIRPath primitive t
 | String                                                                      | kotlin.String                                                                 |
 | Integer                                                                     | kotlin.Int                                                                    |
 | Long                                                                        | kotlin.Long                                                                   |
-| Decimal                                                                     | com.ionspin.kotlin.bignum.decimal.BigDecimal                                  |
+| Decimal                                                                     | FhirPathDecimal                                                               |
 | Date                                                                        | FhirPathDate                                                                  |
 | DateTime                                                                    | FhirPathDateTime                                                              |
 | Time                                                                        | FhirPathTime                                                                  |

@@ -16,8 +16,8 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
+import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 import dev.ohs.fhir.fhirpath.ucum.BaseUnit
 import dev.ohs.fhir.fhirpath.ucum.Prefix
 import dev.ohs.fhir.fhirpath.ucum.Unit
@@ -144,7 +144,7 @@ private fun FhirPathQuantity.stripUcumPrefix(): FhirPathQuantity {
     val codeWithoutPrefix = code.removePrefix(prefix.code)
     if (codeWithoutPrefix in (BaseUnit.entries.map { it.code } + Unit.entries.map { it.code })) {
       return FhirPathQuantity(
-        value = value!! * 10.0.pow(prefix.power).toBigDecimal(),
+        value = value!! * 10.0.pow(prefix.power).toFhirPathDecimal(),
         unit = "'$codeWithoutPrefix'",
       )
     }
@@ -173,7 +173,7 @@ private fun FhirPathQuantity.toCanonicalizedUcumUnit(): FhirPathQuantity {
 
   // Process derived units
   Unit.fromString(unitCode)?.let {
-    return FhirPathQuantity(value = value!! * it.scalar.toBigDecimal(), unit = "'${it.base}'")
+    return FhirPathQuantity(value = value!! * it.scalar.toFhirPathDecimal(), unit = "'${it.base}'")
   }
 
   return this

@@ -16,8 +16,8 @@
 
 package dev.ohs.fhir.fhirpath
 
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
+import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,13 +35,13 @@ class ConversionTest {
   @Test
   fun `toQuantity with unit conversion`() {
     val result = fhirPathEngine.evaluateExpression("'5 \\'kg\\''.toQuantity('g')", null)
-    assertEquals(listOf(FhirPathQuantity(5000.toBigDecimal(), "'g'")), result.toList())
+    assertEquals(listOf(FhirPathQuantity(FhirPathDecimal.fromInt(5000), "'g'")), result.toList())
   }
 
   @Test
   fun `toQuantity with calendar duration unit conversion`() {
     val result = fhirPathEngine.evaluateExpression("'1 hour'.toQuantity('minute')", null)
-    assertEquals(listOf(FhirPathQuantity(60.toBigDecimal(), "minute")), result.toList())
+    assertEquals(listOf(FhirPathQuantity(FhirPathDecimal.fromInt(60), "minute")), result.toList())
   }
 
   @Test
