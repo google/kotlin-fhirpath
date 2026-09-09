@@ -41,9 +41,13 @@ feature-by-feature implementation status.
 Our core expression evaluator (`fhir-path-core`) is model-agnostic and evaluates expressions
 against FHIR R4, R4B, and R5 resources. Support for future FHIR versions will be added.
 
-For using FHIRPath with FHIR resources, including accessing choice elements, referencing FHIR types,
-and FHIR-specific variables and functions, we implement the
-[FHIRPath](https://hl7.org/fhir/R5/fhirpath.html) section in FHIR R5.
+Each FHIR version ([R4](https://hl7.org/fhir/R4/fhirpath.html),
+[R4B](https://hl7.org/fhir/R4B/fhirpath.html), [R5](https://hl7.org/fhir/R5/fhirpath.html))
+specifies how FHIRPath expressions work with its FHIR types, including accessing choice elements
+and referencing FHIR types, and defines FHIR-specific variables, functions and operators. To reduce
+maintenance cost, this implementation follows the behavior in FHIR R5, while still supporting FHIR
+resources from older FHIR versions. Whenever the behavior differs between versions, it is
+documented.
 
 See [FHIRPath in FHIR specification conformance](docs/conformance.md#fhirpath-in-fhir-specification)
 for domain-specific implementation details.
@@ -184,6 +188,19 @@ To balance these two requirements, such conversions are performed last-minute on
 that trigger conversion include equality (`=`), comparison (`<`, `<=`, `>`, `>=`), membership (`in`,
 `contains`), and set functions (`union`, `distinct`, `intersect`, `exclude`, `subsetOf`,
 `supersetOf`).
+
+### Profile validation
+
+The `conformsTo()` function supports the base FHIR profiles
+(`http://hl7.org/fhir/StructureDefinition/<Type>`): the input element's type is compared to the
+type named by the structure. Other profiles, such as those defined in implementation guides (e.g.
+the US Core Patient profile), would require profile validation, which is not implemented. Passing
+such a profile URL yields an empty result[^2].
+
+[^2]: R4 and R4B require an error for an unresolvable structure
+(https://hl7.org/fhir/R4/fhirpath.html#functions), revised to an empty result in R5
+(https://hl7.org/fhir/R5/fhirpath.html#functions). Therefore `testConformsTo3` is skipped in the
+[test conformance](docs/conformance.md#test-conformance) suite.
 
 ### Timezone offset in date time values
 
