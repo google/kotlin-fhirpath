@@ -29,9 +29,17 @@ class FhirPathEngine(
   private val fhirPathTypeResolver: FhirPathTypeResolver,
   val fhirModelNavigator: FhirModelNavigator,
   val strictMode: Boolean = false,
+  private val cacheParsedExpressions: Boolean = true,
 ) {
   var traces: Map<String, List<TraceEntry>> = emptyMap()
     private set
+
+  private val parsedExpressionCache =
+    object : LinkedHashMap<String, fhirpathParser.ExpressionContext>(64, 0.75f, true) {
+      override fun removeEldestEntry(
+        eldest: MutableMap.MutableEntry<String, fhirpathParser.ExpressionContext>
+      ) = size > MAX_CACHED_PARSED_EXPRESSIONS
+    }
 
   /**
    * Evaluates a FHIRPath expression against a single FHIR resource.
@@ -46,23 +54,7 @@ class FhirPathEngine(
     base: Any?,
     variables: Map<String, Any?> = emptyMap(),
   ): Collection<Any> {
-    val lexer = fhirpathLexer(CharStreams.fromString(expression))
-    val tokenStream = CommonTokenStream(lexer)
-    val parser =
-      fhirpathParser(tokenStream).apply {
-        // Make sure the parser fails for invalid expressions instead of trying to recover
-        errorHandler = BailErrorStrategy()
-      }
-
-    val parsedExpression = parser.expression()
-    // ANTLR attempts to parse the entire expression but does not throw an error when it cannot. In
-    // such cases, explicitly check that the entire expression has been consumed to ensure that the
-    // expression is valid.
-    if (tokenStream.LA(1) != Token.EOF) {
-      error(
-        "Expression contains extraneous input that could not be parsed: '${tokenStream[parser.currentToken!!.tokenIndex + 1].text}'"
-      )
-    }
+    val parsedExpression = parseExpression(expression)
 
     // Create a new evaluator per invocation for thread safety.
     val evaluator =
@@ -86,5 +78,43 @@ class FhirPathEngine(
     return result
   }
 
-  companion object
+  private fun parseExpression(expression: String): fhirpathParser.ExpressionContext {
+    if (cacheParsedExpressions) {
+      synchronized(parsedExpressionCache) {
+        parsedExpressionCache[expression]?.let {
+          return it
+        }
+      }
+    }
+    val parsed = parseUncached(expression)
+    if (cacheParsedExpressions) {
+      synchronized(parsedExpressionCache) { parsedExpressionCache[expression] = parsed }
+    }
+    return parsed
+  }
+
+  private fun parseUncached(expression: String): fhirpathParser.ExpressionContext {
+    val lexer = fhirpathLexer(CharStreams.fromString(expression))
+    val tokenStream = CommonTokenStream(lexer)
+    val parser =
+      fhirpathParser(tokenStream).apply {
+        // Make sure the parser fails for invalid expressions instead of trying to recover
+        errorHandler = BailErrorStrategy()
+      }
+
+    val parsedExpression = parser.expression()
+    // ANTLR attempts to parse the entire expression but does not throw an error when it cannot. In
+    // such cases, explicitly check that the entire expression has been consumed to ensure that the
+    // expression is valid.
+    if (tokenStream.LA(1) != Token.EOF) {
+      error(
+        "Expression contains extraneous input that could not be parsed: '${tokenStream[parser.currentToken!!.tokenIndex + 1].text}'"
+      )
+    }
+    return parsedExpression
+  }
+
+  companion object {
+    private const val MAX_CACHED_PARSED_EXPRESSIONS = 512
+  }
 }

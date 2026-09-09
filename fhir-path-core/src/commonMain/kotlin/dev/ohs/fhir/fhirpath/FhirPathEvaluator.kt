@@ -348,7 +348,11 @@ internal class FhirPathEvaluator(
         listOf("http://hl7.org/fhir/StructureDefinition/$extensionId")
       }
       variables.containsKey(name) -> {
-        variables[name]?.let { listOf(it) } ?: emptyList()
+        when (val value = variables[name]) {
+          null -> emptyList()
+          is Collection<*> -> value.filterNotNull()
+          else -> listOf(value)
+        }
       }
       else -> error("Unknown variable: %$name")
     }

@@ -93,4 +93,15 @@ class EnvironmentVariablesTest {
       fhirPathEngine.evaluateExpression(expression = "%unknownVar", base = null)
     }
   }
+
+  @Test
+  fun `collection environment variable is the collection itself`() {
+    val result =
+      fhirPathEngine.evaluateExpression(
+        expression = "%items",
+        base = null,
+        variables = mapOf("items" to listOf("a", "b")),
+      )
+    assertEquals(listOf("a", "b"), result.toList())
+  }
 }
