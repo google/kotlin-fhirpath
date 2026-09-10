@@ -50,8 +50,9 @@ data class UnitComponent(val scalarAsPowerOfTen: Int, val code: String, val powe
  * the scalar value 6.67430e-11 and the unit string `m3.kg-1.s-2`.
  *
  * Its canonical representation will have the scalar value 6.67430e-14 and the base unit string
- * `g-1.m3.s-2`. Notice that the unit string is canonicalized using the base unit (g in this case)
- * and ordered and the scalar value is adapted accordingly.
+ * `g-1.m3.s-2`. An exponent of 1 is omitted, matching UCUM's own tables (`g`, `m.s-2`). Notice that
+ * the unit string is canonicalized using the base unit (g in this case) and ordered and the scalar
+ * value is adapted accordingly.
  *
  * This canonicalization makes quantity comparison possible. Two quantities with units that have the
  * same base unit string can be compared after applying the scalars to the quantity values
@@ -64,7 +65,9 @@ internal data class CanonicalUnitRepresentation(
   fun getBaseUnitString() =
     baseUnits.entries
       .sortedBy { it.key.Code } // Sort the units for deterministic output
-      .joinToString(".") { (baseUnit, power) -> "${baseUnit.Code}$power" }
+      .joinToString(".") { (baseUnit, power) ->
+        if (power == 1) baseUnit.Code else "${baseUnit.Code}$power"
+      }
 }
 
 internal class UcumUnitCanonicalizer(root: Root) {
