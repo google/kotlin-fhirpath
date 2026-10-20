@@ -31,23 +31,19 @@ For the full conformance analysis, see the [conformance](docs/conformance.md) do
 
 ### FHIRPath specification
 
-The library implements [FHIRPath Specification v3.0.0](https://hl7.org/fhirpath/STU3/en/).
+The core library (`fhir-path-core`) is model-agnostic and implements
+[FHIRPath Specification v3.0.0](https://hl7.org/fhirpath/STU3/en/).
 
 See [FHIRPath specification conformance](docs/conformance.md#fhirpath-specification) for
 feature-by-feature implementation status.
 
 ### FHIRPath in FHIR specification
 
-Our core expression evaluator (`fhir-path-core`) is model-agnostic and evaluates expressions
-against FHIR R4, R4B, and R5 resources. Support for future FHIR versions will be added.
-
-Each FHIR version ([R4](https://hl7.org/fhir/R4/fhirpath.html),
+Besides the FHIRPath specification, each FHIR version ([R4](https://hl7.org/fhir/R4/fhirpath.html),
 [R4B](https://hl7.org/fhir/R4B/fhirpath.html), [R5](https://hl7.org/fhir/R5/fhirpath.html))
-specifies how FHIRPath expressions work with its FHIR types, including accessing choice elements
-and referencing FHIR types, and defines FHIR-specific variables, functions and operators. To reduce
-maintenance cost, this implementation follows the behavior in FHIR R5, while still supporting FHIR
-resources from older FHIR versions. Whenever the behavior differs between versions, it is
-documented.
+also defines additional variables, functions, and operators in FHIRPath. Since later FHIR versions
+primarily expand and refine earlier definitions, this library only implements the definitions
+from the latest FHIR version.
 
 See [FHIRPath in FHIR specification conformance](docs/conformance.md#fhirpath-in-fhir-specification)
 for domain-specific implementation details.

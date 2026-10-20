@@ -39,13 +39,6 @@ private val fhirPathEngine = FhirPathEngine.forR4()
 private val fhirPathEngineStrict = FhirPathEngine.forR4(strictMode = true)
 
 /**
- * A map from the test group name to the reason why the test group is skipped.
- *
- * N.B. This should be kept in sync with the conformance table in the `README.md` file.
- */
-val skippedTestGroupToReasonMap = emptyMap<String, String>()
-
-/**
  * A map from the test case name to the reason why the test case is skipped.
  *
  * N.B. This should be kept in sync with the conformance table in the `README.md` file.
@@ -98,11 +91,7 @@ class FhirPathEngineTest :
     val testSuite = XML.decodeFromString<Tests>(xmlContent)
 
     testSuite.groups.forEach { group ->
-      context(group.name).config(
-        enabledOrReasonIf = {
-          skippedTestGroupToReasonMap[group.name]?.let { Enabled.disabled(it) } ?: Enabled.enabled
-        }
-      ) {
+      context(group.name).config {
         group.tests.forEach { testCase ->
           test(testCase.name).config(
             enabledOrReasonIf = {
