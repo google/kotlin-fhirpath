@@ -310,58 +310,58 @@ class ConversionTest {
   @Test
   fun `toDecimal on Decimal value`() =
     assertEquals(
-      listOf("123.45".toBigDecimalPreservingScale()),
+      listOf(FhirPathDecimal.fromString("123.45")),
       fhirPathEngine.evaluateExpression("123.45.toDecimal()", null).toList(),
     )
 
   @Test
   fun `toDecimal on Integer value`() =
     assertEquals(
-      listOf(42.toBigDecimal()),
+      listOf(FhirPathDecimal.fromInt(42)),
       fhirPathEngine.evaluateExpression("42.toDecimal()", null).toList(),
     )
 
   @Test
   fun `toDecimal on Long value`() =
     assertEquals(
-      listOf(1234567890123L.toBigDecimal()),
+      listOf(FhirPathDecimal.fromLong(1234567890123L)),
       fhirPathEngine.evaluateExpression("toDecimal()", 1234567890123L).toList(),
     )
 
   @Test
   fun `toDecimal on Boolean true`() =
     assertEquals(
-      listOf(1.toBigDecimal()),
+      listOf(FhirPathDecimal.fromInt(1)),
       fhirPathEngine.evaluateExpression("true.toDecimal()", null).toList(),
     )
 
   @Test
   fun `toDecimal on Boolean false`() =
     assertEquals(
-      listOf(0.toBigDecimal()),
+      listOf(FhirPathDecimal.fromInt(0)),
       fhirPathEngine.evaluateExpression("false.toDecimal()", null).toList(),
     )
 
   @Test
   fun `toDecimal on String value preserving precision`() =
     assertEquals(
-      listOf("12345678901234567890.12345678901234567890".toBigDecimalPreservingScale()),
+      listOf(FhirPathDecimal.fromString("12345678901234567890.12345678901234567890")),
       fhirPathEngine
         .evaluateExpression("'12345678901234567890.12345678901234567890'.toDecimal()", null)
         .toList(),
     )
 
   @Test
-  fun `toDecimal on String value preserving scale with trailing zeros`() =
-    assertEquals(
-      listOf("1.500".toBigDecimalPreservingScale()),
-      fhirPathEngine.evaluateExpression("'1.500'.toDecimal()", null).toList(),
-    )
+  fun `toDecimal on String value preserving scale with trailing zeros`() {
+    val result = fhirPathEngine.evaluateExpression("'1.500'.toDecimal()", null).toList()
+    assertEquals(listOf(FhirPathDecimal.fromString("1.500")), result)
+    assertEquals(3L, (result.single() as FhirPathDecimal).decimalPlaces)
+  }
 
   @Test
   fun `toDecimal on signed String value`() =
     assertEquals(
-      listOf("-123.45".toBigDecimalPreservingScale()),
+      listOf(FhirPathDecimal.fromString("-123.45")),
       fhirPathEngine.evaluateExpression("'-123.45'.toDecimal()", null).toList(),
     )
 
@@ -374,10 +374,7 @@ class ConversionTest {
 
   @Test
   fun `toDecimal on invalid String value with scientific notation`() =
-    assertEquals(
-      emptyList(),
-      fhirPathEngine.evaluateExpression("'1e5'.toDecimal()", null).toList(),
-    )
+    assertEquals(emptyList(), fhirPathEngine.evaluateExpression("'1e5'.toDecimal()", null).toList())
 
   @Test
   fun `toDecimal on invalid String value with multiple decimal points`() =
