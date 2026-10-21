@@ -36,7 +36,7 @@ internal class ConformanceSuiteConfig(
   val resourceDecoder: (String) -> Any,
   val fhirStringValueExtractor: (Any) -> String?,
   val fhirQuantityStringExtractor: (Any) -> String?,
-  val skippedGroups: Map<String, String>,
+  val skippedGroups: Map<String, String> = emptyMap(),
   val skippedCases: Map<String, String>,
 )
 

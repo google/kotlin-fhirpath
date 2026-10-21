@@ -24,13 +24,6 @@ private const val TEST_RESOURCE_DIR = "third_party/fhir-test-cases/r4"
 private val jsonR4 = Json { ignoreUnknownKeys = true }
 
 /**
- * A map from the test group name to the reason why the test group is skipped.
- *
- * N.B. This should be kept in sync with the test conformance table in `docs/conformance.md`.
- */
-val skippedR4TestGroupToReasonMap = mapOf("testConformsTo" to "Unimplemented")
-
-/**
  * A map from the test case name to the reason why the test case is skipped.
  *
  * N.B. This should be kept in sync with the test conformance table in `docs/conformance.md`.
@@ -55,6 +48,8 @@ val skippedR4TestCaseToReasonMap =
       "Test ignores decimal portion of second duration (0.1 's'), contradicting FHIRPath spec section on DateTime arithmetic",
     "testType22" to
       "`is` with an unknown `System` type should evaluate to false, but the type resolver throws `Unknown System type Patient`.",
+    "testConformsTo3" to
+      "Intentional deviation: an unresolvable structure returns empty following R5 (https://hl7.org/fhir/R5/fhirpath.html#functions); R4 requires an error",
     "LowBoundaryDateTimeMillisecond1" to
       "https://chat.fhir.org/#narrow/channel/179266-fhirpath/topic/lowBoundary.20and.20highBoundary.20with.20incomplete.20date.20time/with/611113639",
     "HighBoundaryDateTimeMillisecond1" to
@@ -67,7 +62,7 @@ val skippedR4TestCaseToReasonMap =
     "testContainedId" to "TBD",
   )
 
-class FhirPathEngineR4Test :
+class ConformanceR4Test :
   FunSpec({
     conformanceSuite(
       ConformanceSuiteConfig(
@@ -82,7 +77,6 @@ class FhirPathEngineR4Test :
             "${q.value!!.value} ${q.code!!.value}"
           }
         },
-        skippedGroups = skippedR4TestGroupToReasonMap,
         skippedCases = skippedR4TestCaseToReasonMap,
       )
     )

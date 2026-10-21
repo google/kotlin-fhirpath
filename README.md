@@ -421,15 +421,14 @@ You can also run individual generation tasks locally:
 
 This project distinguishes between two types of tests:
 
-* **Spec-based tests**: Driven by
+* **Spec-based conformance tests**: Driven by
   [ConformanceSuite.kt](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/ConformanceSuite.kt)
-  and run per FHIR version by `FhirPathEngineR4Test`, `FhirPathEngineR4BTest` and
-  `FhirPathEngineR5Test`, these load the official
-  [test cases](https://github.com/FHIR/fhir-test-cases) from
-  [third_party/fhir-test-cases/](third_party/fhir-test-cases/). As they require local file access, they only run on **JVM**
-  and **Android** targets. On other platform targets, file loading is stubbed out. See
-  [Test Conformance](docs/conformance.md#test-conformance) for an analysis of known test suite
-  divergences.
+  and run per FHIR version by `ConformanceR4Test`, `ConformanceR4BTest` and `ConformanceR5Test`,
+  these load the official [test cases](https://github.com/FHIR/fhir-test-cases) from
+  [third_party/fhir-test-cases/](third_party/fhir-test-cases/). As they require local file access,
+  they only run on **JVM** and **Android** targets. On other platform targets, file loading is
+  stubbed out. See [Test Conformance](docs/conformance.md#test-conformance) for an analysis of known
+  test suite divergences.
 * **Unit tests**: Located in
   [fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/](fhir-path/src/commonTest/kotlin/dev/ohs/fhir/fhirpath/),
   these verify specific, platform-agnostic behaviors and run across all targets:
