@@ -164,8 +164,7 @@ class EnvironmentVariablesTest {
 
   @Test
   fun `rootResource returns base resource within nested lambda scopes`() {
-    val patient =
-      Patient(id = "p1", name = listOf(HumanName(family = FhirString(value = "Smith"))))
+    val patient = Patient(id = "p1", name = listOf(HumanName(family = FhirString(value = "Smith"))))
     val result =
       fhirPathEngine.evaluateExpression(
         expression = "Patient.name.where(family = 'Smith').select(%rootResource.id)",
