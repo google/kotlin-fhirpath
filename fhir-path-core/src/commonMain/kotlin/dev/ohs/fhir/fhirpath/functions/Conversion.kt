@@ -17,6 +17,7 @@
 package dev.ohs.fhir.fhirpath.functions
 
 import dev.ohs.fhir.fhirpath.isValidUcumUnit
+import dev.ohs.fhir.fhirpath.toBigDecimalOrNullPreservingScale
 import dev.ohs.fhir.fhirpath.toEqualCanonicalized
 import dev.ohs.fhir.fhirpath.toFhirPathType
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
@@ -109,6 +110,13 @@ internal fun Collection<Any>.toInteger(
 
   return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is Int -> listOf(value)
+    is Long -> {
+      if (value in Int.MIN_VALUE..Int.MAX_VALUE) {
+        listOf(value.toInt())
+      } else {
+        emptyList()
+      }
+    }
     is String -> {
       value.toIntOrNull()?.let { listOf(it) } ?: emptyList()
     }
@@ -258,9 +266,11 @@ internal fun Collection<Any>.toDecimal(
   return when (val value = single().toFhirPathType(fhirPathTypeResolver)) {
     is FhirPathDecimal -> listOf(value)
     is Int -> listOf(value.toFhirPathDecimal())
+    is Long -> listOf(value.toFhirPathDecimal())
     is Boolean -> listOf(if (value) FhirPathDecimal.ONE else FhirPathDecimal.ZERO)
     is String -> {
-      value.toDoubleOrNull()?.let { listOf(it.toFhirPathDecimal()) } ?: emptyList()
+      value.toBigDecimalOrNullPreservingScale()?.let { listOf(FhirPathDecimal.fromBigDecimal(it)) }
+        ?: emptyList()
     }
     else -> emptyList()
   }
@@ -287,18 +297,9 @@ internal fun Collection<Any>.toQuantity(
   if (isEmpty()) return emptyList()
 
   return when (val item = single().toFhirPathType(fhirPathTypeResolver)) {
-    is Int -> {
-      val pair = (item.toFhirPathDecimal() to DEFAULT_UNIT)
-      listOf(FhirPathQuantity(value = pair.first, unit = pair.second))
-    }
-    is Long -> {
-      val pair1 = (item.toFhirPathDecimal() to DEFAULT_UNIT)
-      listOf(FhirPathQuantity(value = pair1.first, unit = pair1.second))
-    }
-    is FhirPathDecimal -> {
-      val pair1 = (item to DEFAULT_UNIT)
-      listOf(FhirPathQuantity(value = pair1.first, unit = pair1.second))
-    }
+    is Int -> listOf(FhirPathQuantity(value = item.toFhirPathDecimal(), unit = DEFAULT_UNIT))
+    is Long -> listOf(FhirPathQuantity(value = item.toFhirPathDecimal(), unit = DEFAULT_UNIT))
+    is FhirPathDecimal -> listOf(FhirPathQuantity(value = item, unit = DEFAULT_UNIT))
     is FhirPathQuantity -> {
       if (targetUnit != null) {
         convertQuantityUnit(item, targetUnit)
@@ -336,10 +337,13 @@ internal fun Collection<Any>.toQuantity(
         listOf(parsedQuantity)
       }
     }
-    is Boolean -> {
-      val pair1 = ((if (item) FhirPathDecimal.ONE else FhirPathDecimal.ZERO) to DEFAULT_UNIT)
-      listOf(FhirPathQuantity(value = pair1.first, unit = pair1.second))
-    }
+    is Boolean ->
+      listOf(
+        FhirPathQuantity(
+          value = if (item) FhirPathDecimal.ONE else FhirPathDecimal.ZERO,
+          unit = DEFAULT_UNIT,
+        )
+      )
     else -> emptyList()
   }
 }

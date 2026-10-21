@@ -31,19 +31,19 @@ For the full conformance analysis, see the [conformance](docs/conformance.md) do
 
 ### FHIRPath specification
 
-The library implements [FHIRPath Specification v3.0.0](https://hl7.org/fhirpath/STU3/en/).
+The core library (`fhir-path-core`) is model-agnostic and implements
+[FHIRPath Specification v3.0.0](https://hl7.org/fhirpath/STU3/en/).
 
 See [FHIRPath specification conformance](docs/conformance.md#fhirpath-specification) for
 feature-by-feature implementation status.
 
 ### FHIRPath in FHIR specification
 
-Our core expression evaluator (`fhir-path-core`) is model-agnostic and evaluates expressions
-against FHIR R4, R4B, and R5 resources. Support for future FHIR versions will be added.
-
-For using FHIRPath with FHIR resources, including accessing choice elements, referencing FHIR types,
-and FHIR-specific variables and functions, we implement the
-[FHIRPath](https://hl7.org/fhir/R5/fhirpath.html) section in FHIR R5.
+Besides the FHIRPath specification, each FHIR version ([R4](https://hl7.org/fhir/R4/fhirpath.html),
+[R4B](https://hl7.org/fhir/R4B/fhirpath.html), [R5](https://hl7.org/fhir/R5/fhirpath.html))
+also defines additional variables, functions, and operators in FHIRPath. Since later FHIR versions
+primarily expand and refine earlier definitions, this library only implements the definitions
+from the latest FHIR version.
 
 See [FHIRPath in FHIR specification conformance](docs/conformance.md#fhirpath-in-fhir-specification)
 for domain-specific implementation details.
@@ -185,6 +185,19 @@ that trigger conversion include equality (`=`), comparison (`<`, `<=`, `>`, `>=`
 `contains`), and set functions (`union`, `distinct`, `intersect`, `exclude`, `subsetOf`,
 `supersetOf`).
 
+### Profile validation
+
+The `conformsTo()` function supports the base FHIR profiles
+(`http://hl7.org/fhir/StructureDefinition/<Type>`): the input element's type is compared to the
+type named by the structure. Other profiles, such as those defined in implementation guides (e.g.
+the US Core Patient profile), would require profile validation, which is not implemented. Passing
+such a profile URL yields an empty result[^2].
+
+[^2]: R4 and R4B require an error for an unresolvable structure
+(https://hl7.org/fhir/R4/fhirpath.html#functions), revised to an empty result in R5
+(https://hl7.org/fhir/R5/fhirpath.html#functions). Therefore `testConformsTo3` is skipped in the
+[test conformance](docs/conformance.md#test-conformance) suite.
+
 ### Timezone offset in date time values
 
 This FHIRPath implementation adopts a strict, safety-first approach to date time comparisons,
@@ -319,10 +332,10 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Use only the FHIR version(s) you need:
-            implementation("dev.ohs.fhir:fhir-path-r4:1.0.0-beta05")
+            implementation("dev.ohs.fhir:fhir-path-r4:1.0.0-beta06")
 
             // Or include all versions at once:
-            // implementation("dev.ohs.fhir:fhir-path:1.0.0-beta05")
+            // implementation("dev.ohs.fhir:fhir-path:1.0.0-beta06")
         }
     }
 }
@@ -337,10 +350,10 @@ For Android projects, add the dependency to the `dependencies` block in the modu
 // e.g., app/build.gradle.kts
 dependencies {
     // Use only the FHIR version(s) you need:
-    implementation("dev.ohs.fhir:fhir-path-r4:1.0.0-beta05")
+    implementation("dev.ohs.fhir:fhir-path-r4:1.0.0-beta06")
 
     // Or include all versions at once:
-    // implementation("dev.ohs.fhir:fhir-path:1.0.0-beta05")
+    // implementation("dev.ohs.fhir:fhir-path:1.0.0-beta06")
 }
 ```
 

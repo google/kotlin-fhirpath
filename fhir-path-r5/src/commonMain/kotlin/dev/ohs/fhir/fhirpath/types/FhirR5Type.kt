@@ -15,6 +15,7 @@
  */
 
 package dev.ohs.fhir.fhirpath.types
+
 import dev.ohs.fhir.model.r5.Resource
 import dev.ohs.fhir.model.r5.ext.getFhirType
 import dev.ohs.fhir.model.r5.terminologies.ResourceType
@@ -41,5 +42,5 @@ interface FhirR5Type : FhirType {
 }
 
 data class FhirR5ResourceType(val resourceType: ResourceType) : FhirR5Type {
-  override val typeName: String = resourceType.getCode()
+  override val typeName: String = resourceType.code
 }
