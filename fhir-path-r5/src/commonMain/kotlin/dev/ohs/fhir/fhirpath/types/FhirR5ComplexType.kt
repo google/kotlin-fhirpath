@@ -26,8 +26,6 @@ public enum class FhirR5ComplexType(override val typeName: String) : FhirR5Type 
   Attachment("Attachment"),
   Availability("Availability"),
   BackboneElement("BackboneElement"),
-  BackboneType("BackboneType"),
-  Base("Base"),
   CodeableConcept("CodeableConcept"),
   CodeableReference("CodeableReference"),
   Coding("Coding"),
@@ -36,7 +34,6 @@ public enum class FhirR5ComplexType(override val typeName: String) : FhirR5Type 
   Contributor("Contributor"),
   Count("Count"),
   DataRequirement("DataRequirement"),
-  DataType("DataType"),
   Distance("Distance"),
   Dosage("Dosage"),
   Duration("Duration"),
@@ -53,7 +50,6 @@ public enum class FhirR5ComplexType(override val typeName: String) : FhirR5Type 
   Narrative("Narrative"),
   ParameterDefinition("ParameterDefinition"),
   Period("Period"),
-  PrimitiveType("PrimitiveType"),
   ProductShelfLife("ProductShelfLife"),
   Quantity("Quantity"),
   Range("Range"),
@@ -80,8 +76,6 @@ public enum class FhirR5ComplexType(override val typeName: String) : FhirR5Type 
         is dev.ohs.fhir.model.r5.Attachment -> Attachment
         is dev.ohs.fhir.model.r5.Availability -> Availability
         is dev.ohs.fhir.model.r5.BackboneElement -> BackboneElement
-        is dev.ohs.fhir.model.r5.BackboneType -> BackboneType
-        is dev.ohs.fhir.model.r5.Base -> Base
         is dev.ohs.fhir.model.r5.CodeableConcept -> CodeableConcept
         is dev.ohs.fhir.model.r5.CodeableReference -> CodeableReference
         is dev.ohs.fhir.model.r5.Coding -> Coding
@@ -90,7 +84,6 @@ public enum class FhirR5ComplexType(override val typeName: String) : FhirR5Type 
         is dev.ohs.fhir.model.r5.Contributor -> Contributor
         is dev.ohs.fhir.model.r5.Count -> Count
         is dev.ohs.fhir.model.r5.DataRequirement -> DataRequirement
-        is dev.ohs.fhir.model.r5.DataType -> DataType
         is dev.ohs.fhir.model.r5.Distance -> Distance
         is dev.ohs.fhir.model.r5.Dosage -> Dosage
         is dev.ohs.fhir.model.r5.Duration -> Duration
@@ -107,7 +100,6 @@ public enum class FhirR5ComplexType(override val typeName: String) : FhirR5Type 
         is dev.ohs.fhir.model.r5.Narrative -> Narrative
         is dev.ohs.fhir.model.r5.ParameterDefinition -> ParameterDefinition
         is dev.ohs.fhir.model.r5.Period -> Period
-        is dev.ohs.fhir.model.r5.PrimitiveType -> PrimitiveType
         is dev.ohs.fhir.model.r5.ProductShelfLife -> ProductShelfLife
         is dev.ohs.fhir.model.r5.Quantity -> Quantity
         is dev.ohs.fhir.model.r5.Range -> Range

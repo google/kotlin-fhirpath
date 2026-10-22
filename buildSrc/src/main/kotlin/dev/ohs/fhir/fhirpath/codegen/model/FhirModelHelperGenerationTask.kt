@@ -145,6 +145,8 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
     //    `Element.getProperty(name)`, causing a StackOverflowError (see #75).
     // 2. An `is DataType` branch would invoke `DataType.getProperty()`, which only handles `id`
     //    and `extension`, skipping the subtype's specific properties.
+    // 3. In `Fhir*ComplexType.fromObject`, `is Base` and `is DataType` arms would match every
+    //    model class implementing those interfaces, shadowing concrete complex types and resources.
     //
     // We keep `BackboneElement` because resource backbone elements (e.g. `Patient.Contact`)
     // delegate to `MoreBackboneElements.kt` via `is BackboneElement -> getProperty(name)`.
@@ -185,7 +187,9 @@ abstract class FhirModelHelperGenerationTask : DefaultTask() {
         fhirPathPackageName = fhirPathPackageName,
         fhirVersion = fhirVersion,
         structureDefinitions =
-          structureDefinitions.filter { it.kind == Kind.COMPLEX_TYPE && it.name != "Element" },
+          structureDefinitions
+            .filter { it.kind == Kind.COMPLEX_TYPE }
+            .filterNot { it.name in abstractBaseComplexTypes },
       )
       .writeTo(outputDir)
   }

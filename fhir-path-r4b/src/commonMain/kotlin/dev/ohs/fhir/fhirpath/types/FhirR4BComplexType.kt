@@ -33,7 +33,6 @@ public enum class FhirR4BComplexType(override val typeName: String) : FhirR4BTyp
   Contributor("Contributor"),
   Count("Count"),
   DataRequirement("DataRequirement"),
-  DataType("DataType"),
   Distance("Distance"),
   Dosage("Dosage"),
   Duration("Duration"),
@@ -82,7 +81,6 @@ public enum class FhirR4BComplexType(override val typeName: String) : FhirR4BTyp
         is dev.ohs.fhir.model.r4b.Contributor -> Contributor
         is dev.ohs.fhir.model.r4b.Count -> Count
         is dev.ohs.fhir.model.r4b.DataRequirement -> DataRequirement
-        is dev.ohs.fhir.model.r4b.DataType -> DataType
         is dev.ohs.fhir.model.r4b.Distance -> Distance
         is dev.ohs.fhir.model.r4b.Dosage -> Dosage
         is dev.ohs.fhir.model.r4b.Duration -> Duration
