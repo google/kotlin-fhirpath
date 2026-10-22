@@ -16,29 +16,38 @@
 
 package dev.ohs.fhir.fhirpath
 
-import dev.ohs.fhir.fhirpath.types.FhirPathDecimal
 import dev.ohs.fhir.fhirpath.types.FhirPathQuantity
+import dev.ohs.fhir.fhirpath.types.toFhirPathDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Canonical UCUM strings omit an exponent of 1, matching UCUM's tables and fhir-ucum. */
 class UcumCanonicalFormTest {
-  private fun canonicalUnit(unit: String) =
-    FhirPathQuantity(value = FhirPathDecimal.ONE, unit = "'$unit'").toEqualCanonicalized().unit
+  private fun quantity(value: Int, unit: String) =
+    FhirPathQuantity(value = value.toFhirPathDecimal(), unit = unit)
+
+  @Test fun baseUnit() = assertEquals(quantity(1, "'g'"), quantity(1, "'g'").toEqualCanonicalized())
 
   @Test
-  fun baseUnitHasNoExponent() = assertEquals("'g'", canonicalUnit("g"))
+  fun prefixedBaseUnit() =
+    assertEquals(quantity(1000, "'g'"), quantity(1, "'kg'").toEqualCanonicalized())
 
   @Test
-  fun prefixedBaseUnitHasNoExponent() = assertEquals("'g'", canonicalUnit("kg"))
+  fun derivedUnit() =
+    assertEquals(quantity(1000, "'g.m.s-2'"), quantity(1, "'N'").toEqualCanonicalized())
 
   @Test
-  fun derivedUnitOmitsOnlyExponentOne() = assertEquals("'g.m.s-2'", canonicalUnit("N"))
+  fun prefixedDerivedUnit() =
+    assertEquals(quantity(1_000_000, "'g.m.s-2'"), quantity(1, "'kN'").toEqualCanonicalized())
 
   @Test
-  fun otherExponentsAreKept() {
-    assertEquals("'m2'", canonicalUnit("ar"))
-    assertEquals("'s-1'", canonicalUnit("Hz"))
-    assertEquals("'m-2.rad2.s'", canonicalUnit("lx"))
-  }
+  fun definiteCalendarDuration() =
+    assertEquals(quantity(604_800, "'s'"), quantity(1, "week").toEqualCanonicalized())
+
+  @Test
+  fun variableCalendarDurationNotEqualCanonicalized() =
+    assertEquals(quantity(1, "year"), quantity(1, "year").toEqualCanonicalized())
+
+  @Test
+  fun variableCalendarDurationEquivalentCanonicalized() =
+    assertEquals(quantity(31_557_600, "'s'"), quantity(1, "year").toEquivalentCanonicalized())
 }

@@ -44,24 +44,28 @@ private val UNIT_COMPONENT_SEPARATOR = Regex("(?=[./])")
 data class UnitComponent(val scalarAsPowerOfTen: Int, val code: String, val power: Int)
 
 /**
- * Represents a unit using a scalar and a list of base units (each with a power component).
+ * Represents a unit using a scalar and a map of base units to their exponents.
  *
  * For example, the Newtonian constant of gravitation `[G]` is defined in the UCUM specification by
- * the scalar value 6.67430e-11 and the unit string `m3.kg-1.s-2`.
+ * the scalar value `6.67430e-11` and the unit string `m3.kg-1.s-2`.
  *
- * Its canonical representation will have the scalar value 6.67430e-14 and the base unit string
- * `g-1.m3.s-2`. An exponent of 1 is omitted, matching UCUM's own tables (`g`, `m.s-2`). Notice that
- * the unit string is canonicalized using the base unit (g in this case) and ordered and the scalar
- * value is adapted accordingly.
- *
- * This canonicalization makes quantity comparison possible. Two quantities with units that have the
- * same base unit string can be compared after applying the scalars to the quantity values
- * respectively.
+ * Its canonical representation has the scalar value `6.67430e-14` and the base units `{m=3, g=-1,
+ * s=-2}`: derived units and prefixes are resolved to base units (`kg-1` becomes `g` with exponent
+ * `-1`), and the scalar value is adjusted accordingly (6.67430e-11 * 10^-3 = 6.67430e-14).
  */
 internal data class CanonicalUnitRepresentation(
   val baseUnits: Map<BaseUnit, Int>,
   val scalar: Double,
 ) {
+  /**
+   * Reconstitutes the canonical base unit string from [baseUnits] (e.g., `g-1.m3.s-2` for `[G]`).
+   * - Base unit components are sorted alphabetically by code (`g`, `m`, `s`) for a deterministic
+   *   representation.
+   * - An exponent of `1` is omitted, matching UCUM's own tables (e.g., `g`, `m.s-2`).
+   *
+   * This makes quantity comparison possible: two quantities with units that have the same base unit
+   * string can be compared after applying the scalars to the quantity values respectively.
+   */
   fun getBaseUnitString() =
     baseUnits.entries
       .sortedBy { it.key.Code } // Sort the units for deterministic output
