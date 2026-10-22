@@ -25,6 +25,7 @@ import dev.ohs.fhir.model.r4.Enumeration
 import dev.ohs.fhir.model.r4.FhirDecimal
 import dev.ohs.fhir.model.r4.Observation
 import dev.ohs.fhir.model.r4.Quantity
+import dev.ohs.fhir.model.r4.terminologies.ObservationStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -41,7 +42,7 @@ class DecimalConversionTest {
 
   private val observation =
     Observation(
-      status = Enumeration(value = Observation.ObservationStatus.Final),
+      status = Enumeration(value = ObservationStatus.Final),
       code = CodeableConcept(),
       value =
         Observation.Value.Quantity(

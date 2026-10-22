@@ -23,6 +23,7 @@ import dev.ohs.fhir.model.r4.Extension
 import dev.ohs.fhir.model.r4.Quantity
 import dev.ohs.fhir.model.r4.String as FhirString
 import dev.ohs.fhir.model.r4.Task
+import dev.ohs.fhir.model.r4.terminologies.TaskStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,7 +31,7 @@ private val fhirPathEngine = FhirPathEngine.forR4()
 
 private val task =
   Task(
-    status = Enumeration(value = Task.TaskStatus.Completed),
+    status = Enumeration(value = TaskStatus.Completed),
     intent =
       Enumeration(
         id = "no-value",

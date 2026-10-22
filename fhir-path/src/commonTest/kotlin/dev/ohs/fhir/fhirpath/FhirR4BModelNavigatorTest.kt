@@ -26,6 +26,7 @@ import dev.ohs.fhir.model.r4b.Observation
 import dev.ohs.fhir.model.r4b.Patient
 import dev.ohs.fhir.model.r4b.Quantity
 import dev.ohs.fhir.model.r4b.String as FhirString
+import dev.ohs.fhir.model.r4b.terminologies.ObservationStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -217,7 +218,7 @@ class FhirR4BModelNavigatorTest {
             value = Extension.Value.String(FhirString(value = "e")),
           )
         ),
-      value = Observation.ObservationStatus.Final,
+      value = ObservationStatus.Final,
     )
 
   @Test
@@ -237,7 +238,7 @@ class FhirR4BModelNavigatorTest {
   @Test
   fun `can access value property on enumeration`() {
     assertEquals(
-      Observation.ObservationStatus.Final,
+      ObservationStatus.Final,
       FhirR4BModelNavigator.accessProperty(enumerationWithAllProperties, "value"),
     )
   }
@@ -256,7 +257,7 @@ class FhirR4BModelNavigatorTest {
   fun `can get all children on enumeration`() {
     val children = FhirR4BModelNavigator.getAllChildren(enumerationWithAllProperties)
     assertTrue(children.contains("e1"))
-    assertTrue(children.contains(Observation.ObservationStatus.Final))
+    assertTrue(children.contains(ObservationStatus.Final))
     assertEquals(3, children.size)
   }
 

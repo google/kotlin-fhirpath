@@ -21,6 +21,7 @@ import dev.ohs.fhir.model.r4.Enumeration
 import dev.ohs.fhir.model.r4.Extension
 import dev.ohs.fhir.model.r4.Observation
 import dev.ohs.fhir.model.r4.String as FhirString
+import dev.ohs.fhir.model.r4.terminologies.ObservationStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -34,7 +35,7 @@ class ExtensionTest {
       Observation(
         status =
           Enumeration(
-            value = Observation.ObservationStatus.Final,
+            value = ObservationStatus.Final,
             extension =
               listOf(
                 Extension(
